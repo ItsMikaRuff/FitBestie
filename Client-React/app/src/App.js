@@ -43,7 +43,7 @@ function App() {
       <input className='inputLogin'value="password"></input>
       
       <Button text={"Login"}/>
-      <Button text={"Sign in"}/>
+      <Button text={"create a new user"}/>
 
       </div>
       <div className='container'>
