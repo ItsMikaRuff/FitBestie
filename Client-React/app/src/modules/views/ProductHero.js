@@ -22,12 +22,12 @@ export default function ProductHero() {
         alt="increase priority"
       />
       <Typography color="inherit" align="center" variant="h2" marked="center">
-      Strong, Confident, Unstoppable – Just Like You!
+      Strong,<br></br> Confident,<br></br> Unstoppable<br></br><br></br> Just Like You!
       </Typography>
       <Typography
         color="inherit"
         align="center"
-        variant="h5"
+        variant="h6"
         sx={{ mb: 4, mt: { xs: 4, sm: 10 } }}
       >
         Hey Bestie! Welcome to FitBestie – your go-to space for all things fitness, fun, and fabulous! 
@@ -40,6 +40,7 @@ export default function ProductHero() {
         component="a"
         href="/premium-themes/onepirate/sign-up/"
         sx={{ minWidth: 200 }}
+        
       >
         Register
       </Button>
