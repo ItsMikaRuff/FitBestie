@@ -1,0 +1,114 @@
+/* מבנה כללי */
+.homepage-container {
+    width: 100vw;
+    height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    box-sizing: border-box; /* כל החישובים יכללו שוליים ופדינג */
+}
+
+/* רקע התמונה */
+.homepage-background {
+    position: fixed;
+    top: 0; /* הצמדת הרקע לראש המסך */
+    left: 0; /* הצמדת הרקע לשמאל */
+    width: 100%; /* רוחב מלא */
+    height: 100%; /* גובה מלא */
+    background-size: cover; /* מתיחת התמונה */
+    background-position: center; /* מרכז התמונה */
+    filter: brightness(50%);
+    z-index: -1; /* לוודא שהרקע מאחור */
+}
+
+/* תוכן דף הבית */
+.homepage-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    box-sizing: border-box; /* לתיאום שוליים */
+}
+
+.homepage-title {
+    font-size: 3.5rem;
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+/* כפתורים */
+.homepage-buttons {
+    display: flex;
+    gap: 20px;
+    margin-top: 190px;
+}
+
+.homepage-button {
+    padding: 20px 50px;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.button-login {
+    background: #f8eaef; /* צבע פסטלי ורוד */
+    color: #333;
+}
+
+.button-login:hover {
+    transform: scale(1.2);
+    background-color: #f8eaef;
+}
+
+.button-signup {
+    background: #f8eaef; /* צבע פסטלי כחול */
+    color: #333;
+}
+
+.button-signup:hover {
+    transform: scale(1.2);
+    background-color: #f8eaef;
+}
+
+/* עלינו */
+.about-section {
+    margin-top: 50vh; /* מרחק משמעותי לגלילה */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 20px;
+}
+
+.about-box {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 800px;
+    text-align: center;
+    color: #333;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.about-box:hover {
+    transform: scale(1);
+}
+
+.about-title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.about-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
