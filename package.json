@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "formik": "2.4.6",
+    "global": "4.4.0",
+    "nodemon": "3.1.9",
+    "react-router-dom": "7.3.0"
+  }
+}
