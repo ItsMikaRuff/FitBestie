@@ -1,20 +1,45 @@
-import './App.css';
-import React from 'react';
+import { ThemeProvider } from 'styled-components';
+import { darkTheme } from './themes/darkTheme';
+import { lightTheme } from './themes/lightTheme';
+import React, { useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
+
+import Layout from './components/Layout'; // הוספת Layout כאן
+
+// Pages
 import HomePage from './pages/Home';
-import { BrowserRouter, Route, Routes, Router } from 'react-router-dom';
+import LoginForm from './pages/LoginForm';
+import SignupPage from './pages/SignUpForm';
+import SignUpSuccessful from './pages/SignUpSuccessful';
+import Profile from './pages/Profile';
+import PersonalQuiz from './components/PersonalQuiz';
 
 function App() {
-  return (
+  const [mainTheme, setTheme] = useState(lightTheme);
 
-    <div >
-      <BrowserRouter>
-        <Router>
-          <Routes>
-            <Route path="/home" component={HomePage} />
-          </Routes>
-        </Router>
-      </BrowserRouter>
-    </div>
+  const toggleTheme = () => {
+    setTheme(prevTheme =>
+      prevTheme.mode === 'light' ? darkTheme : lightTheme
+    );
+  };
+
+  return (
+    <ThemeProvider theme={mainTheme}>
+      <Routes>
+        {/* עמודים עם Header/Footer */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="SignUpSuccessful" element={<SignUpSuccessful />} />
+          <Route path="/quiz" element={<PersonalQuiz />} />
+
+        </Route>
+
+        {/* עמודים בלי Header/Footer */}
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Routes>
+    </ThemeProvider>
   );
 }
 

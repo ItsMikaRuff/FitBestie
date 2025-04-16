@@ -5,8 +5,12 @@ const MONGO_URL = 'mongodb+srv://mikadiel:PUkr8Fjaevy6scHt@fitbestiecluster.tzyr
 async function connect() {
     
     try{
-        await mongoose.connect(MONGO_URL)
-        console.log("DB - connection succesfull");
+        await mongoose.connect(MONGO_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+
+        console.log("DB - connection successful");
         
     } catch (error){
         console.log("MongoDB Error: ", error);
