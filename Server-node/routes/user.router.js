@@ -5,7 +5,7 @@ const userController = require("../controllers/user.controller")
 
 //add user
 
-router.post("/addUser", async (req,res)=>{
+router.post("/", async (req,res)=>{
     try{
         const user = await userController.create(req.body)
         if(!user) throw {code: 500}
@@ -14,6 +14,30 @@ router.post("/addUser", async (req,res)=>{
         res.status(500).send("Error creating user")
     }
 })
+
+// login user
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await userController.readOne({ email });
+
+    if (!user) {
+      return res.status(401).send("User not found");
+    }
+
+    // השוואת סיסמה פשוטה (אם את משתמשת בהאש, תצטרכי bcrypt)
+    if (user.password !== password) {
+      return res.status(401).send("Invalid password");
+    }
+
+    // אם הכל תקין - מחזירים את המשתמש
+    res.send(user);
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).send("Error logging in");
+  }
+});
 
 //get user by id
 router.get("/:id",async (req,res)=>{
