@@ -2,7 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const port =  5000;
+const port = 5000;
 
 //db connection
 require('./db').connect()
@@ -18,12 +18,16 @@ app.use(express.json());
 
 
 //routes
-app.use('/user',userRouter);
-app.use('/quiz',quizRouter);
+app.use('/user', userRouter);
+app.use('/quiz', quizRouter);
+
+app.get('/ping', (req, res) => {
+    res.send('pong!');
+});
 
 
-app.listen(port,()=>{
-    
+app.listen(port, () => {
+
     console.log('listening on port 5000');
-    
+
 })

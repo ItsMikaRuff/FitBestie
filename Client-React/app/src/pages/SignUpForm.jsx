@@ -62,7 +62,7 @@ const SignUpForm = () => {
             }
 
             try {
-                await axios.post("http://localhost:5000/user", values);
+                await axios.post(`${process.env.REACT_APP_API_URL}/user`, values);
                 console.log("Signup success");
 
                 // Handle successful signup (e.g., redirect to login page or show success message)
