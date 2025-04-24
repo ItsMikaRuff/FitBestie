@@ -32,7 +32,7 @@ export const UserProvider = ({ children }) => {
         setUser(updatedData);
         localStorage.setItem("user", JSON.stringify(updatedData));
     };
-
+    
     return (
         <UserContext.Provider value={{ user, setUser, isLoggedIn, login, logout, updateUser }}>
             {children}
