@@ -48,7 +48,7 @@ const Profile = () => {
             setLoading(true);
             const userId = user?._id || user?.id;
     
-            const res = await axios.put(
+            const res = await axios.post(
                 `${process.env.REACT_APP_API_URL}/user/update/${userId}`,
                 data,
                 {
