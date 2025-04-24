@@ -3,13 +3,15 @@ import { useFormik } from 'formik';
 import { LoginButton, LoginDiv, LoginFormComponent, LoginInput, LoginTitle, GlobalError } from "../components/styledComponents";
 import { useUser } from "../context/UserContext";
 import axios from "axios";
+import { useState } from "react";
+import Loader from "../components/Loader";
 
 const LoginForm = () => {
 
-
-
+    const [loading, setLoading] = useState(false); // State to manage loading status
     const { login } = useUser(); // Import the login function from the context
     const navigate = useNavigate(); // Import the useNavigate hook
+
 
     const loginFormik = useFormik({
         initialValues: {
@@ -52,12 +54,13 @@ const LoginForm = () => {
             }
 
             try {
+                setLoading(true); 
                 const response = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, values);
-
-
                 login(response.data); // שמור את המשתמש בקונטקסט
+                setLoading(false);
                 navigate('/'); // מעבר לעמוד הבית או כל עמוד אחר
             } catch (error) {
+                setLoading(false);
                 console.error('Login error:', error);
                 formikHelpers.setFieldError('email', 'Invalid email or password');
             }
@@ -113,7 +116,11 @@ const LoginForm = () => {
                 )}
 
                 <LoginButton type="submit">Login</LoginButton>
-
+                {
+                    loading?
+                    <Loader/>
+                    :null
+                }
             </LoginFormComponent>
 
             <Link to="/signup">Don't have an account? Sign up</Link>

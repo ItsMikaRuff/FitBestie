@@ -1,30 +1,16 @@
 // theme.js
-
 export const theme = {
-    mode: "light",
     colors: {
-        primary: "blue",
-        secondary: "gray",
+        primary: '#f8eaef',       // ורוד מודרני ונשי
+        accent: '#f9b5d0',        // ורוד בהיר להיילייטים
+        secondary: '#6c63ff',     // סגול בהיר כגוון משלים
+        background: '#fffafc',    // רקע רך ונעים
+        text: '#ffffff',             // טקסט לבן
+        
     },
-    background: {
-        primary: "lightgray",
-        secondary: "lightyellow",
-    },
-    boxBackground: {
-        first: "red",
-        second: "green",
-    },
-    fontFamily: {
-        primary: "Arial, sans-serif",
-        secondary: "Georgia, serif",
-    },
-    fontSizes: {
-        normal: "16px",
-        large: "20px",
-    },
-    padding: {
-        small: "10px",
-        medium: "15px",
-        large: "20px",
+    breakpoints: {
+        mobile: '480px',
+        tablet: '768px',
+        laptop: '1024px',
     },
 };

@@ -1,24 +1,25 @@
 import React from "react";
 import stretch from "../Images/stretch-laptop.jpg"; // ודא שהנתיב נכון
 import {
-    HomepageContainer,
-    HomepageBackground,
-    HomepageContent,
+        HomepageBackground,
     WelcomeText,
     AboutSection,
     AboutBox,
     AboutTitle,
-    AboutText
+    AboutText,
+    Container,
 } from "../components/styledComponents"; // ודא שהנתיב נכון
-
 
 const Home = () => {
     return (
-        <HomepageContainer>
+        <Container>
             <HomepageBackground style={{ backgroundImage: `url(${stretch})` }} />
-            <HomepageContent>
-                <WelcomeText>Hi Bestie! What are you looking for today?</WelcomeText>
-                <AboutSection>
+
+            {console.log("API URL:", process.env.REACT_APP_API_URL)}
+            
+            <WelcomeText>Hi Bestie! What are you looking for today?</WelcomeText>
+        
+            <AboutSection>
                 <AboutBox>
                     <AboutTitle>About us</AboutTitle>
                     <AboutText>
@@ -29,8 +30,7 @@ const Home = () => {
                     </AboutText>
                 </AboutBox>
             </AboutSection>
-            </HomepageContent>
-        </HomepageContainer>
+        </Container>
     );
 };
 

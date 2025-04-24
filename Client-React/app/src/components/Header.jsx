@@ -1,13 +1,12 @@
 import { useUser } from "../context/UserContext";
 import {
-    HeaderButton,
+    Button,
+    FooterLink,
     HeaderButtonDiv,
     HeaderStyle,
-    HeaderText,
-    HeaderTitle
-} from "./styledComponents";
-
+    HeaderText, } from "./styledComponents";
 import { Link, useNavigate } from "react-router-dom";
+import FITBESTIE_LOGO from "../Images/FITBESTIE_LOGO.jpg";
 
 const Header = () => {
     const { user, isLoggedIn, logout } = useUser();
@@ -24,23 +23,27 @@ const Header = () => {
                 Welcome, {isLoggedIn && user?.name ? user.name : "Guest"}
             </HeaderText>
 
-            <HeaderTitle>FIT-BESTIE</HeaderTitle>
+            {/* <HeaderTitle>FIT-BESTIE</HeaderTitle> */}
+            
+            <FooterLink href="/">
+                <img src={FITBESTIE_LOGO} alt="Logo" style={{ width: "100px", height: "auto" }} />
+            </FooterLink>
 
             <HeaderButtonDiv>
                 {isLoggedIn ? (
                     <>
                         <Link to="/profile">
-                            <HeaderButton>Profile</HeaderButton>
+                            <Button>Profile</Button>
                         </Link>
-                        <HeaderButton onClick={handleLogout}>Logout</HeaderButton>
+                        <Button onClick={handleLogout}>Logout</Button>
                     </>
                 ) : (
                     <>
                         <Link to="/login">
-                            <HeaderButton>Login</HeaderButton>
+                            <Button>Login</Button>
                         </Link>
                         <Link to="/signup">
-                            <HeaderButton>Signup</HeaderButton>
+                            <Button>Signup</Button>
                         </Link>
                     </>
                 )}

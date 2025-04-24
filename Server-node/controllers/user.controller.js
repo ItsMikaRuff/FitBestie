@@ -1,4 +1,5 @@
 //CRUD - Create Read Update Delete
+
 const express = require('express');
 const router = express.Router();
 
@@ -6,10 +7,8 @@ const userModel = require("../models/user.model")
 
 const create = async (data) => {
     try{
-
         const result = await userModel.create(data)
         return result
-
     }catch(err){
         console.error("Error creating user: ", err);
         throw new Error("Failed to create user");
@@ -27,15 +26,17 @@ const read = async (filter = {}) => {
 }
 
 const update = async (filter, data) => {
-    return await userModel.findOneAndUpdate(filter, data)
-}
+    const user = await userModel.findByIdAndUpdate(filter._id, data, { new: true });
+
+    return user;
+};
 
 const deleteOne = async (filter) => {
-    return await userModel.findOneAndDelete(filter)
-}
+    return await userModel.findOneAndDelete(filter);
+};
 
 
 // findOne=array.find
 // find = array.filter
 
-module.exports = { create, readOne, read, update, deleteOne }
+module.exports = { create, readOne, read, update, deleteOne };
