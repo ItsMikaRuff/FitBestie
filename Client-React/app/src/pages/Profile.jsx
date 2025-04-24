@@ -11,8 +11,10 @@ import {
 import Loader from "../components/Loader";
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 const Profile = () => {
-    const { user, setUser, isLoggedIn } = useUser();
+    const { user, updateUser, isLoggedIn } = useUser();
 
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +49,7 @@ const Profile = () => {
             const userId = user?._id || user?.id;
 
             const res = await axios.post(
-                `https://fitbestie.onrender.com/user/update/${userId}`,
+                `${API_URL}/user/update/${userId}`,
                 data,
                 {
                     headers: {
@@ -57,7 +59,8 @@ const Profile = () => {
                 }
             );
 
-            setUser(res.data);
+            updateUser(res.data);
+            localStorage.setItem("user", JSON.stringify(res.data));
             alert("עודכן בהצלחה 🎉");
             setIsEditing(false);
 

@@ -66,12 +66,15 @@ const SignUpForm = () => {
             }
 
             try {
+                
+                setLoading(true); // Set loading to true when starting the request
                 await axios.post(`${process.env.REACT_APP_API_URL}/user`, values);
                 console.log("Signup success");
-
+                setLoading(false); // Set loading to false when the request is complete
                 // Handle successful signup (e.g., redirect to login page or show success message)
                 navigate("/SignUpSuccessful"); // Redirect to the success page
             } catch (error) {
+                setLoading(false); // Set loading to false if there's an error
                 console.error("Signup error:", error.response ? error.response.data : error.message);
             }
         },
