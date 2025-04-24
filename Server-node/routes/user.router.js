@@ -4,8 +4,6 @@ const userController = require("../controllers/user.controller");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../utils/cloudinary");
-// const upload = multer({ dest: "uploads/" });
-// const path = require("path");
 
 
 // configure cloud storage
@@ -13,21 +11,18 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "fitbestie_users", // folder name in Cloudinary
-    allowed_formats: ["jpg", "png", "jpeg"],
+    allowed_formats: ["jpg", "png", "jpeg", "mp4", "mov"],
+    transformation: [{ width: 500, height: 500, crop: "limit" }], // optional transformations
   },
 });
 
-const upload = multer({ storage });
+// console.log("Cloudinary config:", {
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET ? "***" : "MISSING"
+// });
 
-// // סינון קבצים (תמונות וסרטונים בלבד)
-// const fileFilter = (req, file, cb) => {
-//   const allowedTypes = ["image/jpeg", "image/png", "video/mp4"];
-//   if (allowedTypes.includes(file.mimetype)) {
-//     cb(null, true);
-//   } else {
-//     cb(new Error("סוג קובץ לא נתמך"), false);
-//   }
-// };
+const upload = multer({ storage });
 
 //add user
 router.post("/", async (req, res) => {
@@ -88,37 +83,40 @@ router.get("/", async (req, res) => {
 
 
 // update user
-router.post("/update/:id", upload.single("image"), async (req, res) => {
 
-  console.log("התקבל עדכון משתמש:", req.params.id);  // 🔴 תוסיפי שורה זו לבדיקה
-  console.log(">>> req.body:", req.body);
-  console.log(">>> req.file:", req.file);
-
-  try {
-    const updates = {
-      name: req.body.name,
-      email: req.body.email,
-    };
-
-    // אם יש קובץ מצורף, נוסיף אותו
-    if (req.file && req.file.path) {
-      updates.image = req.file.path; // this will be a public Cloudinary URL
+router.post("/update/:id", (req, res, next) => {
+  upload.single("image")(req, res, async (err) => {
+    if (err) {
+      console.error("🧨 Multer error:", err);
+      return res.status(500).json({ message: "Multer error", error: err.message });
     }
 
-    const user = await userController.update({ _id: req.params.id }, updates);
+    console.log("📤 Update route hit");
+    console.log(">>> req.params:", req.params);
+    console.log(">>> req.body:", req.body);
+    console.log(">>> req.file:", req.file);
 
-    console.log(">>> updates to apply:", updates);
-    console.log(">>> updated user:", user);
+    try {
+      const updates = {
+        name: req.body.name,
+        email: req.body.email,
+      };
 
-    if (!user) throw "User not found";
+      if (req.file && req.file.path) {
+        updates.image = req.file.path;
+      }
 
-    res.send(user); // שלח את המידע המעודכן חזרה
+      const user = await userController.update({ _id: req.params.id }, updates);
+      if (!user) throw new Error("User not found");
 
-  } catch (error) {
-    console.error("Error updating user with file:", error);
-    res.status(500).send("Error updating user");
-  }
+      res.send(user);
+    } catch (error) {
+      console.error("🔥 Error updating user:", error);
+      res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  });
 });
+
 
 //delete user
 router.delete("/:id", async (req, res) => {

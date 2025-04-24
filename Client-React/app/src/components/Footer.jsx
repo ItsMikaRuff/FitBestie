@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTheme } from '../context/ThemeContext'; // נתיב של ThemeContext
 import { FooterStyle, FooterText, FooterLink } from './styledComponents';
 
 const Footer = () => {

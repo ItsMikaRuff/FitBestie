@@ -1,5 +1,4 @@
 import { ThemeProvider } from 'styled-components';
-import { darkTheme } from './themes/darkTheme';
 import {theme} from './themes/theme';
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
@@ -17,12 +16,6 @@ import PersonalQuiz from './components/PersonalQuiz';
 
 function App() {
   const [mainTheme, setTheme] = useState(theme);
-
-  const toggleTheme = () => {
-    setTheme(prevTheme =>
-      prevTheme.mode === 'light' ? darkTheme : theme
-    );
-  };
 
   return (
     <ThemeProvider theme={mainTheme}>

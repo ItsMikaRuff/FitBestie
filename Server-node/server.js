@@ -8,6 +8,8 @@ const port = 5000;
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 
+require('dotenv').config();
+
 //db connection
 require('./db').connect()
 

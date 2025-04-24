@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { useUser } from "../context/UserContext";
-
 const QuizContainer = styled.div`
     max-width: 800px;
     margin: 0 auto;
