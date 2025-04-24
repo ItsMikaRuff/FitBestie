@@ -1,28 +1,96 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
+// Global styles
+
+export const Button = styled.button`
+  background-color: ${({ theme }) => theme.colors.secondary};
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.accent};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+export const Card = styled.div`
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+`;
+
+export const SectionTitle = styled.h2`
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.colors.primary};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    font-size: 1.5rem;
+  }
+`;
+
+export const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 1.5rem 1rem;
+  }
+`;
+
+
 // Header & Footer styles
 
 export const HeaderStyle = styled.header`
-display: flex;
-position: sticky;
-top: 0;
-justify-content: space-between;
-background-color: #333;
-color: #fff;
-padding: 5px;
-width: 100%;
-z-index: 1000;
-box-sizing: border-box;
-overflow-x: hidden;
-`;
-export const HeaderButtonDiv = styled.div`
-    display: flex;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
     flex-wrap: wrap;
+    justify-content: center;
     gap: 10px;
-    align-items: center;
-    max-width: 100%;
-    overflow: hidden;
+    text-align: center;
+  }
+`;
+
+
+
+export const HeaderButtonDiv = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
 `;
 
 export const HeaderTitle = styled.h1`
@@ -31,11 +99,18 @@ export const HeaderTitle = styled.h1`
     margin: 0;
     white-space: nowrap;
 `;
-export const HeaderText = styled.h2`
-    font-size: 1rem;
-    margin: 0;
-    white-space: nowrap;
+
+export const HeaderText = styled.div`
+  font-size: 16px;
+  margin-left: 10px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    text-align: center;
+    margin: 5px 0;
+  }
 `;
+
 export const HeaderButton = styled.button`
     padding: 8px 16px;
     font-size: 0.9rem;
@@ -88,18 +163,6 @@ export const HomepageBackground = styled.div`
     background-position: center;
     filter: brightness(50%);
     z-index: -1;
-`;
-
-export const HomepageContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    color: #fff;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    box-sizing: border-box;
 `;
 
 export const ButtonLogin = styled(HeaderButton)`

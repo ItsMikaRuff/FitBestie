@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
         enum: ['user', 'trainer','Admin', 'Manager'], // אפשרויות למשתמש: user או trainer
         required: true,
     },
+    image: {
+        type: String,
+        required: false,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

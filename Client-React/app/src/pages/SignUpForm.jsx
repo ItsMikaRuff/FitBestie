@@ -3,8 +3,12 @@ import { useFormik } from "formik";
 import axios from "axios"; // אל תשכח להתקין axios
 
 import { SignUpFormComponent, SignUpDiv, SignUpInput, SignUpButton, SignUpSelect, SignUpTitle, GlobalError } from "../components/styledComponents";
+import { useState } from "react";
+import Loader from "../components/Loader";
 
 const SignUpForm = () => {
+
+    const [loading, setLoading] = useState(false); // State to manage loading status
 
     const navigate = useNavigate();
 
@@ -140,7 +144,11 @@ const SignUpForm = () => {
             )}
 
             <SignUpButton type="submit">Sign Up</SignUpButton>
-
+            {
+                loading ?
+                    <Loader/>
+                    : null
+            }
 
 
         </SignUpFormComponent>

@@ -1,8 +1,9 @@
 import { ThemeProvider } from 'styled-components';
 import { darkTheme } from './themes/darkTheme';
-import { lightTheme } from './themes/lightTheme';
+import {theme} from './themes/theme';
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import GlobalStyle from './themes/GlobalStyle';
 
 import Layout from './components/Layout'; // הוספת Layout כאן
 
@@ -15,16 +16,17 @@ import Profile from './pages/Profile';
 import PersonalQuiz from './components/PersonalQuiz';
 
 function App() {
-  const [mainTheme, setTheme] = useState(lightTheme);
+  const [mainTheme, setTheme] = useState(theme);
 
   const toggleTheme = () => {
     setTheme(prevTheme =>
-      prevTheme.mode === 'light' ? darkTheme : lightTheme
+      prevTheme.mode === 'light' ? darkTheme : theme
     );
   };
 
   return (
     <ThemeProvider theme={mainTheme}>
+      <GlobalStyle />
       <Routes>
         {/* עמודים עם Header/Footer */}
         <Route path="/" element={<Layout />}>
@@ -32,7 +34,6 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="SignUpSuccessful" element={<SignUpSuccessful />} />
           <Route path="/quiz" element={<PersonalQuiz />} />
-
         </Route>
 
         {/* עמודים בלי Header/Footer */}
