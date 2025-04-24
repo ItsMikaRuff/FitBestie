@@ -12,14 +12,12 @@ import Loader from "../components/Loader";
 import axios from "axios";
 
 const Profile = () => {
-
     const { user, setUser, isLoggedIn } = useUser();
 
-    const [loading, setLoading] = useState(false); // State to manage loading status
+    const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
     const [formData, setFormData] = useState({
-
         name: user?.name || "",
         email: user?.email || "",
         image: null,
@@ -36,33 +34,33 @@ const Profile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         const data = new FormData();
         data.append("name", formData.name);
         data.append("email", formData.email);
         if (formData.image) {
             data.append("image", formData.image);
         }
-    
+
         try {
             setLoading(true);
             const userId = user?._id || user?.id;
-    
+
             const res = await axios.post(
-                `${process.env.REACT_APP_API_URL}/user/update/${userId}`,
+                `https://fitbestie.onrender.com/user/update/${userId}`,
                 data,
                 {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
+                    withCredentials: true,
                 }
             );
-    
-            console.log("User updated successfully", res.data);
+
             setUser(res.data);
             alert("עודכן בהצלחה 🎉");
             setIsEditing(false);
-    
+
         } catch (error) {
             console.error("Axios error:", error);
             alert("שגיאה בעדכון הפרופיל");
@@ -71,18 +69,18 @@ const Profile = () => {
         }
     };
 
-
     if (!isLoggedIn) return <p>Unauthorized</p>;
 
     return (
         <DashboardContainer>
             {user?.image && (
                 <img
-                    src={`${process.env.REACT_APP_API_URL}/uploads/${user.image}`}
+                    src={user.image}
                     alt="תמונת פרופיל"
                     style={{ width: "120px", borderRadius: "50%", marginTop: "1rem" }}
                 />
             )}
+
             <ProfileSection>
                 <ProfileTitle>👤 פרטי משתמש</ProfileTitle>
 
@@ -109,11 +107,7 @@ const Profile = () => {
                             onChange={handleChange}
                         />
                         <ProfileButton type="submit">שמור</ProfileButton>
-                        {
-                            loading ? (
-                                <Loader />
-                            ) : null
-                        }
+                        {loading && <Loader />}
                     </form>
                 ) : (
                     <>
@@ -127,7 +121,6 @@ const Profile = () => {
                 </ProfileButton>
             </ProfileSection>
 
-
             <ProfileSection>
                 <ProfileTitle>🧮 מדדים אישיים</ProfileTitle>
                 <Info>BMI: (בפיתוח)</Info>
@@ -137,7 +130,7 @@ const Profile = () => {
 
             <ProfileSection>
                 <ProfileTitle>📝 שאלון התאמה אישית</ProfileTitle>
-                <StyledLink to="/quiz"> מעבר לשאלון</StyledLink>
+                <StyledLink to="/quiz">מעבר לשאלון</StyledLink>
             </ProfileSection>
 
             <ProfileSection>
