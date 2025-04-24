@@ -22,7 +22,12 @@ const quizRouter = require('./routes/quiz.router')
 //middleware
 
 app.use(cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "https://fitbestie.vercel.app"],
+    origin: [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://fitbestie.vercel.app",
+        "https://www.fitbestie.com" 
+    ],
     credentials: true,
 }));
 
