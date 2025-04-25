@@ -28,10 +28,11 @@ const upload = multer({ storage });
 router.post("/", async (req, res) => {
   try {
     const user = await userController.create(req.body)
-    if (!user) throw { code: 500 }
+    // if (!user) throw { code: 500 }
     res.send(user)
   } catch (err) {
-    res.status(500).send("Error creating user")
+    console.log("error from controller", err.code)
+    res.status(500).send({message:"Error creating user", code: err.code})
   }
 })
 

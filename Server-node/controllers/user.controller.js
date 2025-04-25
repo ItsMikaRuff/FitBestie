@@ -10,8 +10,8 @@ const create = async (data) => {
         const result = await userModel.create(data)
         return result
     }catch(err){
-        console.error("Error creating user: ", err);
-        throw new Error("Failed to create user");
+        console.error("Error creating user: ", err.code, err.errmsg);
+        throw {message:"Failed to create user", code: err.code, errmsg: err.errmsg};
     }
 };
 
