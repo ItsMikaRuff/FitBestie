@@ -1,7 +1,7 @@
 // theme.js
 export const theme = {
     colors: {
-        primary: '#f8eaef',       // ורוד מודרני ונשי
+        primary: '#333',       // אפור
         accent: '#f9b5d0',        // ורוד בהיר להיילייטים
         secondary: '#6c63ff',     // סגול בהיר כגוון משלים
         background: '#fffafc',    // רקע רך ונעים
