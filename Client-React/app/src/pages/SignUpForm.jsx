@@ -48,6 +48,7 @@ const SignUpForm = () => {
             } else if (values.password !== values.confirmPassword) {
                 errors.confirmPassword = "Passwords do not match";
             }
+            
             return errors;
         },
 
@@ -74,8 +75,17 @@ const SignUpForm = () => {
                 // Handle successful signup (e.g., redirect to login page or show success message)
                 navigate("/SignUpSuccessful"); // Redirect to the success page
             } catch (error) {
+
                 setLoading(false); // Set loading to false if there's an error
+                console.log(error);
+
+                if(error.code === 11000){
+                    
+                    formikHelpers.setErrors({ email: "Email already exists" });
+                }
+                
                 console.error("Signup error:", error.response ? error.response.data : error.message);
+                
             }
         },
     });
