@@ -5,12 +5,13 @@ import {
     HeaderButtonDiv,
     HeaderStyle,
     HeaderText, } from "./styledComponents";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import FITBESTIE_LOGO from "../Images/FITBESTIE_LOGO.jpg";
 
 const Header = () => {
     const { user, isLoggedIn, logout } = useUser();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleLogout = () => {
         logout();              // מוחק את המשתמש מהזיכרון וה־localStorage
@@ -32,8 +33,8 @@ const Header = () => {
             <HeaderButtonDiv>
                 {isLoggedIn ? (
                     <>
-                        <Link to="/profile">
-                            <Button>Profile</Button>
+                        <Link to={location.pathname === "/profile" ? "/" : "/profile"}>
+                            <Button>{location.pathname === "/profile" ? "Home" : "Profile"}</Button>
                         </Link>
                         <Button onClick={handleLogout}>Logout</Button>
                     </>

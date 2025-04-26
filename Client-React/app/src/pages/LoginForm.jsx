@@ -123,7 +123,7 @@ const LoginForm = () => {
                 }
             </LoginFormComponent>
 
-            <Link to="/signup">Don't have an account? Sign up</Link>
+            <Link to="/signup">Don&apos;t have an account? Sign up</Link>
             <br />
             <Link to="/forgot-password">Forgot password?</Link>
             <br />
