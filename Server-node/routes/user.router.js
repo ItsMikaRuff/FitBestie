@@ -101,7 +101,21 @@ router.post("/update/:id", (req, res, next) => {
       const updates = {
         name: req.body.name,
         email: req.body.email,
+        location: req.body.location,
+        phone: req.body.phone,
+        whatsapp: req.body.whatsapp,
+        instagram: req.body.instagram,
       };
+
+      // Handle expertise if it exists in the request
+      if (req.body.expertise) {
+        try {
+          updates.expertise = JSON.parse(req.body.expertise);
+        } catch (e) {
+          console.error("Error parsing expertise:", e);
+          updates.expertise = req.body.expertise;
+        }
+      }
 
       if (req.file && req.file.path) {
         updates.image = req.file.path;

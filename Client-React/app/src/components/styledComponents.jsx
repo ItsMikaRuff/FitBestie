@@ -262,6 +262,29 @@ export const LoginInput = styled.input`
     border-radius: 5px;
 `;
 
+export const PasswordInputContainer = styled.div`
+    position: relative;
+    width: 300px;
+    margin: 10px 0;
+`;
+
+export const TogglePasswordButton = styled.button`
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 0;
+    
+    &:hover {
+        color: #333;
+    }
+`;
+
 export const LoginButton = styled.button`
     padding: 10px 20px;
     background-color: #4caf50;
@@ -384,3 +407,89 @@ export const StyledLink = styled(Link)`
     text-decoration: underline; 
     }
 `;
+
+// Trainer Profile styles
+export const TrainerDashboardContainer = styled(DashboardContainer)`
+    max-width: 1200px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+`;
+
+export const TrainerHeader = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: linear-gradient(135deg,rgb(209, 205, 236) 0%,rgb(209, 205, 236) 100%);
+    padding: 2rem;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+`;
+
+export const TrainerImage = styled.img`
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid white;
+    object-fit: cover;
+`;
+
+export const TrainerInfo = styled.div`
+    text-align: right;
+    flex: 1;
+`;
+
+export const TrainerName = styled.h1`
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+`;
+
+export const TrainerTitle = styled.h2`
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    opacity: 0.9;
+`;
+
+export const TrainerGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+`;
+
+export const EnhancedProfileSection = styled(ProfileSection)`
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+`;
+
+export const EnhancedProfileTitle = styled(ProfileTitle)`
+    color: #6c5ce7;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+`;
+
+export const EnhancedInfo = styled(Info)`
+    font-size: 1.1rem;
+    color: #333;
+    margin: 0.8rem 0;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+`;
+

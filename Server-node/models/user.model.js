@@ -24,6 +24,31 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    expertise: {
+        type: [String],
+        required: function() { return this.role === 'trainer'; },
+        default: []
+    },
+    location: {
+        type: String,
+        required: function() { return this.role === 'trainer'; },
+        default: ''
+    },
+    phone: {
+        type: String,
+        required: false,
+        default: ''
+    },
+    whatsapp: {
+        type: String,
+        required: false,
+        default: ''
+    },
+    instagram: {
+        type: String,
+        required: false,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now,

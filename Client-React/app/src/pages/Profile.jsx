@@ -23,6 +23,8 @@ const Profile = () => {
         name: user?.name || "",
         email: user?.email || "",
         image: null,
+        expertise: user?.expertise || [],//בוצע שינויי
+        location: user?.location || "",//בוצע שינויי
     });
 
     const handleChange = (e) => {
@@ -109,6 +111,27 @@ const Profile = () => {
                             accept="image/*"
                             onChange={handleChange}
                         />
+                        {user?.role === "trainer" && (
+                            <>
+                                <input
+                                    type="text"
+                                    name="expertise"
+                                    value={formData.expertise.join(', ')}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        expertise: e.target.value.split(',').map(item => item.trim())
+                                    }))}
+                                    placeholder="תחומי התמחות (מופרדים בפסיקים)"
+                                />
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleChange}
+                                    placeholder="מיקום (עיר/אזור)"
+                                />
+                            </>
+                        )}
                         <ProfileButton type="submit">שמור</ProfileButton>
                         {loading && <Loader />}
                     </form>
@@ -116,6 +139,12 @@ const Profile = () => {
                     <>
                         <Info>שם: {user?.name || "לא זמין"}</Info>
                         <Info>אימייל: {user?.email || "לא זמין"}</Info>
+                        {user?.role === "trainer" && (
+                            <>
+                                <Info>תחומי התמחות: {user?.expertise?.join(', ') || "לא זמין"}</Info>
+                                <Info>מיקום: {user?.location || "לא זמין"}</Info>
+                            </>
+                        )}
                     </>
                 )}
 
