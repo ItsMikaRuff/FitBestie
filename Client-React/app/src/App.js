@@ -12,9 +12,10 @@ import HomePage from './pages/Home';
 import LoginForm from './pages/LoginForm';
 import SignupPage from './pages/SignUpForm';
 import SignUpSuccessful from './pages/SignUpSuccessful';
-import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
 import TrainerProfile from './pages/TrainerProfile';
 import PersonalQuiz from './components/PersonalQuiz';
+import SearchTrainerResults from './pages/SearchTrainerResults';
 
 function App() {
   const [mainTheme] = useState(theme);
@@ -27,9 +28,10 @@ function App() {
         {/* עמודים עם Header/Footer */}
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
-          <Route path="profile" element={user?.role === 'trainer' ? <TrainerProfile /> : <Profile />} />
+          <Route path="profile" element={user?.role === 'trainer' ? <TrainerProfile /> : <UserProfile />} />
           <Route path="SignUpSuccessful" element={<SignUpSuccessful />} />
           <Route path="/quiz" element={<PersonalQuiz />} />
+          <Route path="/search" element={<SearchTrainerResults />} />
         </Route>
 
         {/* עמודים בלי Header/Footer */}

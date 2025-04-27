@@ -5,8 +5,12 @@ export const theme = {
         accent: '#f9b5d0',        // ורוד בהיר להיילייטים
         secondary: '#6c63ff',     // סגול בהיר כגוון משלים
         background: '#fffafc',    // רקע רך ונעים
-        text: '#ffffff',             // טקסט לבן
+        text: '#333',             // אפור
         
+    },
+    backgroundColors: {
+        primary: '#fffafc',       // רקע לבן רך ונעים
+        primaryTransparent: '#fefafa',
     },
     breakpoints: {
         mobile: '480px',

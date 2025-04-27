@@ -1,24 +1,66 @@
 import React from "react";
-import stretch from "../Images/stretch-laptop.jpg"; // ודא שהנתיב נכון
+import { useUser } from "../context/UserContext";
 import {
-        HomepageBackground,
-    WelcomeText,
+    HomepageBackground,
     AboutSection,
     AboutBox,
     AboutTitle,
     AboutText,
     Container,
-} from "../components/styledComponents"; // ודא שהנתיב נכון
+} from "../components/styledComponents";
+import { DashboardCard, CardsContainer } from "../components/DashboardCard";
+import stretch from "../Images/stretch-laptop.jpg";
 
 const Home = () => {
+    const { isLoggedIn } = useUser();
+
     return (
         <Container>
             <HomepageBackground style={{ backgroundImage: `url(${stretch})` }} />
-
-            {console.log("API URL:", process.env.REACT_APP_API_URL)}
             
-            <WelcomeText>Hi Bestie! What are you looking for today?</WelcomeText>
-        
+            <CardsContainer>
+                {isLoggedIn ? (
+                    <>
+                        <DashboardCard 
+                            title="המדדים שלי"
+                            description="צפי במדדים שלך, כולל BMI, סוג גוף, ומעקב אחר התקדמותך."
+                            buttonText="צפי במדדים"
+                            buttonLink="/profile"
+                        />
+
+                        <DashboardCard 
+                            title="חפש מאמן כושר"
+                            description="מצאי מאמן כושר אישי שיתאים בדיוק לצרכים שלך."
+                            buttonText="חפשי מאמן"
+                            buttonLink="/search?type=trainer"
+                        />
+
+                        <DashboardCard 
+                            title="חפש סטודיו"
+                            description="מצאי סטודיו כושר קרוב לביתך עם המאמנים הטובים ביותר."
+                            buttonText="חפשי סטודיו"
+                            buttonLink="/search?type=studio"
+                        />
+                    </>
+                ) : (
+                    <>
+                        <DashboardCard 
+                            title="גלי את סוג הגוף שלך"
+                            description="עני על מספר שאלות פשוטות וגלי את סוג הגוף שלך כדי להתאים את התוכנית המושלמת עבורך."
+                            buttonText="התחל עכשיו"
+                            buttonLink="/signup"
+                        />
+
+                        <DashboardCard 
+                            title="חפשי סטודיו או מאמנת אישית בקרבתך"
+                            description="מצאי מאמן כושר אישי שיתאים בדיוק לצרכים שלך."
+                            buttonText="לחיפוש"
+                            buttonLink="/search?type=trainer"
+                        />
+                    </>
+                )}
+            </CardsContainer>
+
             <AboutSection>
                 <AboutBox>
                     <AboutTitle>About us</AboutTitle>
