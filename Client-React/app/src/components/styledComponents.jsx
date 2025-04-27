@@ -59,38 +59,27 @@ export const Container = styled.div`
 // Header & Footer styles
 
 export const HeaderStyle = styled.header`
+  background-color: #333;
+  padding: 1rem 2rem;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   position: sticky;
   top: 0;
-  background-color: #333;
-  color: #fff;
-  padding: 10px 20px;
   width: 100%;
   z-index: 1000;
   box-sizing: border-box;
-
-  @media (max-width: 768px) {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    text-align: center;
-  }
 `;
-
-
 
 export const HeaderButtonDiv = styled.div`
   display: flex;
-  gap: 10px;
-  align-items: center;
+  gap: 1rem;
+`;
 
-  @media (max-width: 768px) {
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-  }
+export const HeaderText = styled.p`
+  color: white;
+  margin: 0;
+  font-size: 1rem;
 `;
 
 export const HeaderTitle = styled.h1`
@@ -98,17 +87,6 @@ export const HeaderTitle = styled.h1`
     font-weight: bold;
     margin: 0;
     white-space: nowrap;
-`;
-
-export const HeaderText = styled.div`
-  font-size: 16px;
-  margin-left: 10px;
-
-  @media (max-width: 768px) {
-    width: 100%;
-    text-align: center;
-    margin: 5px 0;
-  }
 `;
 
 export const HeaderButton = styled.button`
@@ -183,12 +161,6 @@ export const ButtonSignup = styled(HeaderButton)`
         transform: scale(1.2);
         background-color: #f8eaef;
     }
-`;
-
-export const WelcomeText = styled.p`
-    font-size: 1.5rem;
-    margin-top: 20px;
-    text-align: center;
 `;
 
 export const AboutSection = styled.section`

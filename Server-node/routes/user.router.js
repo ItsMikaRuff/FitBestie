@@ -82,6 +82,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Search trainers by location
+router.get("/search", async (req, res) => {
+    try {
+        const { type } = req.query;
+        
+        // Build the search query
+        const query = {
+            role: type || 'trainer' // אם לא צוין type, מחפש מאמנים
+        };
+
+        // Search for trainers
+        const results = await userController.searchByTypeAndLocation(query);
+        console.log('Search results:', results); // Add logging
+        res.json(results);
+    } catch (error) {
+        console.error("Search error:", error);
+        res.status(500).json({ message: "Error searching for trainers" });
+    }
+});
 
 // update user
 
@@ -98,14 +117,39 @@ router.post("/update/:id", (req, res, next) => {
     console.log(">>> req.file:", req.file);
 
     try {
-      const updates = {
-        name: req.body.name,
-        email: req.body.email,
-        location: req.body.location,
-        phone: req.body.phone,
-        whatsapp: req.body.whatsapp,
-        instagram: req.body.instagram,
-      };
+      const updates = {};
+
+      // Handle basic user info
+      if (req.body.name) updates.name = req.body.name;
+      if (req.body.email) updates.email = req.body.email;
+      if (req.body.location) updates.location = req.body.location;
+      if (req.body.phone) updates.phone = req.body.phone;
+      if (req.body.whatsapp) updates.whatsapp = req.body.whatsapp;
+      if (req.body.instagram) updates.instagram = req.body.instagram;
+
+      // Handle address
+      if (req.body.address) {
+        try {
+          const addressData = JSON.parse(req.body.address);
+          // Ensure all required fields are present
+          updates.address = {
+            street: addressData.street || '',
+            city: addressData.city || '',
+            state: addressData.state || '',
+            country: addressData.country || '',
+            zipCode: addressData.zipCode || '',
+            coordinates: {
+              lat: addressData.coordinates?.lat || null,
+              lng: addressData.coordinates?.lng || null
+            }
+          };
+          console.log("Parsed address data:", updates.address);
+        } catch (e) {
+          console.error("Error parsing address:", e);
+          // If parsing fails, try to use the raw address data
+          updates.address = req.body.address;
+        }
+      }
 
       // Handle expertise if it exists in the request
       if (req.body.expertise) {
@@ -117,9 +161,45 @@ router.post("/update/:id", (req, res, next) => {
         }
       }
 
+      // Handle measurements
+      if (req.body.height || req.body.weight || req.body.bmi || req.body.bmiCategory || 
+          req.body.wrist || req.body.ankle || req.body.hip || req.body.waist || req.body.shoulder) {
+        
+        // Create new measurements object with only the sent fields
+        const measurements = {};
+        
+        // Update only the fields that were sent
+        if (req.body.height) measurements.height = Number(req.body.height);
+        if (req.body.weight) measurements.weight = Number(req.body.weight);
+        if (req.body.bmi) measurements.bmi = Number(req.body.bmi);
+        if (req.body.bmiCategory) measurements.bmiCategory = req.body.bmiCategory;
+        if (req.body.wrist) measurements.wrist = Number(req.body.wrist);
+        if (req.body.ankle) measurements.ankle = Number(req.body.ankle);
+        if (req.body.hip) measurements.hip = Number(req.body.hip);
+        if (req.body.waist) measurements.waist = Number(req.body.waist);
+        if (req.body.shoulder) measurements.shoulder = Number(req.body.shoulder);
+        
+        // Update lastUpdated only if we have new measurements
+        measurements.lastUpdated = new Date();
+        
+        // Update the measurements object in the updates
+        updates.measurements = measurements;
+      }
+
+      // Handle body type
+      if (req.body.bodyType || req.body.bodyTypeDescription) {
+        updates.bodyType = {
+          type: req.body.bodyType || null,
+          description: req.body.bodyTypeDescription || null,
+          lastCalculated: new Date()
+        };
+      }
+
       if (req.file && req.file.path) {
         updates.image = req.file.path;
       }
+
+      console.log("Final updates object:", updates);
 
       const user = await userController.update({ _id: req.params.id }, updates);
       if (!user) throw new Error("User not found");
@@ -136,11 +216,22 @@ router.post("/update/:id", (req, res, next) => {
 //delete user
 router.delete("/:id", async (req, res) => {
   try {
-    const user = await userController.deleteOne({ _id: req.params.id });
-    if (!user) throw "User not found";
-    res.send(user);
+    // Get user before deletion to verify it exists
+    const user = await userController.readOne({ _id: req.params.id });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete user
+    const deletedUser = await userController.deleteOne({ _id: req.params.id });
+    if (!deletedUser) {
+      return res.status(500).json({ message: "Failed to delete user" });
+    }
+
+    res.json({ message: "User deleted successfully", user: deletedUser });
   } catch (error) {
-    res.status(500).send("Error creating user");
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 });
 

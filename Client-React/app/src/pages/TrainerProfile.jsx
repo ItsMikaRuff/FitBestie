@@ -1,5 +1,5 @@
 import { useUser } from "../context/UserContext";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
     TrainerDashboardContainer,
     TrainerHeader,
@@ -17,6 +17,8 @@ import {
 import Loader from "../components/Loader";
 import axios from "axios";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import AddressInput from '../components/AddressInput';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -96,19 +98,33 @@ const expertiseOptions = [
 ];
 
 const TrainerProfile = () => {
-    const { user, updateUser, isLoggedIn } = useUser();
+    const { user, updateUser, isLoggedIn, logout } = useUser();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const editFormRef = useRef(null);
 
     const [formData, setFormData] = useState({
         name: user?.name || "",
         email: user?.email || "",
         image: null,
         expertise: user?.expertise || [],
-        location: user?.location || "",
         phone: user?.phone || "",
         whatsapp: user?.whatsapp || "",
         instagram: user?.instagram || "",
+        address: user?.address || {
+            street: '',
+            city: '',
+            state: '',
+            country: '',
+            zipCode: '',
+            coordinates: {
+                lat: null,
+                lng: null
+            }
+        }
     });
 
     const handleChange = (e) => {
@@ -168,11 +184,11 @@ const TrainerProfile = () => {
         const data = new FormData();
         data.append("name", formData.name);
         data.append("email", formData.email);
-        data.append("location", formData.location);
         data.append("expertise", JSON.stringify(formData.expertise));
         data.append("phone", formData.phone);
         data.append("whatsapp", formData.whatsapp);
         data.append("instagram", formData.instagram);
+        data.append("address", JSON.stringify(formData.address));
         if (formData.image) {
             data.append("image", formData.image);
         }
@@ -192,6 +208,9 @@ const TrainerProfile = () => {
                 }
             );
 
+            console.log("Sending address:", formData.address);
+            console.log("Response from server:", res.data);
+
             updateUser(res.data);
             localStorage.setItem("user", JSON.stringify(res.data));
             alert("עודכן בהצלחה 🎉");
@@ -205,27 +224,84 @@ const TrainerProfile = () => {
         }
     };
 
+    const handleDeleteProfile = async () => {
+        if (!showDeleteConfirmation) {
+            setShowDeleteConfirmation(true);
+            return;
+        }
+
+        if (!deleteConfirmed) {
+            alert("אנא אשר את מחיקת הפרופיל");
+            return;
+        }
+
+        if (!window.confirm("האם אתה בטוח שברצונך למחוק את הפרופיל? פעולה זו אינה ניתנת לביטול.")) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const userId = user?._id || user?.id;
+
+            const res = await axios.delete(
+                `${API_URL}/user/${userId}`,
+                {
+                    withCredentials: true,
+                }
+            );
+
+            if (res.data.message === "User deleted successfully") {
+                logout();
+                navigate("/");
+                alert("הפרופיל נמחק בהצלחה");
+            } else {
+                throw new Error("Failed to delete profile");
+            }
+        } catch (error) {
+            console.error("Error deleting profile:", error);
+            alert("שגיאה במחיקת הפרופיל");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEditClick = () => {
+        setIsEditing(true);
+        // Add a small delay to ensure the form is rendered before scrolling
+        setTimeout(() => {
+            editFormRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    };
+
     if (!isLoggedIn || user?.role !== "trainer") return <p>Unauthorized</p>;
 
     return (
         <TrainerDashboardContainer>
             <TrainerHeader>
                 <TrainerImage
-                    src={user?.image || "https://via.placeholder.com/150"}
+                    src={user?.image || "https://placehold.co/150x150"}
                     alt="תמונת פרופיל"
                 />
                 <TrainerInfo>
                     <TrainerName>{user?.name || "מאמנת"}</TrainerName>
-                    <TrainerTitle>מאמנת כושר </TrainerTitle>
-                    <EnhancedInfo>מיקום: {user?.location || "לא זמין"}</EnhancedInfo>
-                    <EnhancedInfo>תחומי התמחות: {user?.expertise?.join(', ') || "לא זמין"}</EnhancedInfo>
+                    <TrainerTitle>מאמנת כושר</TrainerTitle>
+                    <div>
+                        <EnhancedInfo>אימייל: {user?.email || "לא זמין"}</EnhancedInfo>
+                        <EnhancedInfo>כתובת: {user?.address?.street ? `${user.address.street}, ${user.address.city}` : "לא זמין"}</EnhancedInfo>
+                        <EnhancedInfo>טלפון: {user?.phone || "לא זמין"}</EnhancedInfo>
+                        <EnhancedInfo>Instagram: {user?.instagram || "לא זמין"}</EnhancedInfo>
+                        <EnhancedInfo>תחומי התמחות: {user?.expertise?.join(', ') || "לא זמין"}</EnhancedInfo>
+                    </div>
+                    <ProfileButton onClick={handleEditClick}>
+                        עריכת פרטים
+                    </ProfileButton>
                 </TrainerInfo>
             </TrainerHeader>
 
             <TrainerGrid>
-                <EnhancedProfileSection>
-                    <EnhancedProfileTitle>👤 פרטי מאמן</EnhancedProfileTitle>
-                    {isEditing ? (
+                {isEditing && (
+                    <EnhancedProfileSection ref={editFormRef}>
+                        <EnhancedProfileTitle>עריכת פרטים</EnhancedProfileTitle>
                         <form onSubmit={handleSubmit}>
                             <FormGroup>
                                 <FormLabel>שם מלא</FormLabel>
@@ -250,13 +326,13 @@ const TrainerProfile = () => {
                             </FormGroup>
 
                             <FormGroup>
-                                <FormLabel>מיקום (עיר/אזור)</FormLabel>
-                                <FormInput
-                                    type="text"
-                                    name="location"
-                                    value={formData.location}
-                                    onChange={handleChange}
-                                    required
+                                <FormLabel>כתובת</FormLabel>
+                                <AddressInput
+                                    value={formData.address}
+                                    onChange={(newAddress) => {
+                                        console.log("New address:", newAddress);
+                                        setFormData(prev => ({ ...prev, address: newAddress }));
+                                    }}
                                 />
                             </FormGroup>
 
@@ -271,7 +347,6 @@ const TrainerProfile = () => {
                                 />
                             </FormGroup>
 
-                        
                             <FormGroup>
                                 <FormLabel>חשבון Instagram מקצועי</FormLabel>
                                 <FormInput
@@ -315,30 +390,51 @@ const TrainerProfile = () => {
                             </ProfileButton>
                             {loading && <Loader />}
                         </form>
-                    ) : (
-                        <>
-                            <EnhancedInfo>שם: {user?.name || "לא זמין"}</EnhancedInfo>
-                            <EnhancedInfo>אימייל: {user?.email || "לא זמין"}</EnhancedInfo>
-                            <EnhancedInfo>טלפון: {user?.phone || "לא זמין"}</EnhancedInfo>
-                            <EnhancedInfo>Instagram: {user?.instagram || "לא זמין"}</EnhancedInfo>
-                            <ProfileButton onClick={() => setIsEditing(true)}>
-                                עריכת פרטים
-                            </ProfileButton>
-                        </>
-                    )}
+                    </EnhancedProfileSection>
+                )}
+
+                <EnhancedProfileSection>
+                    <EnhancedProfileTitle>⚠️ מחיקת פרופיל</EnhancedProfileTitle>
+                    <div>
+                        <p>שים לב: מחיקת הפרופיל היא פעולה בלתי הפיכה. כל הנתונים שלך יימחקו לצמיתות.</p>
+                        {showDeleteConfirmation && (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={deleteConfirmed}
+                                        onChange={(e) => setDeleteConfirmed(e.target.checked)}
+                                    />
+                                    <span>אני מבין שמחיקת הפרופיל היא פעולה בלתי הפיכה</span>
+                                </label>
+                            </div>
+                        )}
+                        <button
+                            onClick={handleDeleteProfile}
+                            disabled={loading || (showDeleteConfirmation && !deleteConfirmed)}
+                            style={{
+                                backgroundColor: '#dc3545',
+                                color: 'white',
+                                padding: '0.8rem 1.5rem',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: loading || (showDeleteConfirmation && !deleteConfirmed) ? 'not-allowed' : 'pointer',
+                                width: '100%',
+                                fontSize: '1rem',
+                                transition: 'background-color 0.3s ease',
+                                opacity: loading || (showDeleteConfirmation && !deleteConfirmed) ? 0.7 : 1,
+                                marginTop: '1rem'
+                            }}
+                            onMouseOver={(e) => !loading && (!showDeleteConfirmation || deleteConfirmed) && (e.target.style.backgroundColor = '#c82333')}
+                            onMouseOut={(e) => !loading && (!showDeleteConfirmation || deleteConfirmed) && (e.target.style.backgroundColor = '#dc3545')}
+                        >
+                            {loading ? 'מוחק...' : showDeleteConfirmation ? 'אשר מחיקה' : 'מחק פרופיל'}
+                        </button>
+                    </div>
                 </EnhancedProfileSection>
-
-                
-
-               
-
-                
             </TrainerGrid>
 
-            
             <StyledLink to="/">🔙 חזרה לדף הבית</StyledLink>
-            
-           
         </TrainerDashboardContainer>
     );
 };

@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'trainer','Admin', 'Manager'], // אפשרויות למשתמש: user או trainer
+        enum: ['user', 'trainer', 'studio', 'Admin', 'Manager'], // אפשרויות למשתמש: user, trainer, studio
         required: true,
     },
     image: {
@@ -31,8 +31,19 @@ const userSchema = new mongoose.Schema({
     },
     location: {
         type: String,
-        required: function() { return this.role === 'trainer'; },
+        required: function() { return this.role === 'trainer' || this.role === 'studio'; },
         default: ''
+    },
+    address: {
+        street: { type: String, default: '' },
+        city: { type: String, default: '' },
+        state: { type: String, default: '' },
+        country: { type: String, default: '' },
+        zipCode: { type: String, default: '' },
+        coordinates: {
+            lat: { type: Number, default: null },
+            lng: { type: Number, default: null }
+        }
     },
     phone: {
         type: String,
@@ -48,6 +59,27 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false,
         default: ''
+    },
+    // BMI and body measurements
+    measurements: {
+        height: { type: Number, default: null },
+        weight: { type: Number, default: null },
+        bmi: { type: Number, default: null },
+        bmiCategory: { type: String, default: null },
+        wrist: { type: Number, default: null },
+        ankle: { type: Number, default: null },
+        hip: { type: Number, default: null },
+        waist: { type: Number, default: null },
+        shoulder: { type: Number, default: null },
+        bodyType: { type: String, default: null },
+        bodyTypeDescription: { type: String, default: null },
+        lastUpdated: { type: Date, default: null }
+    },
+    // Body type information
+    bodyType: {
+        type: { type: String, enum: ['אקטומורף', 'מזומורף', 'אנדומורף', null], default: null },
+        description: { type: String, default: null },
+        lastCalculated: { type: Date, default: null }
     },
     createdAt: {
         type: Date,
