@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "db.js",
   "scripts": {
+    "prestart": "npm install",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
