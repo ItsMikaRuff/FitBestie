@@ -6,7 +6,7 @@ const Layout = () => {
     const location = useLocation();
 
     // דפים שבהם לא יוצג ה-Header וה-Footer
-    const hideLayout = ["/login", "/signup"].includes(location.pathname);
+    const hideLayout = ["/login", "/signup", "/trainer-signup"].includes(location.pathname);
 
     return (
         <>

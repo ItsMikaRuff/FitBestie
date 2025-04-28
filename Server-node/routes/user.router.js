@@ -55,6 +55,19 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Get pending trainers
+router.get("/pending-trainers", async (req, res) => {
+    try {
+        const pendingTrainers = await userController.read({
+            role: 'trainer',
+            trainerStatus: 'pending'
+        });
+        res.send(pendingTrainers);
+    } catch (error) {
+        res.status(500).send("Error fetching pending trainers");
+    }
+});
+
 //get user by id
 router.get("/:id", async (req, res) => {
   try {
@@ -232,5 +245,36 @@ router.get("/search", async (req, res) => {
   }
 });
 
+// Approve trainer
+router.post("/approve-trainer/:id", async (req, res) => {
+    try {
+        const trainer = await userController.update(
+            { _id: req.params.id },
+            { trainerStatus: 'approved' }
+        );
+        if (!trainer) {
+            return res.status(404).send("Trainer not found");
+        }
+        res.send({ message: "Trainer approved successfully", trainer });
+    } catch (error) {
+        res.status(500).send("Error approving trainer");
+    }
+});
+
+// Reject trainer
+router.post("/reject-trainer/:id", async (req, res) => {
+    try {
+        const trainer = await userController.update(
+            { _id: req.params.id },
+            { trainerStatus: 'rejected' }
+        );
+        if (!trainer) {
+            return res.status(404).send("Trainer not found");
+        }
+        res.send({ message: "Trainer rejected successfully", trainer });
+    } catch (error) {
+        res.status(500).send("Error rejecting trainer");
+    }
+});
 
 module.exports = router;

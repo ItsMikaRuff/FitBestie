@@ -2,11 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import axios from "axios"; // אל תשכח להתקין axios
 
-import { SignUpFormComponent, SignUpDiv, SignUpInput, SignUpButton, SignUpSelect, SignUpTitle, GlobalError } from "../components/styledComponents";
+import { SignUpFormComponent, SignUpDiv, SignUpInput, 
+    SignUpButton, SignUpTitle, GlobalError, StyledLink } from "../components/styledComponents";
 import { useState } from "react";
 import Loader from "../components/Loader";
 
-const SignUpForm = () => {
+const UserSignUp = () => {
 
     const [loading, setLoading] = useState(false); // State to manage loading status
 
@@ -148,16 +149,6 @@ const SignUpForm = () => {
                 value={formik.values.confirmPassword}
                 style={{ textAlign: 'right' }}
             />
-            <SignUpSelect
-                name="role"
-                onChange={formik.handleChange}
-                value={formik.values.role}
-                placeholder=" "
-                style={{ textAlign: 'right' }}
-            >
-                <option value="user">משתמש רגיל</option>
-                <option value="trainer">מאמן כושר</option>
-            </SignUpSelect>
 
             {/* הצגת שגיאה כללית מתחת לטופס */}
             {getFirstError() && (
@@ -176,10 +167,20 @@ const SignUpForm = () => {
 
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
             <Link to="/login" style={{ display: 'block', marginBottom: '10px' }}>כבר יש לך חשבון? התחבר</Link>
+            <StyledLink to="/trainer-signup" style={{ 
+                display: 'block', 
+                marginBottom: '10px',
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                color: '#6c5ce7',
+                textDecoration: 'underline'
+            }}>
+                אני מעוניינת לפרסם את העסק שלי
+            </StyledLink>
             <Link to="/" style={{ display: 'block' }}>חזרה לדף הבית</Link>
         </div>
 
     </SignUpDiv>
 
 }
-export default SignUpForm;
+export default UserSignUp;

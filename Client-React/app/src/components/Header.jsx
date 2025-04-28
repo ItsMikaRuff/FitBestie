@@ -48,6 +48,11 @@ const Header = () => {
                                 </Button>
                             </Link>
                         )}
+                        {user?.role?.toLowerCase() === "worker" && (
+                            <Link to="/worker">
+                                <Button>אימות ספקיות כושר</Button>
+                            </Link>
+                        )}
                         <Link to="/profile">
                             <Button>פרופיל</Button>
                         </Link>

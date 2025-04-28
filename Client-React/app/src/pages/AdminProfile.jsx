@@ -273,6 +273,7 @@ const AdminProfile = () => {
                                 <option value="trainer">Trainer</option>
                                 <option value="admin">Admin</option>
                                 <option value="manager">Manager</option>
+                                <option value="worker">Worker</option>
                                 {user?.role === "superAdmin" && (
                                     <option value="superAdmin">Super Admin</option>
                                 )}
@@ -328,6 +329,7 @@ const AdminProfile = () => {
                                                 <option value="trainer">Trainer</option>
                                                 <option value="admin">Admin</option>
                                                 <option value="manager">Manager</option>
+                                                <option value="worker">Worker</option>
                                                 {user?.role === "superAdmin" && (
                                                     <option value="superAdmin">Super Admin</option>
                                                 )}
