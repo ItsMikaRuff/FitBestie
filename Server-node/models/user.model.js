@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'trainer', 'admin', 'manager'], // אפשרויות למשתמש: user, trainer, studio
+        enum: ['user', 'trainer', 'admin', 'superAdmin', 'manager'], // אפשרויות למשתמש: user, trainer, admin, superAdmin, manager
         required: true,
     },
     image: {
