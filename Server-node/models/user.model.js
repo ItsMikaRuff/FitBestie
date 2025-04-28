@@ -17,8 +17,28 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'trainer', 'admin', 'superAdmin', 'manager'], // אפשרויות למשתמש: user, trainer, admin, superAdmin, manager
+        enum: ['user', 'trainer', 'admin', 'superAdmin', 'manager', 'worker'], // אפשרויות למשתמש
         required: true,
+    },
+    trainerStatus: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        required: function() { return this.role === 'trainer'; },
+        default: null
+    },
+    paymentDetails: {
+        cardNumber: {
+            type: String,
+            required: function() { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+        },
+        expiryDate: {
+            type: String,
+            required: function() { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+        },
+        cvv: {
+            type: String,
+            required: function() { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+        }
     },
     image: {
         type: String,

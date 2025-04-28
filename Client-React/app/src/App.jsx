@@ -1,4 +1,5 @@
 import SearchResults from './pages/SearchResults';
+import WorkerPage from './pages/WorkerPage';
 
 <Routes>
     <Route path="/" element={<Home />} />
@@ -9,4 +10,5 @@ import SearchResults from './pages/SearchResults';
     <Route path="/quiz" element={<Quiz />} />
     <Route path="/content" element={<Content />} />
     <Route path="/search" element={<SearchResults />} />
+    <Route path="/worker" element={<WorkerPage />} />
 </Routes> 
