@@ -32,6 +32,7 @@ const FormInput = styled.input`
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s ease;
+    text-align: right;
 
     &:focus {
         outline: none;
@@ -44,10 +45,12 @@ const FormLabel = styled.label`
     margin: 10px 0 5px;
     font-weight: 500;
     color: #333;
+    text-align: right;
 `;
 
 const FormGroup = styled.div`
     margin-bottom: 15px;
+    text-align: right;
 `;
 
 const UserProfile = () => {
@@ -175,7 +178,7 @@ const UserProfile = () => {
     if (!isLoggedIn) return <p>Unauthorized</p>;
 
     return (
-        <DashboardContainer>
+        <DashboardContainer style={{ direction: 'rtl' }}>
             <TrainerHeader>
                 <TrainerImage
                     src={user?.image || "https://placehold.co/150x150"}
@@ -197,7 +200,7 @@ const UserProfile = () => {
             {isEditing && (
                 <ProfileSection ref={editFormRef}>
                     <ProfileTitle>עריכת פרטים</ProfileTitle>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} style={{ textAlign: 'right' }}>
                         <FormGroup>
                             <FormLabel>שם מלא</FormLabel>
                             <FormInput
@@ -238,10 +241,12 @@ const UserProfile = () => {
                             />
                         </FormGroup>
 
-                        <ProfileButton type="submit">שמור שינויים</ProfileButton>
-                        <ProfileButton type="button" onClick={() => setIsEditing(false)}>
-                            ביטול
-                        </ProfileButton>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <ProfileButton type="submit">שמור שינויים</ProfileButton>
+                            <ProfileButton type="button" onClick={() => setIsEditing(false)}>
+                                ביטול
+                            </ProfileButton>
+                        </div>
                         {loading && <Loader />}
                     </form>
                 </ProfileSection>
@@ -274,17 +279,17 @@ const UserProfile = () => {
 
             <ProfileSection>
                 <ProfileTitle>⚠️ מחיקת פרופיל</ProfileTitle>
-                <div>
+                <div style={{ textAlign: 'right' }}>
                     <p>שים לב: מחיקת הפרופיל היא פעולה בלתי הפיכה. כל הנתונים שלך יימחקו לצמיתות.</p>
                     {showDeleteConfirmation && (
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ marginTop: '10px' }}>
+                            <label style={{ display: 'block', marginBottom: '10px' }}>
                                 <input
                                     type="checkbox"
                                     checked={deleteConfirmed}
                                     onChange={(e) => setDeleteConfirmed(e.target.checked)}
                                 />
-                                <span>אני מבין שמחיקת הפרופיל היא פעולה בלתי הפיכה</span>
+                                אני מבין/ה שפעולה זו אינה ניתנת לביטול
                             </label>
                         </div>
                     )}

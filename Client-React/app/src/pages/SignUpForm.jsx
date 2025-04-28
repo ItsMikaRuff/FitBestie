@@ -53,7 +53,6 @@ const SignUpForm = () => {
         },
 
         onSubmit: async (values, formikHelpers) => {
-
             const errors = await formikHelpers.validateForm();
 
             if (Object.keys(errors).length > 0) {
@@ -67,25 +66,32 @@ const SignUpForm = () => {
             }
 
             try {
+                setLoading(true);
                 
-                setLoading(true); // Set loading to true when starting the request
+                // Check if email already exists
+                const checkEmail = await axios.get(`${process.env.REACT_APP_API_URL}/user?email=${values.email}`);
+                if (checkEmail.data && checkEmail.data.length > 0) {
+                    formikHelpers.setErrors({ email: "A user with this email already exists" });
+                    setLoading(false);
+                    return;
+                }
+
+                // If email doesn't exist, proceed with signup
                 await axios.post(`${process.env.REACT_APP_API_URL}/user`, values);
                 console.log("Signup success");
-                setLoading(false); // Set loading to false when the request is complete
-                // Handle successful signup (e.g., redirect to login page or show success message)
-                navigate("/SignUpSuccessful"); // Redirect to the success page
+                setLoading(false);
+                navigate("/SignUpSuccessful");
             } catch (error) {
-
-                setLoading(false); // Set loading to false if there's an error
-                console.log(error);
-
-                if(error.code === 11000){
-                    
-                    formikHelpers.setErrors({ email: "Email already exists" });
-                }
-                
+                setLoading(false);
                 console.error("Signup error:", error.response ? error.response.data : error.message);
                 
+                if (error.response?.data?.message) {
+                    formikHelpers.setErrors({ email: error.response.data.message });
+                } else if (error.code === 11000) {
+                    formikHelpers.setErrors({ email: "Email already exists" });
+                } else {
+                    formikHelpers.setErrors({ email: "An error occurred during signup" });
+                }
             }
         },
     });
@@ -102,51 +108,55 @@ const SignUpForm = () => {
         return null;
     };
 
-    return <SignUpDiv>
+    return <SignUpDiv style={{ direction: 'rtl' }}>
 
-        <SignUpTitle>Sign Up</SignUpTitle>
+        <SignUpTitle>הרשמה</SignUpTitle>
 
-        <SignUpFormComponent onSubmit={formik.handleSubmit}>
+        <SignUpFormComponent onSubmit={formik.handleSubmit} style={{ textAlign: 'right' }}>
 
             <SignUpInput
                 type="text"
                 name="name"
-                placeholder="Full Name"
+                placeholder="שם מלא"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.name}
+                style={{ textAlign: 'right' }}
             />
 
             <SignUpInput
                 type="email"
                 name="email"
-                placeholder="Email"
+                placeholder="אימייל"
                 onChange={formik.handleChange}
                 value={formik.values.email}
+                style={{ textAlign: 'right' }}
             />
             <SignUpInput
                 type="password"
                 name="password"
-                placeholder="Password"
+                placeholder="סיסמה"
                 onChange={formik.handleChange}
                 value={formik.values.password}
+                style={{ textAlign: 'right' }}
             />
             <SignUpInput
                 type="password"
                 name="confirmPassword"
-                placeholder="Confirm Password"
+                placeholder="אימות סיסמה"
                 onChange={formik.handleChange}
                 value={formik.values.confirmPassword}
+                style={{ textAlign: 'right' }}
             />
             <SignUpSelect
                 name="role"
                 onChange={formik.handleChange}
                 value={formik.values.role}
                 placeholder=" "
+                style={{ textAlign: 'right' }}
             >
-                <option value="user">Regular User</option>
-                <option value="trainer">Fitness Trainer</option>
-
+                <option value="user">משתמש רגיל</option>
+                <option value="trainer">מאמן כושר</option>
             </SignUpSelect>
 
             {/* הצגת שגיאה כללית מתחת לטופס */}
@@ -156,21 +166,18 @@ const SignUpForm = () => {
                 </GlobalError>
             )}
 
-            <SignUpButton type="submit">Sign Up</SignUpButton>
+            <SignUpButton type="submit">הרשמה</SignUpButton>
             {
                 loading ?
                     <Loader/>
                     : null
             }
-
-
         </SignUpFormComponent>
 
-        <br />
-        <Link to="/login">Already have an account? Login</Link>
-        <br />
-        <Link to="/">Back to Home</Link>
-        <br />
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+            <Link to="/login" style={{ display: 'block', marginBottom: '10px' }}>כבר יש לך חשבון? התחבר</Link>
+            <Link to="/" style={{ display: 'block' }}>חזרה לדף הבית</Link>
+        </div>
 
     </SignUpDiv>
 

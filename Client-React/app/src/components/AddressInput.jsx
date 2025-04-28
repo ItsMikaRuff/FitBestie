@@ -13,6 +13,7 @@ const Input = styled.input`
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
+    text-align: right;
 
     &:focus {
         outline: none;
@@ -49,15 +50,14 @@ const AddressInput = ({ value, onChange }) => {
             zoom: 8
         });
 
-        const autocomplete = new window.google.maps.places.Autocomplete(
-            document.getElementById('street'),
-            { 
-                types: ['address'],
-                componentRestrictions: { country: 'il' }, // Restrict to Israel
-                fields: ['address_components', 'geometry', 'name']
-            }
-        );
+        // Create the Autocomplete input
+        const input = document.getElementById('autocomplete-input');
+        const autocomplete = new window.google.maps.places.Autocomplete(input, {
+            types: ['address'],
+            componentRestrictions: { country: 'il' }
+        });
 
+        // Listen for place changes
         autocomplete.addListener('place_changed', () => {
             const place = autocomplete.getPlace();
             if (place.geometry) {
@@ -86,16 +86,30 @@ const AddressInput = ({ value, onChange }) => {
     }, [onChange]);
 
     useEffect(() => {
-        // Define the callback function globally
-        window.initMap = initializeMap;
-
-        // If Google Maps is already loaded, initialize immediately
-        if (window.google && window.google.maps) {
+        // Check if script is already loaded
+        if (document.querySelector('script[src*="maps.googleapis.com"]')) {
             initializeMap();
+            return;
         }
 
+        // Load Google Maps script asynchronously
+        const loadGoogleMapsScript = () => {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly`;
+            script.async = true;
+            script.defer = true;
+            script.onload = initializeMap;
+            document.head.appendChild(script);
+        };
+
+        loadGoogleMapsScript();
+
         return () => {
-            delete window.initMap;
+            // Cleanup
+            const script = document.querySelector('script[src*="maps.googleapis.com"]');
+            if (script) {
+                script.remove();
+            }
         };
     }, [initializeMap]);
 
@@ -112,11 +126,10 @@ const AddressInput = ({ value, onChange }) => {
     return (
         <AddressContainer>
             <Input
-                id="street"
-                name="street"
-                value={address.street}
-                onChange={handleChange}
-                placeholder="הקלד כתובת לחיפוש אוטומטי"
+                id="autocomplete-input"
+                type="text"
+                placeholder="הזן כתובת"
+                style={{ marginBottom: '1rem' }}
             />
             <Input
                 name="city"

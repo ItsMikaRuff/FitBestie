@@ -12,15 +12,15 @@ const GlobalStyle = createGlobalStyle`
   }
 
   html {
-    font-size: 16px;
+    font-size: 14px;
     scroll-behavior: smooth;
 
     @media (max-width: 768px) {
-      font-size: 15px;
+      font-size: 13px;
     }
 
     @media (max-width: 480px) {
-      font-size: 14px;
+      font-size: 12px;
     }
   }
 

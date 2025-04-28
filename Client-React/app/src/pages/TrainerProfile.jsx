@@ -30,6 +30,7 @@ const FormInput = styled.input`
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s ease;
+    text-align: right;
 
     &:focus {
         outline: none;
@@ -42,6 +43,7 @@ const FormLabel = styled.label`
     margin: 10px 0 5px;
     font-weight: 500;
     color: #333;
+    text-align: right;
 `;
 
 const ExpertiseGrid = styled.div`
@@ -49,6 +51,7 @@ const ExpertiseGrid = styled.div`
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 10px;
     margin: 10px 0;
+    direction: rtl;
 `;
 
 const ExpertiseOption = styled.label`
@@ -78,6 +81,7 @@ const ExpertiseOption = styled.label`
 
 const FormGroup = styled.div`
     margin-bottom: 15px;
+    text-align: right;
 `;
 
 const expertiseOptions = [
@@ -208,8 +212,6 @@ const TrainerProfile = () => {
                 }
             );
 
-            console.log("Sending address:", formData.address);
-            console.log("Response from server:", res.data);
 
             updateUser(res.data);
             localStorage.setItem("user", JSON.stringify(res.data));
@@ -276,19 +278,20 @@ const TrainerProfile = () => {
     if (!isLoggedIn || user?.role !== "trainer") return <p>Unauthorized</p>;
 
     return (
-        <TrainerDashboardContainer>
+        <TrainerDashboardContainer style={{ direction: 'rtl' }}>
             <TrainerHeader>
                 <TrainerImage
                     src={user?.image || "https://placehold.co/150x150"}
                     alt="תמונת פרופיל"
                 />
                 <TrainerInfo>
-                    <TrainerName>{user?.name || "מאמנת"}</TrainerName>
-                    <TrainerTitle>מאמנת כושר</TrainerTitle>
+                    <TrainerName>{user?.name || "מאמן"}</TrainerName>
+                    <TrainerTitle>מאמן כושר</TrainerTitle>
                     <div>
                         <EnhancedInfo>אימייל: {user?.email || "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>כתובת: {user?.address?.street ? `${user.address.street}, ${user.address.city}` : "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>טלפון: {user?.phone || "לא זמין"}</EnhancedInfo>
+                        <EnhancedInfo>WhatsApp: {user?.whatsapp || "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>Instagram: {user?.instagram || "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>תחומי התמחות: {user?.expertise?.join(', ') || "לא זמין"}</EnhancedInfo>
                     </div>
@@ -302,7 +305,7 @@ const TrainerProfile = () => {
                 {isEditing && (
                     <EnhancedProfileSection ref={editFormRef}>
                         <EnhancedProfileTitle>עריכת פרטים</EnhancedProfileTitle>
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} style={{ textAlign: 'right' }}>
                             <FormGroup>
                                 <FormLabel>שם מלא</FormLabel>
                                 <FormInput
@@ -326,29 +329,29 @@ const TrainerProfile = () => {
                             </FormGroup>
 
                             <FormGroup>
-                                <FormLabel>כתובת</FormLabel>
-                                <AddressInput
-                                    value={formData.address}
-                                    onChange={(newAddress) => {
-                                        console.log("New address:", newAddress);
-                                        setFormData(prev => ({ ...prev, address: newAddress }));
-                                    }}
-                                />
-                            </FormGroup>
-
-                            <FormGroup>
-                                <FormLabel>מספר טלפון</FormLabel>
+                                <FormLabel>טלפון</FormLabel>
                                 <FormInput
                                     type="tel"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    placeholder="05XXXXXXXX"
+                                    placeholder="+972"
                                 />
                             </FormGroup>
 
                             <FormGroup>
-                                <FormLabel>חשבון Instagram מקצועי</FormLabel>
+                                <FormLabel>WhatsApp</FormLabel>
+                                <FormInput
+                                    type="tel"
+                                    name="whatsapp"
+                                    value={formData.whatsapp}
+                                    onChange={handleChange}
+                                    placeholder="+972"
+                                />
+                            </FormGroup>
+
+                            <FormGroup>
+                                <FormLabel>Instagram</FormLabel>
                                 <FormInput
                                     type="text"
                                     name="instagram"
@@ -359,19 +362,11 @@ const TrainerProfile = () => {
                             </FormGroup>
 
                             <FormGroup>
-                                <FormLabel>תחומי התמחות</FormLabel>
-                                <ExpertiseGrid>
-                                    {expertiseOptions.map((expertise) => (
-                                        <ExpertiseOption key={expertise}>
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.expertise.includes(expertise)}
-                                                onChange={() => handleExpertiseChange(expertise)}
-                                            />
-                                            {expertise}
-                                        </ExpertiseOption>
-                                    ))}
-                                </ExpertiseGrid>
+                                <FormLabel>כתובת</FormLabel>
+                                <AddressInput
+                                    value={formData.address}
+                                    onChange={(address) => setFormData(prev => ({ ...prev, address }))}
+                                />
                             </FormGroup>
 
                             <FormGroup>
@@ -384,28 +379,46 @@ const TrainerProfile = () => {
                                 />
                             </FormGroup>
 
-                            <ProfileButton type="submit">שמור שינויים</ProfileButton>
-                            <ProfileButton type="button" onClick={() => setIsEditing(false)}>
-                                ביטול
-                            </ProfileButton>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                <ProfileButton type="submit">שמור שינויים</ProfileButton>
+                                <ProfileButton type="button" onClick={() => setIsEditing(false)}>
+                                    ביטול
+                                </ProfileButton>
+                            </div>
                             {loading && <Loader />}
                         </form>
                     </EnhancedProfileSection>
                 )}
 
                 <EnhancedProfileSection>
+                    <EnhancedProfileTitle>💪 תחומי התמחות</EnhancedProfileTitle>
+                    <ExpertiseGrid>
+                        {expertiseOptions.map((expertise) => (
+                            <ExpertiseOption key={expertise}>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.expertise.includes(expertise)}
+                                    onChange={() => handleExpertiseChange(expertise)}
+                                />
+                                {expertise}
+                            </ExpertiseOption>
+                        ))}
+                    </ExpertiseGrid>
+                </EnhancedProfileSection>
+
+                <EnhancedProfileSection>
                     <EnhancedProfileTitle>⚠️ מחיקת פרופיל</EnhancedProfileTitle>
-                    <div>
+                    <div style={{ textAlign: 'right' }}>
                         <p>שים לב: מחיקת הפרופיל היא פעולה בלתי הפיכה. כל הנתונים שלך יימחקו לצמיתות.</p>
                         {showDeleteConfirmation && (
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ marginTop: '10px' }}>
+                                <label style={{ display: 'block', marginBottom: '10px' }}>
                                     <input
                                         type="checkbox"
                                         checked={deleteConfirmed}
                                         onChange={(e) => setDeleteConfirmed(e.target.checked)}
                                     />
-                                    <span>אני מבין שמחיקת הפרופיל היא פעולה בלתי הפיכה</span>
+                                    אני מבין/ה שפעולה זו אינה ניתנת לביטול
                                 </label>
                             </div>
                         )}

@@ -29,17 +29,10 @@ const Home = () => {
                         />
 
                         <DashboardCard 
-                            title="חפש מאמן כושר"
+                            title="חפשי מאמנת כושר"
                             description="מצאי מאמן כושר אישי שיתאים בדיוק לצרכים שלך."
                             buttonText="חפשי מאמן"
                             buttonLink="/search?type=trainer"
-                        />
-
-                        <DashboardCard 
-                            title="חפש סטודיו"
-                            description="מצאי סטודיו כושר קרוב לביתך עם המאמנים הטובים ביותר."
-                            buttonText="חפשי סטודיו"
-                            buttonLink="/search?type=studio"
                         />
                     </>
                 ) : (

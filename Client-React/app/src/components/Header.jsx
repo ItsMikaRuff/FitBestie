@@ -6,8 +6,6 @@ import { Link, useNavigate } from "react-router-dom";
 import FITBESTIE_LOGO from "../Images/FITBESTIE_LOGO.jpg";
 import { FiSettings } from "react-icons/fi";
 
-
-
 const Header = () => {
     const { user, isLoggedIn, logout } = useUser();
     const navigate = useNavigate();
@@ -19,24 +17,24 @@ const Header = () => {
     }
 
     return (
-        <HeaderStyle>
-            <div style={{ flex: "0 0 auto" }}>
+        <HeaderStyle style={{ direction: 'rtl' }}>
+            <div style={{ flex: "0 0 auto", marginLeft: "20px" }}>
                 <FooterLink href="/">
                     <img src={FITBESTIE_LOGO} alt="Logo" />
                 </FooterLink>
             </div>
             <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
                 <HeaderText>
-                    Welcome, {isLoggedIn && user?.name ? user.name : "Guest"}
+                    ברוכה הבאה, {isLoggedIn && user?.name ? user.name : "חברה!"}
                 </HeaderText>
             </div>
-            <HeaderButtonDiv>
+            <HeaderButtonDiv style={{ marginRight: "20px" }}>
                 {isLoggedIn ? (
                     <>
                         {(user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "superadmin") && (
                             <Link to="/admin">
                                 <Button
-                                    title="Configuration"
+                                    title="הגדרות"
                                     style={{
                                         display: "flex",
                                         alignItems: "center",
@@ -50,23 +48,23 @@ const Header = () => {
                                 </Button>
                             </Link>
                         )}
+                        <Link to="/profile">
+                            <Button>פרופיל</Button>
+                        </Link>
                         {(user?.role?.toLowerCase() === "superadmin" || user?.role?.toLowerCase() === "manager") && (
                             <Link to="/manager">
-                                <Button title="Manager">Manager</Button>
+                                <Button title="ניהול">ניהול</Button>
                             </Link>
                         )}
-                        <Link to="/profile">
-                            <Button>Profile</Button>
-                        </Link>
-                        <Button onClick={handleLogout}>Logout</Button>
+                        <Button onClick={handleLogout}>התנתק</Button>
                     </>
                 ) : (
                     <>
-                        <Link to="/login">
-                            <Button>Login</Button>
-                        </Link>
                         <Link to="/signup">
-                            <Button>Signup</Button>
+                            <Button>הרשמה</Button>
+                        </Link>
+                        <Link to="/login">
+                            <Button>התחבר</Button>
                         </Link>
                     </>
                 )}
