@@ -16,11 +16,6 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// console.log("Cloudinary config:", {
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET ? "***" : "MISSING"
-// });
 
 const upload = multer({ storage });
 
@@ -82,26 +77,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Search trainers by location
-router.get("/search", async (req, res) => {
-    try {
-        const { type } = req.query;
-        
-        // Build the search query
-        const query = {
-            role: type || 'trainer' // אם לא צוין type, מחפש מאמנים
-        };
-
-        // Search for trainers
-        const results = await userController.searchByTypeAndLocation(query);
-        console.log('Search results:', results); // Add logging
-        res.json(results);
-    } catch (error) {
-        console.error("Search error:", error);
-        res.status(500).json({ message: "Error searching for trainers" });
-    }
-});
-
 // update user
 
 router.post("/update/:id", (req, res, next) => {
@@ -126,6 +101,7 @@ router.post("/update/:id", (req, res, next) => {
       if (req.body.phone) updates.phone = req.body.phone;
       if (req.body.whatsapp) updates.whatsapp = req.body.whatsapp;
       if (req.body.instagram) updates.instagram = req.body.instagram;
+      if (req.body.role) updates.role = req.body.role;
 
       // Handle address
       if (req.body.address) {
@@ -234,5 +210,27 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 });
+
+
+// Search trainers by location
+router.get("/search", async (req, res) => {
+  try {
+      const { type } = req.query;
+      
+      // Build the search query
+      const query = {
+          role: type || 'trainer' // אם לא צוין type, מחפש מאמנים
+      };
+
+      // Search for trainers
+      const results = await userController.searchByTypeAndLocation(query);
+      console.log('Search results:', results); // Add logging
+      res.json(results);
+  } catch (error) {
+      console.error("Search error:", error);
+      res.status(500).json({ message: "Error searching for trainers" });
+  }
+});
+
 
 module.exports = router;

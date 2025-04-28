@@ -6,11 +6,17 @@ import styled from 'styled-components';
 export const Button = styled.button`
   background-color: ${({ theme }) => theme.colors.secondary};
   color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 2rem;
-  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 500;
   transition: background-color 0.3s ease;
+  min-width: 60px;
+  min-height: 32px;
+  text-align: center;
+  display: inline-block;
+  border: none;
+  box-shadow: none;
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.accent};
@@ -19,6 +25,13 @@ export const Button = styled.button`
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  @media (max-width: 700px) {
+    width: 90%;
+    font-size: 1rem;
+    min-height: 36px;
+    padding: 0.5rem 0;
   }
 `;
 
@@ -60,26 +73,35 @@ export const Container = styled.div`
 
 export const HeaderStyle = styled.header`
   background-color: #333;
-  padding: 1rem 2rem;
+  padding: 0.7rem 1.2rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 1000;
   box-sizing: border-box;
-`;
 
-export const HeaderButtonDiv = styled.div`
-  display: flex;
-  gap: 1rem;
+  @media (max-width: 700px) {
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.7rem 0.5rem;
+  }
 `;
 
 export const HeaderText = styled.p`
   color: white;
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  flex: 1;
+
+  @media (max-width: 700px) {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
 `;
 
 export const HeaderTitle = styled.h1`
@@ -89,15 +111,20 @@ export const HeaderTitle = styled.h1`
     white-space: nowrap;
 `;
 
-export const HeaderButton = styled.button`
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 600;
-    white-space: nowrap;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+export const HeaderButtonDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+
+  @media (max-width: 700px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 `;
+
+
 
 export const FooterStyle = styled.footer`
     background-color: #333;
@@ -117,8 +144,18 @@ export const FooterText = styled.p`
 export const FooterLink = styled.a`
     color: #fff;
     text-decoration: none;
-    &:hover {
-        text-decoration: underline;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    img {
+        width: 100px;
+        height: auto;
+        display: block;
+        @media (max-width: 700px) {
+            width: 70px;
+        }
     }
 `;
 
@@ -143,7 +180,7 @@ export const HomepageBackground = styled.div`
     z-index: -1;
 `;
 
-export const ButtonLogin = styled(HeaderButton)`
+export const ButtonLogin = styled(Button)`
     background: #f8eaef;
     color: #333;
 
@@ -153,7 +190,7 @@ export const ButtonLogin = styled(HeaderButton)`
     }
 `;
 
-export const ButtonSignup = styled(HeaderButton)`
+export const ButtonSignup = styled(Button)`
     background: #f8eaef;
     color: #333;
 
@@ -330,25 +367,34 @@ export const SignUpButton = styled(LoginButton)`
 // Profile
 
 export const DashboardContainer = styled.div`
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-family: 'Arial', sans-serif;
-    text-align: center;
-    direction: rtl;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  @media (max-width: 700px) {
+    padding: 1rem 0.2rem;
+  }
 `;
 
-export const ProfileSection = styled.div`
-    background-color: #f7f7f7;
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+export const ProfileSection = styled.section`
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 2rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
 `;
 
 export const ProfileTitle = styled.h2`
-    margin-bottom: 1rem;
-    color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+
+  @media (max-width: 700px) {
+    font-size: 1.1rem;
+  }
 `;
 
 export const Info = styled.p`
@@ -357,18 +403,25 @@ export const Info = styled.p`
 `;
 
 export const ProfileButton = styled.button`
-    background-color: #6c5ce7;
-    color: white;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 1rem;
+  background-color: #6c5ce7;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 1rem;
 
-    &:hover {
+  &:hover {
     background-color: #5a4bcf;
-    }
+  }
+
+  @media (max-width: 700px) {
+    width: 100%;
+    padding: 0.7rem 0;
+    font-size: 1rem;
+  }
 `;
+
 export const StyledLink = styled(Link)`
     display: inline-block;
     margin-top: 1rem;
@@ -390,41 +443,67 @@ export const TrainerDashboardContainer = styled(DashboardContainer)`
 `;
 
 export const TrainerHeader = styled.div`
-    display: flex;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: linear-gradient(135deg, rgb(209, 205, 236) 0%, rgb(209, 205, 236) 100%);
+  padding: 2rem;
+  border-radius: 20px;
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 700px) {
+    flex-direction: column;
     align-items: center;
-    gap: 2rem;
-    background: linear-gradient(135deg,rgb(209, 205, 236) 0%,rgb(209, 205, 236) 100%);
-    padding: 2rem;
-    border-radius: 20px;
-    color: white;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    gap: 1rem;
+    text-align: center;
+  }
 `;
 
 export const TrainerImage = styled.img`
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 4px solid white;
-    object-fit: cover;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid white;
+  object-fit: cover;
+
+  @media (max-width: 700px) {
+    width: 90px;
+    height: 90px;
+  }
 `;
 
 export const TrainerInfo = styled.div`
-    text-align: right;
-    flex: 1;
+  text-align: right;
+  flex: 1;
+
+  @media (max-width: 700px) {
+    text-align: center;
+    width: 100%;
+  }
 `;
 
 export const TrainerName = styled.h1`
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: 700;
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+
+  @media (max-width: 700px) {
+    font-size: 1.7rem;
+  }
 `;
 
 export const TrainerTitle = styled.h2`
-    margin: 0.5rem 0;
-    font-size: 1.5rem;
-    font-weight: 500;
-    opacity: 0.9;
+  margin: 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  opacity: 0.9;
+
+  @media (max-width: 700px) {
+    font-size: 1.1rem;
+  }
 `;
 
 export const TrainerGrid = styled.div`
@@ -456,12 +535,12 @@ export const EnhancedProfileTitle = styled(ProfileTitle)`
     gap: 0.5rem;
 `;
 
-export const EnhancedInfo = styled(Info)`
-    font-size: 1.1rem;
-    color: #333;
-    margin: 0.8rem 0;
-    padding: 0.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
+export const EnhancedInfo = styled.div`
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+
+  @media (max-width: 700px) {
+    font-size: 0.95rem;
+  }
 `;
 
