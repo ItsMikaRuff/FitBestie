@@ -23,21 +23,19 @@ const LoginForm = () => {
             const errors = {};
 
             if (!values.email) {
-                errors.email = 'Email is required';
+                errors.email = 'נדרש אימייל';
             } else if (!/\S+@\S+\.\S+/.test(values.email)) {
-                errors.email = 'Invalid email address';
+                errors.email = 'כתובת אימייל לא תקינה';
             }
             if (!values.password) {
-                errors.password = 'Password is required';
+                errors.password = 'נדרשת סיסמה';
             } else if (values.password.length < 6) {
-                errors.password = 'Must be at least 6 characters long';
+                errors.password = 'הסיסמה חייבת להכיל לפחות 6 תווים';
             }
             return errors;
         },
 
         onSubmit: async (values, formikHelpers) => {
-
-            console.log('login clicked');
 
             const errors = await formikHelpers.validateForm();
 
@@ -62,7 +60,7 @@ const LoginForm = () => {
             } catch (error) {
                 setLoading(false);
                 console.error('Login error:', error);
-                formikHelpers.setFieldError('email', 'Invalid email or password');
+                formikHelpers.setFieldError('email', 'אימייל או סיסמה לא נכונים');
             }
 
 
@@ -83,39 +81,40 @@ const LoginForm = () => {
 
 
     return (
-        <LoginDiv className="flex flex-col items-center justify-center h-screen bg-gray-100">
+        <LoginDiv className="flex flex-col items-center justify-center h-screen bg-gray-100" style={{ direction: 'rtl' }}>
 
-            <LoginTitle>Login</LoginTitle>
+            <LoginTitle>התחברות</LoginTitle>
 
-            <LoginFormComponent onSubmit={loginFormik.handleSubmit}>
+            <LoginFormComponent onSubmit={loginFormik.handleSubmit} style={{ textAlign: 'right' }}>
 
                 <LoginInput
                     type="email"
                     name="email"
-                    placeholder="Email"
+                    placeholder="אימייל"
                     onChange={loginFormik.handleChange}
                     onBlur={loginFormik.handleBlur}
                     value={loginFormik.values.email}
+                    style={{ textAlign: 'right' }}
                 />
 
                 <LoginInput
                     type="password"
                     name="password"
-                    placeholder="Password"
+                    placeholder="סיסמה"
                     onChange={loginFormik.handleChange}
                     onBlur={loginFormik.handleBlur}
                     value={loginFormik.values.password}
+                    style={{ textAlign: 'right' }}
                 />
 
                 {/* הצגת שגיאה כללית מתחת לטופס */}
-
                 {getFirstError() && (
                     <GlobalError>
                         {getFirstError()}
                     </GlobalError>
                 )}
 
-                <LoginButton type="submit">Login</LoginButton>
+                <LoginButton type="submit">התחבר</LoginButton>
                 {
                     loading?
                     <Loader/>
@@ -123,11 +122,11 @@ const LoginForm = () => {
                 }
             </LoginFormComponent>
 
-            <Link to="/signup">Don&apos;t have an account? Sign up</Link>
-            <br />
-            <Link to="/forgot-password">Forgot password?</Link>
-            <br />
-            <Link to="/">Back to Home</Link>
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <Link to="/signup" style={{ display: 'block', marginBottom: '10px' }}>אין לך חשבון? הירשם</Link>
+                <Link to="/forgot-password" style={{ display: 'block', marginBottom: '10px' }}>שכחת סיסמה?</Link>
+                <Link to="/" style={{ display: 'block' }}>חזרה לדף הבית</Link>
+            </div>
         </LoginDiv>
     );
 }

@@ -106,8 +106,8 @@ const FilterButton = styled.button`
     padding: 0.5rem 1rem;
     border: 1px solid #ddd;
     border-radius: 20px;
-    background: ${props => props.active ? '#6c5ce7' : 'white'};
-    color: ${props => props.active ? 'white' : '#333'};
+    background: ${props => props.$active ? '#6c5ce7' : 'white'};
+    color: ${props => props.$active ? 'white' : '#333'};
     cursor: pointer;
     transition: all 0.3s ease;
 
@@ -178,19 +178,19 @@ const SearchTrainerResults = () => {
 
             <FilterContainer>
                 <FilterButton 
-                    active={activeFilter === 'all'} 
+                    $active={activeFilter === 'all'} 
                     onClick={() => setActiveFilter('all')}
                 >
                     הכל
                 </FilterButton>
                 <FilterButton 
-                    active={activeFilter === 'trainers'} 
+                    $active={activeFilter === 'trainers'} 
                     onClick={() => setActiveFilter('trainers')}
                 >
                     מאמנות אישיות
                 </FilterButton>
                 <FilterButton 
-                    active={activeFilter === 'studios'} 
+                    $active={activeFilter === 'studios'} 
                     onClick={() => setActiveFilter('studios')}
                 >
                     מאמנות קבוצתיות

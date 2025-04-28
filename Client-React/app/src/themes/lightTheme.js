@@ -19,8 +19,8 @@ export const lightTheme = {
         secondary: "Georgia, serif",
     },
     fontSizes: {
-        normal: "16px",
-        large: "20px",
+        normal: "14px",
+        large: "18px",
     },
     padding: {
         small: "10px",

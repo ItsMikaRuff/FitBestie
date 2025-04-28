@@ -162,7 +162,15 @@ const AdminProfile = () => {
             setMessage("You don't have permission to create superAdmin users.");
             return;
         }
+
+        // Check if email already exists
         try {
+            const checkEmail = await axios.get(`${API_URL}/user?email=${form.email}`, { withCredentials: true });
+            if (checkEmail.data && checkEmail.data.length > 0) {
+                setMessage("A user with this email already exists.");
+                return;
+            }
+
             await axios.post(`${API_URL}/user`, form, { withCredentials: true });
             setMessage("User created successfully!");
             setForm({ name: "", email: "", password: "", role: "user" });
@@ -174,7 +182,7 @@ const AdminProfile = () => {
                 setUsers(res.data);
             }
         } catch (err) {
-            setMessage("Error creating user.");
+            setMessage(err.response?.data?.message || "Error creating user.");
         }
     };
 
@@ -215,12 +223,21 @@ const AdminProfile = () => {
             alert("You don't have permission to edit superAdmin users or create new superAdmin users.");
             return;
         }
+
+        // Check if email already exists (excluding the current user)
         try {
+            const checkEmail = await axios.get(`${API_URL}/user?email=${editForm.email}`, { withCredentials: true });
+            const existingUser = checkEmail.data.find(u => u._id !== id);
+            if (existingUser) {
+                alert("A user with this email already exists.");
+                return;
+            }
+
             const res = await axios.post(`${API_URL}/user/update/${id}`, editForm, { withCredentials: true });
             setUsers(users.map(u => u._id === id ? res.data : u));
             setEditId(null);
-        } catch {
-            alert("Failed to update user");
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to update user");
         }
     };
 

@@ -8,7 +8,7 @@ export const Button = styled.button`
   color: white;
   padding: 0.3rem 0.6rem;
   border-radius: 1.2rem;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
   transition: background-color 0.3s ease;
   min-width: 60px;
@@ -29,7 +29,7 @@ export const Button = styled.button`
 
   @media (max-width: 700px) {
     width: 90%;
-    font-size: 1rem;
+    font-size: 0.9rem;
     min-height: 36px;
     padding: 0.5rem 0;
   }
@@ -48,13 +48,13 @@ export const Card = styled.div`
 `;
 
 export const SectionTitle = styled.h2`
-  font-size: 2rem;
+  font-size: 1.7rem;
   text-align: center;
   margin-bottom: 1.5rem;
   color: ${({ theme }) => theme.colors.primary};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 `;
 
@@ -94,18 +94,18 @@ export const HeaderStyle = styled.header`
 export const HeaderText = styled.p`
   color: white;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   flex: 1;
 
   @media (max-width: 700px) {
     text-align: center;
-    font-size: 1rem;
+    font-size: 0.9rem;
     margin-bottom: 0.3rem;
   }
 `;
 
 export const HeaderTitle = styled.h1`
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
     margin: 0;
     white-space: nowrap;
@@ -136,7 +136,7 @@ export const FooterStyle = styled.footer`
 `;
 
 export const FooterText = styled.p`
-    font-size: 1rem;
+    font-size: 0.9rem;
     margin: 0;
     font-weight: normal;
 `;
@@ -225,13 +225,13 @@ export const AboutBox = styled.div`
 `;
 
 export const AboutTitle = styled.h2`
-    font-size: 2rem;
+    font-size: 1.7rem;
     margin-bottom: 15px;
     font-weight: bold;
 `;
 
 export const AboutText = styled.p`
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     line-height: 1.6;
 `;
 
@@ -248,7 +248,7 @@ export const LoginDiv = styled.div`
 `;
 
 export const LoginTitle = styled.h1`
-    font-size: 2rem;
+    font-size: 1.7rem;
     margin-bottom: 20px;
     color: #333;
 `;
@@ -388,7 +388,7 @@ export const ProfileSection = styled.section`
 `;
 
 export const ProfileTitle = styled.h2`
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin-bottom: 1rem;
   font-weight: bold;
 
@@ -398,7 +398,7 @@ export const ProfileTitle = styled.h2`
 `;
 
 export const Info = styled.p`
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #555;
 `;
 
@@ -487,22 +487,22 @@ export const TrainerInfo = styled.div`
 
 export const TrainerName = styled.h1`
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
 
   @media (max-width: 700px) {
-    font-size: 1.7rem;
+    font-size: 1.5rem;
   }
 `;
 
 export const TrainerTitle = styled.h2`
   margin: 0.5rem 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 500;
   opacity: 0.9;
 
   @media (max-width: 700px) {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 `;
 
@@ -536,11 +536,11 @@ export const EnhancedProfileTitle = styled(ProfileTitle)`
 `;
 
 export const EnhancedInfo = styled.div`
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   margin-bottom: 0.3rem;
 
   @media (max-width: 700px) {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
   }
 `;
 
