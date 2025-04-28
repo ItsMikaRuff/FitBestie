@@ -12,6 +12,7 @@ const Header = () => {
     const { user, isLoggedIn, logout } = useUser();
     const navigate = useNavigate();
 
+
     const handleLogout = () => {
         logout();              // מוחק את המשתמש מהזיכרון וה־localStorage
         navigate("/");    // מחזיר את המשתמש לדף הבית 
@@ -32,7 +33,7 @@ const Header = () => {
             <HeaderButtonDiv>
                 {isLoggedIn ? (
                     <>
-                        {user?.role?.toLowerCase() === "admin" && (
+                        {(user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "superadmin") && (
                             <Link to="/admin">
                                 <Button
                                     title="Configuration"
@@ -47,6 +48,11 @@ const Header = () => {
                                 >
                                     <FiSettings size={22} />
                                 </Button>
+                            </Link>
+                        )}
+                        {(user?.role?.toLowerCase() === "superadmin" || user?.role?.toLowerCase() === "manager") && (
+                            <Link to="/manager">
+                                <Button title="Manager">Manager</Button>
                             </Link>
                         )}
                         <Link to="/profile">

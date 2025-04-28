@@ -137,9 +137,16 @@ const AdminProfile = () => {
 
     // Fetch all users on mount
     useEffect(() => {
-        if (user?.role?.toLowerCase() === "admin") {
+        if (user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase() === "superadmin") {
             axios.get(`${API_URL}/user`, { withCredentials: true })
-                .then(res => setUsers(res.data))
+                .then(res => {
+                    // If user is admin, filter out superAdmin users
+                    if (user?.role?.toLowerCase() === "admin") {
+                        setUsers(res.data.filter(u => u.role !== "superAdmin"));
+                    } else {
+                        setUsers(res.data);
+                    }
+                })
                 .catch(() => setUsers([]));
         }
     }, [user]);
@@ -150,13 +157,22 @@ const AdminProfile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // Prevent admin users from creating superAdmin users
+        if (user?.role?.toLowerCase() === "admin" && form.role === "superAdmin") {
+            setMessage("You don't have permission to create superAdmin users.");
+            return;
+        }
         try {
             await axios.post(`${API_URL}/user`, form, { withCredentials: true });
             setMessage("User created successfully!");
             setForm({ name: "", email: "", password: "", role: "user" });
             // Refresh user list
             const res = await axios.get(`${API_URL}/user`, { withCredentials: true });
-            setUsers(res.data);
+            if (user?.role?.toLowerCase() === "admin") {
+                setUsers(res.data.filter(u => u.role !== "superAdmin"));
+            } else {
+                setUsers(res.data);
+            }
         } catch (err) {
             setMessage("Error creating user.");
         }
@@ -164,6 +180,12 @@ const AdminProfile = () => {
 
     // Delete user
     const handleDelete = async (id) => {
+        const userToDelete = users.find(u => u._id === id);
+        // Prevent admin users from deleting superAdmin users
+        if (user?.role?.toLowerCase() === "admin" && userToDelete?.role === "superAdmin") {
+            alert("You don't have permission to delete superAdmin users.");
+            return;
+        }
         if (!window.confirm("Are you sure you want to delete this user?")) return;
         try {
             await axios.delete(`${API_URL}/user/${id}`, { withCredentials: true });
@@ -175,12 +197,24 @@ const AdminProfile = () => {
 
     // Start editing
     const handleEdit = (u) => {
+        // Prevent admin users from editing superAdmin users
+        if (user?.role?.toLowerCase() === "admin" && u.role === "superAdmin") {
+            alert("You don't have permission to edit superAdmin users.");
+            return;
+        }
         setEditId(u._id);
         setEditForm({ name: u.name, email: u.email, role: u.role });
     };
 
     // Save edit
     const handleEditSave = async (id) => {
+        const userToEdit = users.find(u => u._id === id);
+        // Prevent admin users from changing roles to superAdmin
+        if (user?.role?.toLowerCase() === "admin" && 
+            (userToEdit?.role === "superAdmin" || editForm.role === "superAdmin")) {
+            alert("You don't have permission to edit superAdmin users or create new superAdmin users.");
+            return;
+        }
         try {
             const res = await axios.post(`${API_URL}/user/update/${id}`, editForm, { withCredentials: true });
             setUsers(users.map(u => u._id === id ? res.data : u));
@@ -193,7 +227,7 @@ const AdminProfile = () => {
     // Cancel edit
     const handleEditCancel = () => setEditId(null);
 
-    if (!user || user.role?.toLowerCase() !== "admin") {
+    if (!user || (user.role?.toLowerCase() !== "admin" && user.role !== "superAdmin")) {
         return <p>Unauthorized</p>;
     }
 
@@ -222,6 +256,9 @@ const AdminProfile = () => {
                                 <option value="trainer">Trainer</option>
                                 <option value="admin">Admin</option>
                                 <option value="manager">Manager</option>
+                                {user?.role === "superAdmin" && (
+                                    <option value="superAdmin">Super Admin</option>
+                                )}
                             </select>
                         </div>
                         <ProfileButton type="submit">Create User</ProfileButton>
@@ -274,6 +311,9 @@ const AdminProfile = () => {
                                                 <option value="trainer">Trainer</option>
                                                 <option value="admin">Admin</option>
                                                 <option value="manager">Manager</option>
+                                                {user?.role === "superAdmin" && (
+                                                    <option value="superAdmin">Super Admin</option>
+                                                )}
                                             </select>
                                         ) : u.role}
                                     </td>

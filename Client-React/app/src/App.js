@@ -17,6 +17,7 @@ import TrainerProfile from './pages/TrainerProfile';
 import PersonalQuiz from './components/PersonalQuiz';
 import SearchTrainerResults from './pages/SearchTrainerResults';
 import AdminProfile from './pages/AdminProfile';
+import ManagerPage from './pages/ManagerPage';
 
 function App() {
   const [mainTheme] = useState(theme);
@@ -34,6 +35,7 @@ function App() {
           <Route path="/quiz" element={<PersonalQuiz />} />
           <Route path="/search" element={<SearchTrainerResults />} />
           <Route path="admin" element={<AdminProfile />} />
+          <Route path="manager" element={<ManagerPage />} />
         </Route>
 
         {/* עמודים בלי Header/Footer */}
