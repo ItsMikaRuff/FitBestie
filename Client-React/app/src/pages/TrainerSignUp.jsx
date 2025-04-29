@@ -58,7 +58,7 @@ const TrainerSignUp = () => {
         const { value, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            expertise: checked 
+            expertise: checked
                 ? [...prev.expertise, value]
                 : prev.expertise.filter(item => item !== value)
         }));
@@ -73,10 +73,37 @@ const TrainerSignUp = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setError('');
 
+        // ולידציה בסיסית בצד לקוח
+        if (
+            !formData.name ||
+            !formData.email ||
+            !formData.password ||
+            !formData.confirmPassword ||
+            !formData.phone ||
+            !formData.paymentDetails.cardNumber ||
+            !formData.paymentDetails.expiryDate ||
+            !formData.paymentDetails.cvv
+        ) {
+            setError('אנא מלאי את כל השדות החיוניים');
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('הסיסמאות לא תואמות');
+            return;
+        }
+
+        setLoading(true);
+
         try {
+            console.log('sending data:', {
+                ...formData,
+                role: 'trainer',
+                trainerStatus: 'pending'
+            });
+
             const response = await axios.post(`${API_URL}/user`, {
                 ...formData,
                 role: 'trainer',
@@ -84,13 +111,19 @@ const TrainerSignUp = () => {
             });
 
             login(response.data);
-            navigate('/profile');
+            navigate('/signup-successful');
         } catch (error) {
-            setError(error.response?.data?.message || 'שגיאה בהרשמה');
+            // --- שינוי כאן ---
+            if (error.response?.data?.message) {
+                setError(error.response.data.message);  // הודעה ברורה מהשרת
+            } else {
+                setError('אירעה שגיאה בלתי צפויה');
+            }
         } finally {
             setLoading(false);
         }
     };
+
 
     const expertiseOptions = [
         { value: 'fitness', label: 'כושר גופני' },
@@ -104,10 +137,10 @@ const TrainerSignUp = () => {
     ];
 
     return (
-        <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             justifyContent: 'center',
             padding: '20px',
             backgroundColor: '#f8eaef',
@@ -183,11 +216,26 @@ const TrainerSignUp = () => {
                     </div>
                 </div>
 
-                <AddressInput style={{width: '100px'}}/>
+                <AddressInput
+                    value={formData.location}
+                    onChange={newAddress => {
+                        setFormData(prev => ({
+                            ...prev,
+                            location: newAddress
+                        }));
+                    }}
+                    placeholder="כתובת"
+                    style={{ width: '100%' }}
+                />
+
 
                 <PaymentAuth onPaymentChange={handlePaymentChange} />
 
-                {error && <GlobalError>{error}</GlobalError>}
+                {error && (
+                    <GlobalError>
+                        {error}
+                    </GlobalError>
+                )}
 
                 <SignUpButton type="submit" disabled={loading}>
                     {loading ? 'מבצע הרשמה...' : 'הרשמה כמאמנת'}

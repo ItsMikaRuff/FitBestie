@@ -53,8 +53,13 @@ const LoginForm = () => {
 
             try {
                 setLoading(true); 
-                const response = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, values);
-                login(response.data); // שמור את המשתמש בקונטקסט
+                // const response = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, values);
+                // login(response.data); // שמור את המשתמש בקונטקסט
+
+                const {data} = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, values);
+                // data = { user: {...}, token: 'JWT...' }
+                login(data);           // עכשיו אנו קוראים ל־login({ user, token })
+                
                 setLoading(false);
                 navigate('/'); // מעבר לעמוד הבית או כל עמוד אחר
             } catch (error) {

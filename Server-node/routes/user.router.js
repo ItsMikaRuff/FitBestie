@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const userController = require("../controllers/user.controller");
+
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../utils/cloudinary");
-
 
 // configure cloud storage
 const storage = new CloudinaryStorage({
@@ -16,39 +17,47 @@ const storage = new CloudinaryStorage({
   },
 });
 
-
 const upload = multer({ storage });
 
+
 //add user
+
 router.post("/", async (req, res) => {
+  console.log("📝 received data:", req.body);
+
   try {
-    const user = await userController.create(req.body)
-    // if (!user) throw { code: 500 }
-    res.send(user)
+      const user = await userController.createUser(req.body);
+      res.status(201).json(user);
   } catch (err) {
-    console.log("error from controller", err.code)
-    res.status(500).send({message:"Error creating user", code: err.code})
+      console.error("❌ create error:", err.message);
+      res.status(500).json({ message: err.message });
   }
-})
+});
+
 
 // login user
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await userController.readOne({ email });
-
-    if (!user) {
-      return res.status(401).send("User not found");
+    if (!user || user.password !== password) {
+      return res.status(401).send("Invalid credentials");
     }
 
-    // השוואת סיסמה פשוטה (אם את משתמשת בהאש, תצטרכי bcrypt)
-    if (user.password !== password) {
-      return res.status(401).send("Invalid password");
-    }
+    // בונים payload
+    const payload = { id: user._id, role: user.role };
+    // חותמים טוקן
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
+    // שולחים גם את אובייקט המשתמש וגם את הטוקן
+    res.json({ user, token });
+
+    // // השוואת סיסמה פשוטה (אם את משתמשת בהאש, תצטרכי bcrypt)
+    // if (user.password !== password) {
+    //   return res.status(401).send("Invalid password");
+    // }
 
     // אם הכל תקין - מחזירים את המשתמש
-    res.send(user);
+    // res.send(user);
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).send("Error logging in");
@@ -57,15 +66,15 @@ router.post("/login", async (req, res) => {
 
 // Get pending trainers
 router.get("/pending-trainers", async (req, res) => {
-    try {
-        const pendingTrainers = await userController.read({
-            role: 'trainer',
-            trainerStatus: 'pending'
-        });
-        res.send(pendingTrainers);
-    } catch (error) {
-        res.status(500).send("Error fetching pending trainers");
-    }
+  try {
+    const pendingTrainers = await userController.read({
+      role: 'trainer',
+      trainerStatus: 'pending'
+    });
+    res.send(pendingTrainers);
+  } catch (error) {
+    res.status(500).send("Error fetching pending trainers");
+  }
 });
 
 //get user by id
@@ -151,12 +160,12 @@ router.post("/update/:id", (req, res, next) => {
       }
 
       // Handle measurements
-      if (req.body.height || req.body.weight || req.body.bmi || req.body.bmiCategory || 
-          req.body.wrist || req.body.ankle || req.body.hip || req.body.waist || req.body.shoulder) {
-        
+      if (req.body.height || req.body.weight || req.body.bmi || req.body.bmiCategory ||
+        req.body.wrist || req.body.ankle || req.body.hip || req.body.waist || req.body.shoulder) {
+
         // Create new measurements object with only the sent fields
         const measurements = {};
-        
+
         // Update only the fields that were sent
         if (req.body.height) measurements.height = Number(req.body.height);
         if (req.body.weight) measurements.weight = Number(req.body.weight);
@@ -167,10 +176,10 @@ router.post("/update/:id", (req, res, next) => {
         if (req.body.hip) measurements.hip = Number(req.body.hip);
         if (req.body.waist) measurements.waist = Number(req.body.waist);
         if (req.body.shoulder) measurements.shoulder = Number(req.body.shoulder);
-        
+
         // Update lastUpdated only if we have new measurements
         measurements.lastUpdated = new Date();
-        
+
         // Update the measurements object in the updates
         updates.measurements = measurements;
       }
@@ -228,53 +237,70 @@ router.delete("/:id", async (req, res) => {
 // Search trainers by location
 router.get("/search", async (req, res) => {
   try {
-      const { type } = req.query;
-      
-      // Build the search query
-      const query = {
-          role: type || 'trainer' // אם לא צוין type, מחפש מאמנים
-      };
+    const { type } = req.query;
 
-      // Search for trainers
-      const results = await userController.searchByTypeAndLocation(query);
-      console.log('Search results:', results); // Add logging
-      res.json(results);
+    // Build the search query
+    const query = {
+      role: type || 'trainer' // אם לא צוין type, מחפש מאמנים
+    };
+
+    // Search for trainers
+    const results = await userController.searchByTypeAndLocation(query);
+    console.log('Search results:', results); // Add logging
+    res.json(results);
   } catch (error) {
-      console.error("Search error:", error);
-      res.status(500).json({ message: "Error searching for trainers" });
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Error searching for trainers" });
   }
 });
 
-// Approve trainer
-router.post("/approve-trainer/:id", async (req, res) => {
-    try {
-        const trainer = await userController.update(
-            { _id: req.params.id },
-            { trainerStatus: 'approved' }
-        );
-        if (!trainer) {
-            return res.status(404).send("Trainer not found");
-        }
-        res.send({ message: "Trainer approved successfully", trainer });
-    } catch (error) {
-        res.status(500).send("Error approving trainer");
-    }
-});
 
-// Reject trainer
-router.post("/reject-trainer/:id", async (req, res) => {
+
+// Approve&Reject trainer
+
+const requireAuth = require('../middleware/requireAuth');
+const requireRole = require('../middleware/requireRole');
+
+// Approve trainer — רק worker או superAdmin
+router.post(
+  "/approve-trainer/:id",
+  requireAuth,
+  requireRole('worker', 'superAdmin'),
+  async (req, res) => {
     try {
-        const trainer = await userController.update(
-            { _id: req.params.id },
-            { trainerStatus: 'rejected' }
-        );
-        if (!trainer) {
-            return res.status(404).send("Trainer not found");
-        }
-        res.send({ message: "Trainer rejected successfully", trainer });
+      const trainer = await userController.update(
+        { _id: req.params.id },
+        { trainerStatus: 'approved' }
+      );
+      if (!trainer) {
+        return res.status(404).send("Trainer not found");
+      }
+      res.send({ message: "Trainer approved successfully", trainer });
     } catch (error) {
-        res.status(500).send("Error rejecting trainer");
+      res.status(500).send("Error approving trainer");
     }
-});
+  }
+);
+
+// Reject trainer — רק worker או superAdmin
+router.post(
+  "/reject-trainer/:id",
+  requireAuth,
+  requireRole('worker', 'superAdmin'),
+  async (req, res) => {
+    try {
+      const trainer = await userController.update(
+        { _id: req.params.id },
+        { trainerStatus: 'rejected' }
+      );
+      if (!trainer) {
+        return res.status(404).send("Trainer not found");
+      }
+      res.send({ message: "Trainer rejected successfully", trainer });
+    } catch (error) {
+      res.status(500).send("Error rejecting trainer");
+    }
+  }
+);
 
 module.exports = router;

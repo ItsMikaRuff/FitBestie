@@ -1,11 +1,16 @@
 const mongoose = require('mongoose')
 
-const userSchema = new mongoose.Schema({
+const baseOptions = {
+    discriminatorKey: 'role',
+    collection: 'users'
+};
 
+const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
         unique: true,
+        sparse: true
     },
     password: {
         type: String,
@@ -17,27 +22,21 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'trainer', 'admin', 'superAdmin', 'manager', 'worker'], // אפשרויות למשתמש
+        enum: ['user', 'trainer', 'admin', 'superAdmin', 'manager', 'worker'],
         required: true,
-    },
-    trainerStatus: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        required: function() { return this.role === 'trainer'; },
-        default: null
     },
     paymentDetails: {
         cardNumber: {
             type: String,
-            required: function() { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
         },
         expiryDate: {
             type: String,
-            required: function() { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
         },
         cvv: {
             type: String,
-            required: function() { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
         }
     },
     image: {
@@ -46,13 +45,8 @@ const userSchema = new mongoose.Schema({
     },
     expertise: {
         type: [String],
-        required: function() { return this.role === 'trainer'; },
+        required: function () { return this.role === 'trainer'; },
         default: []
-    },
-    location: {
-        type: String,
-        required: function() { return this.role === 'trainer' || this.role === 'studio'; },
-        default: ''
     },
     address: {
         street: { type: String, default: '' },
@@ -70,17 +64,6 @@ const userSchema = new mongoose.Schema({
         required: false,
         default: ''
     },
-    whatsapp: {
-        type: String,
-        required: false,
-        default: ''
-    },
-    instagram: {
-        type: String,
-        required: false,
-        default: ''
-    },
-    // BMI and body measurements
     measurements: {
         height: { type: Number, default: null },
         weight: { type: Number, default: null },
@@ -95,7 +78,6 @@ const userSchema = new mongoose.Schema({
         bodyTypeDescription: { type: String, default: null },
         lastUpdated: { type: Date, default: null }
     },
-    // Body type information
     bodyType: {
         type: { type: String, enum: ['אקטומורף', 'מזומורף', 'אנדומורף', null], default: null },
         description: { type: String, default: null },
@@ -105,9 +87,7 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+}, baseOptions);
 
-
-})
-
-const user = mongoose.model('user', userSchema)
-module.exports = user
+const User = mongoose.model('user', userSchema);
+module.exports = User;

@@ -13,6 +13,8 @@ import {
     EnhancedInfo,
     ProfileButton,
     StyledLink,
+    TrainerStatus,
+    ContactAdminButton,
 } from "../components/styledComponents";
 import Loader from "../components/Loader";
 import axios from "axios";
@@ -148,7 +150,7 @@ const TrainerProfile = () => {
         const newExpertise = formData.expertise.includes(expertise)
             ? formData.expertise.filter(item => item !== expertise)
             : [...formData.expertise, expertise];
-            
+
         setFormData(prev => ({
             ...prev,
             expertise: newExpertise
@@ -159,7 +161,7 @@ const TrainerProfile = () => {
             setLoading(true);
             const data = new FormData();
             data.append("expertise", JSON.stringify(newExpertise));
-            
+
             const userId = user?._id || user?.id;
             const res = await axios.post(
                 `${API_URL}/user/update/${userId}`,
@@ -279,6 +281,20 @@ const TrainerProfile = () => {
 
     return (
         <TrainerDashboardContainer style={{ direction: 'rtl' }}>
+
+            <TrainerStatus status={user.trainerStatus}>
+                {user.trainerStatus === 'approved' && 'החשבון שלך מאושר'}
+                {user.trainerStatus === 'pending' && 'החשבון שלך ממתין לאישור מנהל'}
+                {user.trainerStatus === 'rejected' && (
+                    <>
+                        הבקשה שלך נדחתה. ניתן ליצור קשר עם מנהל המערכת.
+                        <ContactAdminButton onClick={() => window.location.href = "mailto:support@fitbestie.com"}>
+                            פנה למנהל
+                        </ContactAdminButton>
+                    </>
+                )}
+            </TrainerStatus>
+
             <TrainerHeader>
                 <TrainerImage
                     src={user?.image || "https://placehold.co/150x150"}
