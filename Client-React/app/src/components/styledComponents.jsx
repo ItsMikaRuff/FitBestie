@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 // Global styles
-
 export const Button = styled.button`
   background-color: ${({ theme }) => theme.colors.secondary};
   color: white;
@@ -160,6 +159,7 @@ export const FooterLink = styled.a`
 `;
 
 // Homepage styles
+
 export const HomepageContainer = styled.div`
     width: 100%;
     min-height: 100vh;
@@ -543,4 +543,57 @@ export const EnhancedInfo = styled.div`
     font-size: 0.85rem;
   }
 `;
+
+export const TrainerStatus = styled.div`
+  margin-top: 15px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background-color: ${({ status }) =>
+    status === 'approved' ? '#d4edda' :
+    status === 'rejected' ? '#f8d7da' :
+    '#fff3cd'};
+
+  color: ${({ status }) =>
+    status === 'approved' ? '#155724' :
+    status === 'rejected' ? '#721c24' :
+    '#856404'};
+
+  border: 1px solid
+    ${({ status }) =>
+      status === 'approved' ? '#c3e6cb' :
+      status === 'rejected' ? '#f5c6cb' :
+      '#ffeeba'};
+
+  &::before {
+    content: ${({ status }) =>
+      status === 'approved' ? '"✅"' :
+      status === 'rejected' ? '"❌"' :
+      '"🔔"'};
+    font-size: 1.2rem;
+  }
+`;
+
+export const ContactAdminButton = styled.button`
+  margin-top: 10px;
+  background-color: #6c5ce7;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #5a4cd6;
+  }
+`;
+
 

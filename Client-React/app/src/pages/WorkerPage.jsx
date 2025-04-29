@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
 import styled from "styled-components";
@@ -76,30 +76,35 @@ const PaymentInfo = styled.div`
 `;
 
 const WorkerPage = () => {
-    const { user } = useUser();
+    const { user, token } = useUser();
     const [pendingTrainers, setPendingTrainers] = useState([]);
     const navigate = useNavigate();
 
+    const fetchPendingTrainers = useCallback(async () => {
+        if (!token) return;  // כעת token אמור להיות מלא
+        const { data } = await axios.get(
+            `${API_URL}/user/pending-trainers`,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setPendingTrainers(data);
+    }, [token]);
+
     useEffect(() => {
-        if (!user || user.role !== 'worker') {
+        if (!user || (user.role !== 'worker' && user.role !== 'superAdmin')) {
             navigate('/');
             return;
         }
         fetchPendingTrainers();
-    }, [user, navigate]);
-
-    const fetchPendingTrainers = async () => {
-        try {
-            const response = await axios.get(`${API_URL}/user/pending-trainers`);
-            setPendingTrainers(response.data);
-        } catch (error) {
-            console.error('Error fetching pending trainers:', error);
-        }
-    };
+    }, [user, navigate, fetchPendingTrainers]);
 
     const handleApprove = async (trainerId) => {
+        if (!token) return;
         try {
-            await axios.post(`${API_URL}/user/approve-trainer/${trainerId}`);
+            await axios.post(
+                `${API_URL}/user/approve-trainer/${trainerId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             fetchPendingTrainers();
         } catch (error) {
             console.error('Error approving trainer:', error);
@@ -107,15 +112,20 @@ const WorkerPage = () => {
     };
 
     const handleReject = async (trainerId) => {
+        if (!token) return;
         try {
-            await axios.post(`${API_URL}/user/reject-trainer/${trainerId}`);
+            await axios.post(
+                `${API_URL}/user/reject-trainer/${trainerId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             fetchPendingTrainers();
         } catch (error) {
             console.error('Error rejecting trainer:', error);
         }
     };
 
-    if (!user || user.role !== 'worker') {
+    if (!user || (user.role !== 'worker' && user.role !== 'superAdmin')) {
         return null;
     }
 
@@ -160,4 +170,4 @@ const WorkerPage = () => {
     );
 };
 
-export default WorkerPage; 
+export default WorkerPage;
