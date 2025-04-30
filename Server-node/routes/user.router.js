@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const userController = require("../controllers/user.controller");
+const trainerModel = require("../models/trainer.model");
 
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -256,31 +257,37 @@ router.get("/search", async (req, res) => {
 
 
 
-// Approve&Reject trainer
+// Approve & Reject trainer
 
 const requireAuth = require('../middleware/requireAuth');
 const requireRole = require('../middleware/requireRole');
 
-// Approve trainer — רק worker או superAdmin
 router.post(
   "/approve-trainer/:id",
   requireAuth,
   requireRole('worker', 'superAdmin'),
   async (req, res) => {
     try {
-      const trainer = await userController.update(
-        { _id: req.params.id },
-        { trainerStatus: 'approved' }
-      );
+      // קודם נשלוף את המשתמש לפי ID
+      const trainer = await trainerModel.findById(req.params.id);
       if (!trainer) {
         return res.status(404).send("Trainer not found");
       }
-      res.send({ message: "Trainer approved successfully", trainer });
+
+      // נשלח את ה־role כ־filter כדי שה-controller יעדכן בטבלה הנכונה
+      const updatedTrainer = await userController.update(
+        { _id: trainer._id, role: 'trainer' },
+        { trainerStatus: 'approved' }
+      );
+
+      res.send({ message: "Trainer approved successfully", trainer: updatedTrainer });
     } catch (error) {
+      console.error("Error approving trainer:", error);
       res.status(500).send("Error approving trainer");
     }
   }
 );
+
 
 // Reject trainer — רק worker או superAdmin
 router.post(
@@ -289,15 +296,19 @@ router.post(
   requireRole('worker', 'superAdmin'),
   async (req, res) => {
     try {
-      const trainer = await userController.update(
-        { _id: req.params.id },
-        { trainerStatus: 'rejected' }
-      );
+      const trainer = await trainerModel.findById(req.params.id);
       if (!trainer) {
         return res.status(404).send("Trainer not found");
       }
-      res.send({ message: "Trainer rejected successfully", trainer });
+
+      const updatedTrainer = await userController.update(
+        { _id: trainer._id, role: 'trainer' },
+        { trainerStatus: 'rejected' }
+      );
+
+      res.send({ message: "Trainer rejected successfully", trainer: updatedTrainer });
     } catch (error) {
+      console.error("Error rejecting trainer:", error);
       res.status(500).send("Error rejecting trainer");
     }
   }

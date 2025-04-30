@@ -21,13 +21,15 @@ const Input = styled.input`
     }
 `;
 
-const MapContainer = styled.div`
-    width: 100%;
-    height: 200px;
-    margin: 1rem 0;
-    border-radius: 8px;
-    overflow: hidden;
-`;
+// map styling
+
+// const MapContainer = styled.div`
+//     width: 100%;
+//     height: 200px;
+//     margin: 1rem 0;
+//     border-radius: 8px;
+//     overflow: hidden;
+// `;
 
 const AddressInput = ({ value, onChange }) => {
     const [address, setAddress] = useState(value || {
@@ -45,10 +47,11 @@ const AddressInput = ({ value, onChange }) => {
     const initializeMap = useCallback(() => {
         if (!window.google || !window.google.maps) return;
 
-        const map = new window.google.maps.Map(document.getElementById('map'), {
-            center: { lat: 31.7683, lng: 35.2137 }, // Default to Jerusalem
-            zoom: 8
-        });
+        // map
+        // const map = new window.google.maps.Map(document.getElementById('map'), {
+        //     center: { lat: 31.7683, lng: 35.2137 }, // Default to Jerusalem
+        //     zoom: 8
+        // });
 
         // Create the Autocomplete input
         const input = document.getElementById('autocomplete-input');
@@ -79,8 +82,8 @@ const AddressInput = ({ value, onChange }) => {
 
                 setAddress(newAddress);
                 onChange(newAddress);
-                map.setCenter(place.geometry.location);
-                map.setZoom(15);
+                // map.setCenter(place.geometry.location);
+                // map.setZoom(15);
             }
         });
     }, [onChange]);
@@ -149,7 +152,9 @@ const AddressInput = ({ value, onChange }) => {
                 onChange={handleChange}
                 placeholder="מיקוד"
             />
-            <MapContainer id="map" />
+            
+            {/* map */}
+            {/* <MapContainer id="map" /> */}
         </AddressContainer>
     );
 };

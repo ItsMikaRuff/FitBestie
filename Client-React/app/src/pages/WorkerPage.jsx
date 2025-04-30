@@ -90,10 +90,7 @@ const WorkerPage = () => {
     }, [token]);
 
     useEffect(() => {
-        if (!user || (user.role !== 'worker' && user.role !== 'superAdmin')) {
-            navigate('/');
-            return;
-        }
+        
         fetchPendingTrainers();
     }, [user, navigate, fetchPendingTrainers]);
 
@@ -128,6 +125,9 @@ const WorkerPage = () => {
     if (!user || (user.role !== 'worker' && user.role !== 'superAdmin')) {
         return null;
     }
+
+    if (user === undefined) return null;
+    if (!user || (user.role !== 'worker' && user.role !== 'superAdmin')) return null;
 
     return (
         <PageContainer>

@@ -48,7 +48,7 @@ const Header = () => {
                                 </Button>
                             </Link>
                         )}
-                        {user?.role?.toLowerCase() === "worker" && (
+                        {(user?.role?.toLowerCase() === "worker" || user?.role?.toLowerCase() === "superadmin") && (
                             <Link to="/worker">
                                 <Button>אימות ספקיות כושר</Button>
                             </Link>
@@ -58,7 +58,7 @@ const Header = () => {
                         </Link>
                         {(user?.role?.toLowerCase() === "superadmin" || user?.role?.toLowerCase() === "manager") && (
                             <Link to="/manager">
-                                <Button title="ניהול">ניהול</Button>
+                                <Button title="ניהול">ממשק ניהול</Button>
                             </Link>
                         )}
                         <Button onClick={handleLogout}>התנתק</Button>
