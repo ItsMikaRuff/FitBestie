@@ -25,18 +25,25 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>FitBestie</title>
+
+    <!-- 
     <script>
       // Define initMap globally
       window.initMap = function() {
         // This will be called when the Google Maps API is loaded
-        console.log('Google Maps API loaded');
+        //console.log('Google Maps API loaded');
       };
     </script>
+
+    -->
+    
     <script
-    async
-    defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyfGOkqzHYn_BMrz46FJZhBr1kAvBAuAw&libraries=places&callback=initMap"
-  ></script>
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyfGOkqzHYn_BMrz46FJZhBr1kAvBAuAw&libraries=places&v=weekly&solution_channel=GMP_QB_placeautocomplete&loading=async">
+</script>
+
+    
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

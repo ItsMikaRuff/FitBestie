@@ -36,8 +36,8 @@ function App() {
           <Route path="/signup-successful" element={<SignupSuccessful />} />
           <Route path="/quiz" element={<PersonalQuiz />} />
           <Route path="/search" element={<SearchTrainerResults />} />
-          <Route path="admin" element={<AdminProfile />} />
-          <Route path="manager" element={<ManagerPage />} />
+          <Route path="/admin" element={<AdminProfile />} />
+          <Route path="/manager" element={<ManagerPage />} />
           <Route path="/worker" element={<WorkerPage />} />
           <Route path="/trainer-signup" element={<TrainerSignUp />} />
         </Route>

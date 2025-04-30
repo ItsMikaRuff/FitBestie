@@ -66,12 +66,15 @@ const read = async (filter = {}) => {
 
 const update = async (filter, data) => {
     try {
-        console.log("Updating user with data:", data);
-        const user = await userModel.findByIdAndUpdate(
+        // נזהה האם המשתמש הוא מאמן או רגיל
+        const baseModel = filter.role === 'trainer' ? trainerModel : userModel;
+
+        const user = await baseModel.findByIdAndUpdate(
             filter._id,
             { $set: data },
             { new: true, runValidators: true }
         );
+
         console.log("User updated successfully:", user);
         return user;
     } catch (error) {
