@@ -81,7 +81,7 @@ const UserSignUp = () => {
                 await axios.post(`${process.env.REACT_APP_API_URL}/user`, values);
                 console.log("Signup success");
                 setLoading(false);
-                navigate("/SignUpSuccessful");
+                navigate('/signup-successful');
             } catch (error) {
                 setLoading(false);
                 console.error("Signup error:", error.response ? error.response.data : error.message);

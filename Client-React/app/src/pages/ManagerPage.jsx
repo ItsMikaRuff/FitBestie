@@ -69,8 +69,8 @@ const ManagerPage = () => {
             ["שם", "אימייל", "תפקיד"],
             ...users.map(u => [u.name, u.email, u.role])
         ];
-        const csvContent = csvRows.map(e => e.join(",")).join("\n");
-        const blob = new Blob([csvContent], { type: "text/csv" });
+        const csvContent = '\uFEFF' + csvRows.map(e => e.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;

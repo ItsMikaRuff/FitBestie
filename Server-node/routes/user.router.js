@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const userController = require("../controllers/user.controller");
-const trainerModel = require("../models/trainer.model");
+const bcrypt = require("bcrypt");
+// const trainerModel = require("../models/trainer.model");
 
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -28,6 +29,7 @@ router.post("/", async (req, res) => {
 
   try {
       const user = await userController.createUser(req.body);
+      
       res.status(201).json(user);
   } catch (err) {
       console.error("❌ create error:", err.message);
@@ -40,28 +42,30 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Find the user by email
     const user = await userController.readOne({ email });
-    if (!user || user.password !== password) {
-      return res.status(401).send("Invalid credentials");
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // בונים payload
+    
+    //השוואה
+    const isMatch = await bcrypt.compare(password, user.password)
+    if(!isMatch){
+      return res.status(400).json({ error: 'Invalid credrntials'});
+    }
+    
+    // Generate a JWT token
     const payload = { id: user._id, role: user.role };
-    // חותמים טוקן
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2h' });
+    
     // שולחים גם את אובייקט המשתמש וגם את הטוקן
     res.json({ user, token });
 
-    // // השוואת סיסמה פשוטה (אם את משתמשת בהאש, תצטרכי bcrypt)
-    // if (user.password !== password) {
-    //   return res.status(401).send("Invalid password");
-    // }
-
-    // אם הכל תקין - מחזירים את המשתמש
-    // res.send(user);
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).send("Error logging in");
+    res.status(500).json({ message: 'Error logging in' });
   }
 });
 

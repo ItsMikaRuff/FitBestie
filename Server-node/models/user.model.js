@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const baseOptions = {
-    discriminatorKey: 'role',
+    discriminatorKey: 'type',
     collection: 'users'
 };
 
