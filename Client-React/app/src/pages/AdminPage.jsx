@@ -177,9 +177,7 @@ const AdminPage = () => {
 
   const handleChange = (e) => {
 
-    console.log("handleChange", e.target.name, e.target.value);
     setForm({ ...form, [e.target.name]: e.target.value});
-
 
   };
 
@@ -190,7 +188,6 @@ const AdminPage = () => {
     if (user?.role?.toLowerCase() === "admin" && form.role === "superAdmin") {
       setMessage("You don't have permission to create superAdmin users.");
       return;
-
     }
 
     // Check if email already exists
@@ -202,12 +199,12 @@ const AdminPage = () => {
       );
 
       if (checkEmail.data && checkEmail.data.length > 0) {
-        setMessage("A user with this email already exists.");
+        setMessage("משתמש עם מייל זה כבר קיים.");
         return;
       }
 
       await axios.post(`${API_URL}/user`, form, { withCredentials: true });
-      setMessage("User created successfully!");
+      setMessage("המשתמש נוצר בהצלחה!");
       setForm({ name: "", email: "", password: "", role: "" });
 
       // Refresh user list
@@ -277,12 +274,12 @@ const AdminPage = () => {
       const existingUser = checkEmail.data.find((u) => u._id !== id);
 
       if (existingUser) {
-        alert("A user with this email already exists.");
+        alert("משתמש עם מייל זה כבר קיים.");
         return;
       }
 
         // Update user
-      const res = await axios.put(`${API_URL}/user/update/${id}`, editForm, {
+      const res = await axios.post(`${API_URL}/user/update/${id}`, editForm, {
         withCredentials: true,
       });
 

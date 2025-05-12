@@ -29,9 +29,7 @@ const LoginForm = () => {
             }
             if (!values.password) {
                 errors.password = 'נדרשת סיסמה';
-            } else if (values.password.length < 6) {
-                errors.password = 'הסיסמה חייבת להכיל לפחות 6 תווים';
-            }
+            } 
             return errors;
         },
 

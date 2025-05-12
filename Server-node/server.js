@@ -16,7 +16,7 @@ require('./db').connect()
 //routers
 const userRouter = require('./routes/user.router')
 const quizRouter = require('./routes/quiz.router')
-const measurementRouter = require("./routes/bodyType.router");
+const bodyTypeRouter = require("./routes/bodyType.router");
 
 // CORS options
 const corsOptions = {
@@ -40,7 +40,7 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use('/user', userRouter);
 app.use('/search', userRouter);
 app.use('/quiz', quizRouter);
-app.use('/measurement', measurementRouter);
+app.use('/measurement', bodyTypeRouter);
 
 app.get('/ping', (req, res) => {
     res.send('pong!');
