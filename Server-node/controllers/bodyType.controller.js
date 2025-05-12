@@ -1,8 +1,8 @@
-const measurementModel = require("../models/measurement.model");
+const bodyTypeModel = require("../models/bodyType.model");
 
 const create = async (data) => {
     try {
-        const result = await measurementModel.create(data);
+        const result = await bodyTypeModel.create(data);
         return result;
     } catch (err) {
         console.error("Error creating measurement: ", err);
@@ -11,22 +11,22 @@ const create = async (data) => {
 };
 
 const readOne = async (filter = {}) => {
-    const result = await measurementModel.findOne(filter);
+    const result = await bodyTypeModel.findOne(filter);
     return result;
 };
 
 const read = async (filter = {}) => {
-    const result = await measurementModel.find(filter).sort({ date: -1 });
+    const result = await bodyTypeModel.find(filter).sort({ date: -1 });
     return result;
 };
 
 const update = async (filter, data) => {
-    const measurement = await measurementModel.findByIdAndUpdate(filter._id, data, { new: true });
+    const measurement = await bodyTypeModel.findByIdAndUpdate(filter._id, data, { new: true });
     return measurement;
 };
 
 const deleteOne = async (filter) => {
-    return await measurementModel.findOneAndDelete(filter);
+    return await bodyTypeModel.findOneAndDelete(filter);
 };
 
 module.exports = { create, readOne, read, update, deleteOne }; 

@@ -132,7 +132,7 @@ const BodyTypeCalculator = () => {
 
             // Save to measurements table
             await axios.post(
-                `${API_URL}/measurement`,
+                `${API_URL}/bodyType`,
                 {
                     userId,
                     wrist: Number(wrist),

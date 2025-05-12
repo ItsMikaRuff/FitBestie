@@ -178,12 +178,13 @@ const UserProfile = () => {
     if (!isLoggedIn) return <p>Unauthorized</p>;
 
     return (
-        <DashboardContainer style={{ direction: 'rtl' }}>
+        <DashboardContainer>
             <TrainerHeader>
                 <TrainerImage
                     src={user?.image || "https://placehold.co/150x150"}
                     alt="תמונת פרופיל"
                 />
+
                 <TrainerInfo>
                     <TrainerName>{user?.name || "משתמש"}</TrainerName>
                     <TrainerTitle>משתמש</TrainerTitle>
@@ -318,6 +319,8 @@ const UserProfile = () => {
             </ProfileSection>
 
             <StyledLink to="/">🔙 חזרה לדף הבית</StyledLink>
+            <StyledLink to="/logout" onClick={logout}>🔒 התנתקות</StyledLink>
+
         </DashboardContainer>
     );
 };

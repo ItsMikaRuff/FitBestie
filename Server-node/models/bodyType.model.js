@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const measurementSchema = new mongoose.Schema({
+const bodyTypeSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
@@ -30,5 +30,5 @@ const measurementSchema = new mongoose.Schema({
     goals: { type: String }
 });
 
-const measurement = mongoose.model('measurement', measurementSchema);
-module.exports = measurement; 
+const bodyType = mongoose.model('bodyType', bodyTypeSchema);
+module.exports = bodyType;

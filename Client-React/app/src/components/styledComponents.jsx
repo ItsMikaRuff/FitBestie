@@ -367,6 +367,8 @@ export const SignUpButton = styled(LoginButton)`
 // Profile
 
 export const DashboardContainer = styled.div`
+  direction: rtl;
+  text-align: right;
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1rem;
@@ -381,7 +383,8 @@ export const ProfileSection = styled.section`
   box-shadow: 0 2px 12px rgba(0,0,0,0.07);
   padding: 2rem;
   margin-bottom: 2rem;
-
+  direction: rtl;
+  text-align: right;
   @media (max-width: 700px) {
     padding: 1rem;
   }

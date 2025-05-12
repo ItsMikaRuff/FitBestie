@@ -20,6 +20,16 @@ const TrainerSignUp = () => {
     const { login } = useUser();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [touched, setTouched] = useState({
+        name: false,
+        email: false,
+        password: false,
+        confirmPassword: false,
+        phone: false,
+        location: false,
+        paymentDetails: false
+    });
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -71,11 +81,16 @@ const TrainerSignUp = () => {
         }));
     };
 
+    const validateEmail = (email) => {
+        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        return regex.test(email);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
-        // ולידציה בסיסית בצד לקוח
+        // וולידציה של שדות
         if (
             !formData.name ||
             !formData.email ||
@@ -92,6 +107,11 @@ const TrainerSignUp = () => {
 
         if (formData.password !== formData.confirmPassword) {
             setError('הסיסמאות לא תואמות');
+            return;
+        }
+
+        if (!validateEmail(formData.email)) {
+            setError('כתובת אימייל לא תקינה');
             return;
         }
 
@@ -113,9 +133,8 @@ const TrainerSignUp = () => {
             login(response.data);
             navigate('/signup-successful');
         } catch (error) {
-            // --- שינוי כאן ---
             if (error.response?.data?.message) {
-                setError(error.response.data.message);  // הודעה ברורה מהשרת
+                setError(error.response.data.message);  // הודעה מהשרת
             } else {
                 setError('אירעה שגיאה בלתי צפויה');
             }
@@ -124,6 +143,9 @@ const TrainerSignUp = () => {
         }
     };
 
+    const handleBlur = (e) => {
+        setTouched(prev => ({ ...prev, [e.target.name]: true }));
+    };
 
     const expertiseOptions = [
         { value: 'fitness', label: 'כושר גופני' },
@@ -153,50 +175,61 @@ const TrainerSignUp = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="שם מלא"
                     required
                     style={{ textAlign: 'right' }}
                 />
+                {touched.name && !formData.name && <GlobalError>שם מלא הוא שדה חובה</GlobalError>}
 
                 <SignUpInput
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="אימייל"
                     required
                     style={{ textAlign: 'right' }}
                 />
+                {touched.email && !formData.email && <GlobalError>אימייל הוא שדה חובה</GlobalError>}
+                {touched.email && formData.email && !validateEmail(formData.email) && <GlobalError>כתובת אימייל לא תקינה</GlobalError>}
 
                 <SignUpInput
                     type="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="סיסמה"
                     required
                     style={{ textAlign: 'right' }}
                 />
+                {touched.password && !formData.password && <GlobalError>סיסמה היא שדה חובה</GlobalError>}
 
                 <SignUpInput
                     type="password"
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="אימות סיסמה"
                     required
                     style={{ textAlign: 'right' }}
                 />
+                {touched.confirmPassword && formData.password !== formData.confirmPassword && <GlobalError>הסיסמאות לא תואמות</GlobalError>}
 
                 <SignUpInput
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     placeholder="מספר טלפון"
                     required
                     style={{ textAlign: 'right' }}
                 />
+                {touched.phone && !formData.phone && <GlobalError>מספר טלפון הוא שדה חובה</GlobalError>}
 
                 <div style={{ margin: '10px 0', textAlign: 'right' }}>
                     <h3 style={{ marginBottom: '10px', fontSize: '1.1rem' }}>תחומי מומחיות</h3>
@@ -224,10 +257,11 @@ const TrainerSignUp = () => {
                             location: newAddress
                         }));
                     }}
+                    onBlur={handleBlur}
                     placeholder="כתובת"
                     style={{ width: '100%' }}
                 />
-
+                {touched.location && !formData.location && <GlobalError>כתובת היא שדה חובה</GlobalError>}
 
                 <PaymentAuth onPaymentChange={handlePaymentChange} />
 
@@ -251,4 +285,4 @@ const TrainerSignUp = () => {
     );
 };
 
-export default TrainerSignUp; 
+export default TrainerSignUp;
