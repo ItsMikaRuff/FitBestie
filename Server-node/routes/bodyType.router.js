@@ -3,10 +3,11 @@ const router = express.Router();
 const bodyTypeController = require("../controllers/bodyType.controller");
 
 // Create new measurement
-router.post("/measurement", async (req, res) => {
+router.post("/", async (req, res) => {
     try {
         const measurement = await bodyTypeController.create(req.body);
         res.send(measurement);
+        
     } catch (err) {
         console.error("Error creating measurement:", err);
         res.status(500).send({ message: "Error creating measurement", code: err.code });

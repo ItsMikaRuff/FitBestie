@@ -153,6 +153,21 @@ const BMICalculator = () => {
             setLoading(true);
             const userId = user?._id || user?.id;
 
+            if (!userId) {
+                console.error("❌ userId is missing");
+                alert("שגיאה: לא אותר מזהה משתמש");
+                setLoading(false); // <- חובה להפסיק את מצב הטעינה
+                return;
+            }
+            console.log("📤 Sending measurement:", {
+                userId,
+                height: h,
+                weight: w,
+                bmi: bmiResult,
+                bmiCategory,
+                date: new Date()
+            });
+            
             await axios.post(`${API_URL}/measurement`, {
                 userId,
                 height: h,

@@ -34,6 +34,12 @@ const Home = () => {
                             buttonText="חפשי מאמן"
                             buttonLink="/search?type=trainer"
                         />
+                        <DashboardCard 
+                            title="סרטוני אימון"
+                            description="סרטוני כושר "
+                            buttonText="צפי במדדים"
+                            buttonLink="/workout-videos"
+                        />
                     </>
                 ) : (
                     <>
@@ -50,7 +56,9 @@ const Home = () => {
                             buttonText="לחיפוש"
                             buttonLink="/search?type=trainer"
                         />
+                        
                     </>
+
                 )}
             </CardsContainer>
 

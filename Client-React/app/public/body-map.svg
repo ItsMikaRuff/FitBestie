@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Head -->
+  <circle cx="200" cy="50" r="30" fill="#4a90e2" />
+  
+  <!-- Torso -->
+  <rect x="150" y="80" width="100" height="200" fill="#4a90e2" />
+  
+  <!-- Arms -->
+  <rect x="100" y="100" width="50" height="150" fill="#4a90e2" />
+  <rect x="250" y="100" width="50" height="150" fill="#4a90e2" />
+  
+  <!-- Legs -->
+  <rect x="150" y="280" width="40" height="200" fill="#4a90e2" />
+  <rect x="210" y="280" width="40" height="200" fill="#4a90e2" />
+  
+  <!-- Interactive Areas -->
+  <g id="interactive-areas">
+    <!-- Arms -->
+    <rect x="100" y="100" width="50" height="150" fill="transparent" class="interactive-area" data-area="arms" />
+    <rect x="250" y="100" width="50" height="150" fill="transparent" class="interactive-area" data-area="arms" />
+    
+    <!-- Legs -->
+    <rect x="150" y="280" width="40" height="200" fill="transparent" class="interactive-area" data-area="legs" />
+    <rect x="210" y="280" width="40" height="200" fill="transparent" class="interactive-area" data-area="legs" />
+    
+    <!-- Core -->
+    <rect x="150" y="150" width="100" height="100" fill="transparent" class="interactive-area" data-area="core" />
+    
+    <!-- Chest -->
+    <rect x="150" y="80" width="100" height="70" fill="transparent" class="interactive-area" data-area="chest" />
+    
+    <!-- Back -->
+    <rect x="150" y="80" width="100" height="200" fill="transparent" class="interactive-area" data-area="back" />
+  </g>
+</svg> 

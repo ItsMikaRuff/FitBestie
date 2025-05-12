@@ -3,6 +3,7 @@ import {theme} from './themes/theme';
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import GlobalStyle from './themes/GlobalStyle';
+import WorkoutVideos from './pages/WorkoutVideos';
 
 import Layout from './components/Layout';
 import { useUser } from './context/UserContext';
@@ -46,6 +47,8 @@ function App() {
           <Route path="/worker" element={<WorkerPage />} />
           <Route path="/trainer-signup" element={<TrainerSignUp />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="/workout-videos" element={<WorkoutVideos />} />
+          
         </Route>
 
         {/* עמודים בלי Header/Footer */}
