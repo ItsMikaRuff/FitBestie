@@ -21,9 +21,18 @@ const read = async (filter = {}) => {
 };
 
 const update = async (filter, data) => {
-    const measurement = await bodyTypeModel.findByIdAndUpdate(filter._id, data, { new: true });
+    const updates = data.measurements ? data.measurements : data;
+    
+    console.log("🔧 filter:", filter);
+    console.log("🔧 updates to apply:", updates);
+
+    const measurement = await bodyTypeModel.findByIdAndUpdate(filter._id, updates, { new: true });
+
+    console.log("✅ updated document:", measurement);
+    
     return measurement;
 };
+
 
 const deleteOne = async (filter) => {
     return await bodyTypeModel.findOneAndDelete(filter);

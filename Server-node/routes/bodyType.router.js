@@ -3,7 +3,7 @@ const router = express.Router();
 const bodyTypeController = require("../controllers/bodyType.controller");
 
 // Create new measurement
-router.post("/", async (req, res) => {
+router.post("/measurement", async (req, res) => {
     try {
         const measurement = await bodyTypeController.create(req.body);
         res.send(measurement);
@@ -39,8 +39,12 @@ router.get("/user/:userId/latest", async (req, res) => {
 router.put("/:id", async (req, res) => {
     try {
         const measurement = await bodyTypeController.update({ _id: req.params.id }, req.body);
+
+        console.log("Updated measurement:", measurement);
+
         if (!measurement) throw new Error("Measurement not found");
         res.send(measurement);
+
     } catch (error) {
         console.error("Error updating measurement:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
