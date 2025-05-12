@@ -61,7 +61,7 @@ const Header = () => {
                                 <Button title="ניהול">ממשק ניהול</Button>
                             </Link>
                         )}
-                        <Button onClick={handleLogout}>התנתק</Button>
+                        <Button style={{backgroundColor:"#dc3545"}} onClick={handleLogout}>התנתק</Button>
                     </>
                 ) : (
                     <>

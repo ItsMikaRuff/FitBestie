@@ -16,7 +16,7 @@ require('./db').connect()
 //routers
 const userRouter = require('./routes/user.router')
 const quizRouter = require('./routes/quiz.router')
-const measurementRouter = require("./routes/measurement.router");
+const measurementRouter = require("./routes/bodyType.router");
 
 // CORS options
 const corsOptions = {
