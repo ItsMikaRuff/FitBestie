@@ -25,6 +25,7 @@ const BMIHistory = ({ user }) => {
             const res = await axios.get(`${API_URL}/measurement/user/${user?._id || user?.id}`, {
                 withCredentials: true
             });
+
             const sorted = res.data.sort((a, b) => new Date(a.date) - new Date(b.date));
             setHistory(sorted);
         } catch (error) {
@@ -41,10 +42,15 @@ const BMIHistory = ({ user }) => {
             <HistoryTitle>📈 היסטוריית מדידות BMI</HistoryTitle>
             <ResponsiveContainer width="100%" height={250}>
                 <LineChart
-                    data={history.map((h) => ({
-                        date: new Date(h.date).toLocaleDateString("he-IL"),
-                        bmi: h.bmi,
-                    }))}
+                    // ✅ שורת בדיקה: תדפיס כל נקודת מידע שהולכת לגרף
+                    data={history.map((h) => {
+                        const entry = {
+                            date: new Date(h.date).toLocaleDateString("he-IL"),
+                            bmi: Number(h.bmi),
+                        };
+                        
+                        return entry;
+                    })}
                 >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />

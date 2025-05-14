@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 
-import BMIHistory from './BMI-History';
+import BMIHistory from './BMIHistory';
 import WeightHistory from './WeightHistory';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -66,7 +66,7 @@ const ResultText = styled.p`
 const CategoryText = styled.p`
     font-size: 1.1rem;
     color: ${props => {
-        switch (props.category) {
+        switch (props.$category) {
             case 'תת משקל': return '#e74c3c';
             case 'משקל תקין': return '#2ecc71';
             case 'עודף משקל': return '#f1c40f';
@@ -119,7 +119,7 @@ const BMICalculator = () => {
         } catch (error) {
             console.error("Failed to load history", error);
         }
-    },[userId]);
+    }, [userId]);
 
     useEffect(() => {
         if (user) fetchHistory();
@@ -159,7 +159,7 @@ const BMICalculator = () => {
                 setLoading(false); // <- חובה להפסיק את מצב הטעינה
                 return;
             }
-            
+
             await axios.post(`${API_URL}/measurement`, {
                 userId,
                 height: h,
@@ -182,6 +182,18 @@ const BMICalculator = () => {
             const res = await axios.post(`${API_URL}/user/update/${userId}`, data, {
                 headers: { "Content-Type": "multipart/form-data" },
                 withCredentials: true,
+            });
+
+            await axios.post(`${API_URL}/measurement`, {
+                userId,
+                height: h,
+                weight: w,
+                bmi: bmiResult,
+                bmiCategory,
+                date: new Date()
+            }, {
+                headers: { "Content-Type": "application/json" },
+                withCredentials: true
             });
 
             updateUser(res.data);
@@ -247,7 +259,7 @@ const BMICalculator = () => {
                 </ResultContainer>
             )}
 
-            {history.length > 0 && <BMIHistory history={history} />}
+            {history.length > 0 && <BMIHistory user={user} />}
             {weightHistory.length > 0 && <WeightHistory history={weightHistory} />} {/* היסטוריית משקל */}
         </CalculatorContainer>
     );

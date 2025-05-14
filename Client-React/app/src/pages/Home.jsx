@@ -18,18 +18,13 @@ const Home = () => {
     return (
         <Container>
 
-
             <HomepageBackground style={{ backgroundImage: `url(${stretch})` }} />
-
-
-
             <CardsContainer>
-
 
                 {isLoggedIn ? (
                     <>
                         <DashboardCard
-                            title="המדדים שלי"
+                            title="הפרופיל שלי"
                             description="צפי במדדים שלך, כולל BMI, סוג גוף, ומעקב אחר התקדמותך."
                             buttonText="צפי במדדים"
                             buttonLink="/profile"
@@ -48,9 +43,7 @@ const Home = () => {
                             buttonLink="/workout-videos"
                         />
 
-
                     </>
-
 
                 ) : (
                     <>
@@ -73,9 +66,9 @@ const Home = () => {
 
                 )}
             </CardsContainer>
-            
+
             <GymSearch />
-            
+
             <AboutSection>
                 <AboutBox>
                     <AboutTitle>About us</AboutTitle>
