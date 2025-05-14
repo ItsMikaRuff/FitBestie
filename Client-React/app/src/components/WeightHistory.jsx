@@ -14,6 +14,8 @@ const HistoryTitle = styled.h3`
 `;
 
 const WeightHistory = ({ history }) => {
+
+    
     return (
         <HistoryContainer>
             <HistoryTitle>📈 היסטוריית משקל</HistoryTitle>

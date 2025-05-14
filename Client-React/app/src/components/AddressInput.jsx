@@ -48,6 +48,7 @@ const AddressInput = ({ value, onChange }) => {
         if (!window.google || !window.google.maps) return;
 
         // map
+        
         // const map = new window.google.maps.Map(document.getElementById('map'), {
         //     center: { lat: 31.7683, lng: 35.2137 }, // Default to Jerusalem
         //     zoom: 8

@@ -11,7 +11,7 @@ import { useUser } from './context/UserContext';
 // Pages
 
 import HomePage from './pages/Home';
-import LoginForm from './pages/LoginForm';
+import LoginPage from './pages/LoginPage';
 import UserSignUp from './pages/UserSignUp';
 import UserProfile from './pages/UserProfile';
 import TrainerProfile from './pages/TrainerProfile';
@@ -53,7 +53,7 @@ function App() {
 
         {/* עמודים בלי Header/Footer */}
 
-        <Route path="/login" element={<LoginForm />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<UserSignUp />} />
 
       </Routes>

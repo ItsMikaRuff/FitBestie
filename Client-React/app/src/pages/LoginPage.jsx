@@ -6,7 +6,7 @@ import axios from "axios";
 import { useState } from "react";
 import Loader from "../components/Loader";
 
-const LoginForm = () => {
+const LoginPage = () => {
 
     const [loading, setLoading] = useState(false); // State to manage loading status
     const { login } = useUser(); // Import the login function from the context
@@ -134,4 +134,4 @@ const LoginForm = () => {
     );
 }
 
-export default LoginForm;
+export default LoginPage;
