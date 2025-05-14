@@ -1,3 +1,6 @@
+//bodytype.router.js
+// this file defines the routes for handling user body type measurements.
+
 const express = require("express");
 const router = express.Router();
 const bodyTypeController = require("../controllers/bodyType.controller");

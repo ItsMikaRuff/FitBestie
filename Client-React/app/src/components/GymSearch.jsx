@@ -22,6 +22,7 @@ const Container = styled.section`
   width: 100%;
   padding: 4rem 2rem;
   background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  border-radius: 25px;
 `;
 
 const Inner = styled.div`
@@ -30,6 +31,7 @@ const Inner = styled.div`
   max-width: 1440px;
   margin: 0 auto;
   gap: 2rem;
+  
 `;
 
 const Top = styled.div`
@@ -37,12 +39,13 @@ const Top = styled.div`
   flex-direction: row;
   gap: 2rem;
   flex-wrap: wrap;
+  
 `;
 
 const MapWrapper = styled.div`
   flex: 1;
   min-width: 300px;
-  height: 500px;
+  height: 300px;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -51,16 +54,15 @@ const MapWrapper = styled.div`
 const ListWrapper = styled.div`
   flex: 1;
   min-width: 300px;
-  max-height: 500px;
+  max-height: 300px;
   overflow-y: auto;
   background: white;
   border-radius: 16px;
-  padding: 2rem;
+  padding: 1rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 `;
 
 const Title = styled.h2`
-  margin-bottom: 1rem;
   font-size: 1.8rem;
   color: #222;
 `;
@@ -86,12 +88,12 @@ const List = styled.ul`
 `;
 
 const ListItem = styled.li`
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 0.5rem;
+  margin-bottom: 0.7rem;
   background: #fefefe;
   border-radius: 12px;
   border: 1px solid #e4e4e4;
-  line-height: 1.6;
+  line-height: 1.4;
   box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 `;
 

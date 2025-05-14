@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
@@ -85,6 +85,8 @@ const LastUpdated = styled.small`
     color: #777;
 `;
 
+
+
 const BMICalculator = () => {
     const { user, updateUser } = useUser();
     const [height, setHeight] = useState(user?.measurements?.height || '');
@@ -100,8 +102,11 @@ const BMICalculator = () => {
         setWeight('');
     };
 
-    const fetchHistory = async () => {
+    const userId = user?._id || user?.id;
+
+    const fetchHistory = useCallback(async () => {
         try {
+            if (!userId) return;
             const res = await axios.get(`${API_URL}/measurement/user/${user?._id || user?.id}`, {
                 withCredentials: true
             });
@@ -114,7 +119,7 @@ const BMICalculator = () => {
         } catch (error) {
             console.error("Failed to load history", error);
         }
-    };
+    },[userId]);
 
     useEffect(() => {
         if (user) fetchHistory();
@@ -143,11 +148,6 @@ const BMICalculator = () => {
 
         setCategory(bmiCategory);
 
-        // אם לא השתנה – לא לשמור שוב
-        if (
-            Number(user?.measurements?.height) === h &&
-            Number(user?.measurements?.weight) === w
-        ) return;
 
         try {
             setLoading(true);
@@ -159,14 +159,6 @@ const BMICalculator = () => {
                 setLoading(false); // <- חובה להפסיק את מצב הטעינה
                 return;
             }
-            console.log("📤 Sending measurement:", {
-                userId,
-                height: h,
-                weight: w,
-                bmi: bmiResult,
-                bmiCategory,
-                date: new Date()
-            });
             
             await axios.post(`${API_URL}/measurement`, {
                 userId,

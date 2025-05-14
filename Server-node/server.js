@@ -28,6 +28,7 @@ require('./db').connect()
 const userRouter = require('./routes/user.router')
 const quizRouter = require('./routes/quiz.router')
 const bodyTypeRouter = require("./routes/bodyType.router");
+const measurementRouter = require("./routes/measurement.router");
 
 
 //middleware
@@ -41,7 +42,8 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use('/user', userRouter);
 app.use('/search', userRouter);
 app.use('/quiz', quizRouter);
-app.use('/measurement', bodyTypeRouter);
+app.use('/bodyType', bodyTypeRouter);
+app.use('/measurement', measurementRouter);
 
 app.get('/ping', (req, res) => {
     res.send('pong!');

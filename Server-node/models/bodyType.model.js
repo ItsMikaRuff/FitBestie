@@ -1,3 +1,6 @@
+//bodyType.model.js
+// This file defines the Mongoose schema and model for storing user body type measurements.
+
 const mongoose = require('mongoose');
 
 const bodyTypeSchema = new mongoose.Schema({
@@ -6,13 +9,13 @@ const bodyTypeSchema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
-    // BMI measurements
+    // BMI snapshot at time of body type calculation
     height: { type: Number },
     weight: { type: Number },
     bmi: { type: Number },
     bmiCategory: { type: String },
-    
-    // Body type measurements
+
+    // Body measurements
     wrist: { type: Number },
     ankle: { type: Number },
     hip: { type: Number },
@@ -20,15 +23,12 @@ const bodyTypeSchema = new mongoose.Schema({
     shoulder: { type: Number },
     bodyType: { type: String },
     bodyTypeDescription: { type: String },
-    
-    // Additional tracking
+
     date: {
         type: Date,
         default: Date.now
-    },
-    notes: { type: String },
-    goals: { type: String }
+    }
 });
 
-const bodyType = mongoose.model('bodyType', bodyTypeSchema);
-module.exports = bodyType;
+const BodyType = mongoose.model('BodyType', bodyTypeSchema);
+module.exports = BodyType;
