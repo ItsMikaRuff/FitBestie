@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 //express
 const express = require("express");
 const cors = require("cors");
@@ -7,16 +9,6 @@ const port = 5000;
 
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
-
-require('dotenv').config();
-
-//db connection
-require('./db').connect()
-
-//routers
-const userRouter = require('./routes/user.router')
-const quizRouter = require('./routes/quiz.router')
-const bodyTypeRouter = require("./routes/bodyType.router");
 
 // CORS options
 const corsOptions = {
@@ -28,6 +20,15 @@ const corsOptions = {
     ],
     credentials: true,
 };
+
+//db connection
+require('./db').connect()
+
+//routers
+const userRouter = require('./routes/user.router')
+const quizRouter = require('./routes/quiz.router')
+const bodyTypeRouter = require("./routes/bodyType.router");
+
 
 //middleware
 app.use(cors(corsOptions));              // קריאות רגילות

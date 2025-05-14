@@ -87,6 +87,10 @@ const WorkoutVideos = () => {
 
   // Mock video data - replace with actual API call
   const videos = {
+    fullbody: [
+      { id: 100, title: 'Full Body HIIT', url: 'https://www.youtube.com/embed/ml6cT4AZdqI' },
+      { id: 101, title: 'Total Body Strength', url: 'https://www.youtube.com/embed/UItWltVZZmE' },
+    ],
     biceps: [
       { id: 1, title: 'Bicep Curls Tutorial', url: 'https://www.youtube.com/embed/ykJmrZ5v0Oo' },
       { id: 2, title: 'Hammer Curls Guide', url: 'https://www.youtube.com/embed/TwD-YGVP4Bk' },
@@ -126,16 +130,22 @@ const WorkoutVideos = () => {
     else setSelectedMuscle(null);
   };
 
+  // לחיצה במקום ריק בתוך ה־Canvas -> Full Body
+  const handleFullBodyClick = () => {
+    setSelectedMuscle('fullbody');
+  };
+
   const handleMuscleHover = (muscleName) => {
     console.log("Hovered muscle:", muscleName);
   };
+
 
   return (
     <Container>
       <Title>Workout Videos</Title>
       <ModelContainer>
         <Canvas camera={{ position: [0, 2, 19], fov: 40 }}>
-
+          onPointerMissed={handleFullBodyClick}
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
           <InteractiveBody

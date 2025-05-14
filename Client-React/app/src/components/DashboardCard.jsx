@@ -72,4 +72,4 @@ const DashboardCard = ({ title, description, buttonText, buttonLink }) => {
     );
 };
 
-export { DashboardCard, CardsContainer };
+export { DashboardCard, CardsContainer, Card };

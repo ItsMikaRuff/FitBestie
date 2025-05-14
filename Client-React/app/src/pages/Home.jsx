@@ -10,58 +10,72 @@ import {
 } from "../components/styledComponents";
 import { DashboardCard, CardsContainer } from "../components/DashboardCard";
 import stretch from "../Images/stretch-laptop.jpg";
+import GymSearch from "../components/GymSearch";
 
 const Home = () => {
     const { isLoggedIn } = useUser();
 
     return (
         <Container>
+
+
             <HomepageBackground style={{ backgroundImage: `url(${stretch})` }} />
-            
+
+
+
             <CardsContainer>
+
+
                 {isLoggedIn ? (
                     <>
-                        <DashboardCard 
+                        <DashboardCard
                             title="המדדים שלי"
                             description="צפי במדדים שלך, כולל BMI, סוג גוף, ומעקב אחר התקדמותך."
                             buttonText="צפי במדדים"
                             buttonLink="/profile"
                         />
 
-                        <DashboardCard 
+                        <DashboardCard
                             title="חפשי מאמנת כושר"
                             description="מצאי מאמן כושר אישי שיתאים בדיוק לצרכים שלך."
                             buttonText="חפשי מאמן"
                             buttonLink="/search?type=trainer"
                         />
-                        <DashboardCard 
+                        <DashboardCard
                             title="סרטוני אימון"
                             description="סרטוני כושר "
-                            buttonText="צפי במדדים"
+                            buttonText="צפי בסרטונים"
                             buttonLink="/workout-videos"
                         />
+
+
                     </>
+
+
                 ) : (
                     <>
-                        <DashboardCard 
+                        <DashboardCard
                             title="גלי את סוג הגוף שלך"
                             description="עני על מספר שאלות פשוטות וגלי את סוג הגוף שלך כדי להתאים את התוכנית המושלמת עבורך."
                             buttonText="התחל עכשיו"
                             buttonLink="/signup"
                         />
 
-                        <DashboardCard 
+                        <DashboardCard
                             title="חפשי סטודיו או מאמנת אישית בקרבתך"
                             description="מצאי מאמן כושר אישי שיתאים בדיוק לצרכים שלך."
                             buttonText="לחיפוש"
                             buttonLink="/search?type=trainer"
                         />
-                        
+
+
                     </>
 
                 )}
             </CardsContainer>
-
+            
+            <GymSearch />
+            
             <AboutSection>
                 <AboutBox>
                     <AboutTitle>About us</AboutTitle>
