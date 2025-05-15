@@ -1,10 +1,15 @@
+//user.router.js
+
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const userController = require("../controllers/user.controller");
 const bcrypt = require("bcrypt");
+const captcha = require("../utils/captcha"); 
+
 // const trainerModel = require("../models/trainer.model");
 const UserModel = require("../models/user.model");
+
 
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -40,31 +45,35 @@ router.post("/", async (req, res) => {
 // login user
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captchaToken } = req.body;
 
-    // Find the user by email
+    // ✅ שלב 1: בדיקת CAPTCHA
+    const isHuman = await captcha(captchaToken);
+    if (!isHuman) {
+      return res.status(403).json({ message: "אימות CAPTCHA נכשל. אנא אשר שאתה לא רובוט." });
+    }
+
+    // ✅ שלב 2: חיפוש משתמש
     const user = await userController.readOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "אימייל או סיסמה שגויים" });
     }
 
-    //השוואה
+    // ✅ שלב 3: השוואת סיסמה
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credrntials" });
+      return res.status(400).json({ message: "אימייל או סיסמה שגויים" });
     }
 
-    // Generate a JWT token
+    // ✅ שלב 4: יצירת טוקן
     const payload = { id: user._id, role: user.role };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "2h",
-    });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
 
-    // שולחים גם את אובייקט המשתמש וגם את הטוקן
     res.json({ user, token });
+
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ message: "Error logging in" });
+    res.status(500).json({ message: "שגיאה בשרת בעת התחברות" });
   }
 });
 

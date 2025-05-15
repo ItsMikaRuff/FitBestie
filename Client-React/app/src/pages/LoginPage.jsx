@@ -5,13 +5,15 @@ import { useUser } from "../context/UserContext";
 import axios from "axios";
 import { useState } from "react";
 import Loader from "../components/Loader";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginPage = () => {
+    const [loading, setLoading] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState(""); // NEW: captcha token state
+    const [showPassword, setShowPassword] = useState(false);
 
-    const [loading, setLoading] = useState(false); // State to manage loading status
-    const { login } = useUser(); // Import the login function from the context
-    const navigate = useNavigate(); // Import the useNavigate hook
-
+    const { login } = useUser();
+    const navigate = useNavigate();
 
     const loginFormik = useFormik({
         initialValues: {
@@ -27,46 +29,49 @@ const LoginPage = () => {
             } else if (!/\S+@\S+\.\S+/.test(values.email)) {
                 errors.email = 'כתובת אימייל לא תקינה';
             }
+
             if (!values.password) {
                 errors.password = 'נדרשת סיסמה';
-            } 
+            }
+
             return errors;
         },
 
         onSubmit: async (values, formikHelpers) => {
-
             const errors = await formikHelpers.validateForm();
 
             if (Object.keys(errors).length > 0) {
-
                 formikHelpers.setTouched(
                     Object.keys(values).reduce((acc, key) => {
                         acc[key] = true;
                         return acc;
                     }, {})
                 );
+                return;
+            }
 
+            if (!captchaToken) {
+                formikHelpers.setFieldError('email', 'יש לאמת שאתה לא רובוט');
                 return;
             }
 
             try {
-                setLoading(true); 
-                // const response = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, values);
-                // login(response.data); // שמור את המשתמש בקונטקסט
+                setLoading(true);
 
-                const {data} = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, values);
-                // data = { user: {...}, token: 'JWT...' }
-                login(data);           // עכשיו אנו קוראים ל־login({ user, token })
-                
+                const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, {
+                    ...values,
+                    captchaToken
+                });
+
+                login(data); // שומר את המשתמש בקונטקסט
                 setLoading(false);
-                navigate('/'); // מעבר לעמוד הבית או כל עמוד אחר
+                navigate('/');
+
             } catch (error) {
                 setLoading(false);
                 console.error('Login error:', error);
                 formikHelpers.setFieldError('email', 'אימייל או סיסמה לא נכונים');
             }
-
-
         }
     });
 
@@ -82,14 +87,11 @@ const LoginPage = () => {
         return null;
     };
 
-
     return (
         <LoginDiv className="flex flex-col items-center justify-center h-screen bg-gray-100" style={{ direction: 'rtl' }}>
-
             <LoginTitle>התחברות</LoginTitle>
 
             <LoginFormComponent onSubmit={loginFormik.handleSubmit} style={{ textAlign: 'right' }}>
-
                 <LoginInput
                     type="email"
                     name="email"
@@ -100,17 +102,49 @@ const LoginPage = () => {
                     style={{ textAlign: 'right' }}
                 />
 
-                <LoginInput
-                    type="password"
-                    name="password"
-                    placeholder="סיסמה"
-                    onChange={loginFormik.handleChange}
-                    onBlur={loginFormik.handleBlur}
-                    value={loginFormik.values.password}
-                    style={{ textAlign: 'right' }}
-                />
+                {/* 🔐 שדה סיסמה עם עין מעוצבת */}
+                <div style={{ position: "relative" }}>
+                    <LoginInput
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="סיסמה"
+                        onChange={loginFormik.handleChange}
+                        onBlur={loginFormik.handleBlur}
+                        value={loginFormik.values.password}
+                        style={{
+                            textAlign: 'right',
+                            paddingLeft: "40px" // מקום לאייקון
+                        }}
+                    />
 
-                {/* הצגת שגיאה כללית מתחת לטופס */}
+                    {/* 👁 עין בעיצוב מינימלי */}
+                    <span
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "10px",
+                            transform: "translateY(-50%)",
+                            cursor: "pointer",
+                            color: "rgba(0, 0, 0, 0.4)", // אפור שקפקף
+                            fontSize: "18px",
+                            userSelect: "none"
+                        }}
+                        title={showPassword ? "הסתר סיסמה" : "הצג סיסמה"}
+                    >
+                        {showPassword ? "🔓" : "🔒"}
+                    </span>
+                </div>
+
+
+                {/* NEW: CAPTCHA component */}
+                <div style={{ margin: '15px 0' }}>
+                    <ReCAPTCHA
+                        sitekey="6LdyKzsrAAAAAB4-WBWTLifFkpyi-fSU26QSYuN1"// 👈 שימי כאן את המפתח מ־Google
+                        onChange={(token) => setCaptchaToken(token)}
+                    />
+                </div>
+
                 {getFirstError() && (
                     <GlobalError>
                         {getFirstError()}
@@ -118,11 +152,8 @@ const LoginPage = () => {
                 )}
 
                 <LoginButton type="submit">התחבר</LoginButton>
-                {
-                    loading?
-                    <Loader/>
-                    :null
-                }
+
+                {loading ? <Loader /> : null}
             </LoginFormComponent>
 
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
@@ -132,6 +163,6 @@ const LoginPage = () => {
             </div>
         </LoginDiv>
     );
-}
+};
 
 export default LoginPage;
