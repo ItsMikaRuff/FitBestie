@@ -5,7 +5,8 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const userController = require("../controllers/user.controller");
 const bcrypt = require("bcrypt");
-const captcha = require("../utils/captcha"); 
+const captcha = require("../utils/captcha");
+const sendOTPEmail = require("../utils/sendOTPEmail");
 
 // const trainerModel = require("../models/trainer.model");
 const UserModel = require("../models/user.model");
@@ -42,6 +43,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+
 // login user
 router.post("/login", async (req, res) => {
   try {
@@ -65,6 +67,27 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "אימייל או סיסמה שגויים" });
     }
 
+    // ✅ אם המשתמש דורש OTP (2FA)
+    if (
+      user.twoFactorEnabled &&
+      (user.role === "admin")
+    ) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expires = new Date(Date.now() + 5 * 60 * 1000); // תקף ל־5 דקות
+
+      user.otpCode = otp;
+      user.otpExpiresAt = expires;
+      await user.save();
+
+      await sendOTPEmail(user.email, otp);
+
+      return res.status(206).json({
+        message: "OTP נשלח למייל",
+        requireOTP: true,
+        userId: user._id,
+      });
+    }
+
     // ✅ שלב 4: יצירת טוקן
     const payload = { id: user._id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
@@ -75,6 +98,43 @@ router.post("/login", async (req, res) => {
     console.error("Login error:", err);
     res.status(500).json({ message: "שגיאה בשרת בעת התחברות" });
   }
+});
+
+// router for otp verification
+
+router.post("/login/verify-otp", async (req, res) => {
+  const { userId, otp } = req.body;
+
+  const user = await UserModel.findById(userId);
+  if (!user || !user.otpCode || new Date() > user.otpExpiresAt) {
+    return res.status(400).json({ message: "OTP לא תקף או פג תוקף" });
+  }
+
+  if (otp !== user.otpCode) {
+    return res.status(401).json({ message: "OTP שגוי" });
+  }
+
+  user.otpCode = undefined;
+  user.otpExpiresAt = undefined;
+  await user.save();
+
+  const payload = { id: user._id, role: user.role };
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
+
+  res.json({ user, token });
+});
+
+
+//enable 2fa 
+
+router.put("/user/:id/2fa", async (req, res) => {
+  const { enabled } = req.body;
+  const user = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    { twoFactorEnabled: enabled },
+    { new: true }
+  );
+  res.json(user);
 });
 
 // Get pending trainers

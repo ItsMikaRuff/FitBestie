@@ -60,6 +60,9 @@ const UserProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [deleteConfirmed, setDeleteConfirmed] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [twoFA, setTwoFA] = useState(user?.twoFactorEnabled || false);
+
+
     const editFormRef = useRef(null);
 
     const [formData, setFormData] = useState({
@@ -78,6 +81,17 @@ const UserProfile = () => {
             }
         }
     });
+
+    const toggle2FA = async () => {
+        try {
+            const res = await axios.put(`${process.env.REACT_APP_API_URL}/user/${user._id}/2fa`, {
+                enabled: !twoFA
+            });
+            setTwoFA(res.data.twoFactorEnabled);
+        } catch (err) {
+            console.error("שגיאה בהפעלת 2FA", err);
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -250,6 +264,10 @@ const UserProfile = () => {
                         </div>
                         {loading && <Loader />}
                     </form>
+
+                    <button onClick={toggle2FA}>
+                        {twoFA ? "כבה אימות דו־שלבי" : "הפעל אימות דו־שלבי"}
+                    </button>
                 </ProfileSection>
             )}
 

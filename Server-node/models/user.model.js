@@ -1,3 +1,5 @@
+//user.model.js
+
 const mongoose = require('mongoose')
 
 const baseOptions = {
@@ -16,6 +18,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+
     name: {
         type: String,
         required: false,
@@ -64,6 +67,19 @@ const userSchema = new mongoose.Schema({
         required: false,
         default: ''
     },
+    twoFactorEnabled: {
+        type: Boolean,
+        default: false
+    },
+    otpCode: {
+        type: String,
+        default: null
+    },
+    otpExpiresAt: {
+        type: Date,
+        default: null
+    },
+
     measurements: {
         height: { type: Number, default: null },
         weight: { type: Number, default: null },

@@ -12,6 +12,12 @@ const LoginPage = () => {
     const [captchaToken, setCaptchaToken] = useState(""); // NEW: captcha token state
     const [showPassword, setShowPassword] = useState(false);
 
+    //OTP 
+    const [requireOTP, setRequireOTP] = useState(false);
+    const [otpValue, setOtpValue] = useState("");
+    const [userIdForOTP, setUserIdForOTP] = useState(null);
+
+
     const { login } = useUser();
     const navigate = useNavigate();
 
@@ -63,6 +69,13 @@ const LoginPage = () => {
                     captchaToken
                 });
 
+                if (data.requireOTP) {
+                    setRequireOTP(true);
+                    setUserIdForOTP(data.userId);
+                    setLoading(false);
+                    return; // לא ממשיכים לניווט עדיין
+                }
+
                 login(data); // שומר את המשתמש בקונטקסט
                 setLoading(false);
                 navigate('/');
@@ -74,6 +87,25 @@ const LoginPage = () => {
             }
         }
     });
+
+    const handleOtpSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            setLoading(true);
+            const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/user/login/verify-otp`, {
+                userId: userIdForOTP,
+                otp: otpValue
+            });
+
+            login(data);
+            navigate('/');
+        } catch (error) {
+            alert("OTP לא תקף או שגוי");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getFirstError = () => {
         const touched = loginFormik.touched;
@@ -144,6 +176,19 @@ const LoginPage = () => {
                         onChange={(token) => setCaptchaToken(token)}
                     />
                 </div>
+
+                {requireOTP && (
+                    <form onSubmit={handleOtpSubmit} style={{ marginTop: "20px", textAlign: 'right' }}>
+                        <label>נא להקליד את קוד ה־OTP שנשלח למייל</label>
+                        <LoginInput
+                            type="text"
+                            value={otpValue}
+                            onChange={(e) => setOtpValue(e.target.value)}
+                            placeholder="קוד אימות"
+                        />
+                        <LoginButton type="submit">אימות</LoginButton>
+                    </form>
+                )}
 
                 {getFirstError() && (
                     <GlobalError>
