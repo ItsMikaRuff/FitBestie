@@ -1,141 +1,113 @@
-/* eslint-disable react/no-unknown-property */
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
-import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import bodyFront from '../Images/bodyFront.png';
+import bodyBack from '../Images/bodyBack.png';
 
-const Muscle = ({ position, rotation, scale, name, color = '#4a90e2', onHover, onClick }) => {
-  const meshRef = useRef();
-  const [hovered, setHovered] = React.useState(false);
+const Container = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+`;
 
-  useFrame(() => {
-    if (hovered) {
-      meshRef.current.material.color.set('#ff0000');
-    } else {
-      meshRef.current.material.color.set(color);
-    }
-  });
+const Img = styled.img`
+  width: 100%;
+  display: block;
+`;
+
+const Hotspot = styled.div`
+  position: absolute;
+  cursor: pointer;
+  border-radius: 50%;
+  background-color: ${({ $hovered }) => ($hovered ? 'rgba(255, 0, 0, 0.4)' : 'transparent')};
+  border: ${({ $hovered }) => ($hovered ? '2px solid red' : 'none')};
+  width: ${({ size }) => size || '8%'};
+  height: ${({ size }) => size || '8%'};
+  transform: translate(-50%, -50%);
+`;
+
+const ToggleView = styled.button`
+  margin: 10px auto;
+  display: block;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: none;
+  background: #333;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const hotspotsFront = [
+  { name: 'front-shoulder-left', top: '22%', left: '38%' },
+  { name: 'front-shoulder-right', top: '22%', left: '62%' },
+  { name: 'front-arm-left', top: '30%', left: '30%' },
+  { name: 'front-arm-right', top: '30%', left: '70%' },
+  { name: 'chest', top: '30%', left: '50%' },
+  { name: 'abs', top: '43%', left: '50%' },
+  { name: 'oblique-left', top: '43%', left: '39%' },
+  { name: 'oblique-right', top: '43%', left: '60%' },
+  { name: 'front-thigh-left', top: '60%', left: '40%' },
+  { name: 'front-thigh-right', top: '60%', left: '60%' },
+  { name: 'front-knee-left', top: '70%', left: '42%' },
+  { name: 'front-knee-right', top: '70%', left: '58%' },
+  { name: 'front-foot-left', top: '90%', left: '40%' },
+  { name: 'front-foot-right', top: '90%', left: '60%' },
+];
+
+const hotspotsBack = [
+  { name: 'back-shoulder-left', top: '12%', left: '28%' },
+  { name: 'back-shoulder-right', top: '12%', left: '72%' },
+  { name: 'back-arm-left', top: '25%', left: '20%' },
+  { name: 'back-arm-right', top: '25%', left: '80%' },
+  { name: 'back', top: '20%', left: '50%' },
+  { name: 'glutes', top: '42%', left: '50%' },
+  { name: 'back-thigh-left', top: '60%', left: '40%' },
+  { name: 'back-thigh-right', top: '60%', left: '60%' },
+  { name: 'back-knee-left', top: '70%', left: '40%' },
+  { name: 'back-knee-right', top: '70%', left: '60%' },
+  { name: 'calf-left', top: '80%', left: '40%' },
+  { name: 'calf-right', top: '80%', left: '60%' },
+  { name: 'back-foot-left', top: '90%', left: '40%' },
+  { name: 'back-foot-right', top: '90%', left: '60%' },
+];
+
+const HumanBody = ({ onMuscleHover = () => {}, onMuscleClick = () => {} }) => {
+  const [view, setView] = useState('front');
+  const [hovered, setHovered] = useState(null);
+
+  const hotspots = view === 'front' ? hotspotsFront : hotspotsBack;
 
   return (
-    <mesh
-      ref={meshRef}
-      position={position}
-      rotation={rotation}
-      scale={scale}
-      name={name}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        onHover(name);
-      }}
-      onPointerOut={(e) => {
-        e.stopPropagation();
-        setHovered(false);
-        onHover(null);
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick(name);
-      }}
-    >
-      <boxGeometry attach="geometry" args={[1, 1, 1]} />
-      <meshStandardMaterial attach="material" color={color} />
-    </mesh>
+    <>
+      <ToggleView onClick={() => setView(view === 'front' ? 'back' : 'front')}>
+        {view === 'front' ? 'הצג גב' : 'הצג קדימה'}
+      </ToggleView>
+
+      <Container>
+        <Img src={view === 'front' ? bodyFront : bodyBack} alt="Human body" />
+
+        {hotspots.map((spot, idx) => (
+          <Hotspot
+            key={`${view}-${spot.name}-${idx}`}
+            size={spot.size}
+            style={{ top: spot.top, left: spot.left }}
+            $hovered={hovered === `${spot.name}-${idx}`}
+            onMouseEnter={() => {
+              setHovered(`${spot.name}-${idx}`);
+              onMuscleHover(spot.name);
+            }}
+            onMouseLeave={() => {
+              setHovered(null);
+              onMuscleHover(null);
+            }}
+            onClick={() => onMuscleClick(spot.name)}
+          />
+        ))}
+      </Container>
+    </>
   );
 };
 
-const HumanBody = ({ onMuscleHover, onMuscleClick }) => {
-  const groupRef = useRef();
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    groupRef.current.rotation.y = Math.sin(t / 4) / 8;
-  });
-
-  return (
-    <group ref={groupRef}>
-      {/* Arms */}
-      <Muscle
-        position={[-1.5, 0, 0]}
-        rotation={[0, 0, Math.PI / 4]}
-        scale={[0.3, 1, 0.3]}
-        name="biceps"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-      <Muscle
-        position={[1.5, 0, 0]}
-        rotation={[0, 0, -Math.PI / 4]}
-        scale={[0.3, 1, 0.3]}
-        name="triceps"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-
-      {/* Legs */}
-      <Muscle
-        position={[-0.5, -1.5, 0]}
-        rotation={[0, 0, 0]}
-        scale={[0.4, 1, 0.4]}
-        name="quadriceps"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-      <Muscle
-        position={[0.5, -1.5, 0]}
-        rotation={[0, 0, 0]}
-        scale={[0.4, 1, 0.4]}
-        name="hamstrings"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-
-      {/* Core */}
-      <Muscle
-        position={[0, -0.5, 0]}
-        rotation={[0, 0, 0]}
-        scale={[0.8, 0.8, 0.3]}
-        name="abs"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-      <Muscle
-        position={[0, -0.5, 0.3]}
-        rotation={[0, 0, 0]}
-        scale={[0.8, 0.8, 0.3]}
-        name="obliques"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-
-      {/* Chest */}
-      <Muscle
-        position={[0, 0.5, 0.3]}
-        rotation={[0, 0, 0]}
-        scale={[1, 0.6, 0.3]}
-        name="pectoralis"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-
-      {/* Back */}
-      <Muscle
-        position={[0, 0.5, -0.3]}
-        rotation={[0, 0, 0]}
-        scale={[1, 0.8, 0.3]}
-        name="latissimus"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-      <Muscle
-        position={[0, 0.8, -0.3]}
-        rotation={[0, 0, 0]}
-        scale={[0.8, 0.4, 0.3]}
-        name="trapezius"
-        onHover={onMuscleHover}
-        onClick={onMuscleClick}
-      />
-    </group>
-  );
-};
-
-export default HumanBody; 
+export default HumanBody;
