@@ -19,7 +19,6 @@ const LoginPage = () => {
     const [otpValue, setOtpValue] = useState("");
     const [userIdForOTP, setUserIdForOTP] = useState(null);
 
-
     const { login } = useUser();
     const navigate = useNavigate();
 

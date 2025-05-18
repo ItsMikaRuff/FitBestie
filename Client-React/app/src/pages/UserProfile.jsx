@@ -1,3 +1,5 @@
+//UserProfile.jsx
+
 import { useUser } from "../context/UserContext";
 import { useState, useRef } from "react";
 import {
@@ -15,8 +17,8 @@ import {
     EnhancedInfo,
 } from "../components/styledComponents";
 import Loader from "../components/Loader";
-import BMICalculator from "../components/BMICalculator";
-import BodyTypeCalculator from "../components/BodyTypeCalculator";
+// import BMICalculator from "../components/BMICalculator";
+// import BodyTypeCalculator from "../components/BodyTypeCalculator";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AddressInput from '../components/AddressInput';
@@ -64,7 +66,6 @@ const UserProfile = () => {
 
 
     const editFormRef = useRef(null);
-
     const [formData, setFormData] = useState({
         name: user?.name || "",
         email: user?.email || "",
@@ -273,9 +274,9 @@ const UserProfile = () => {
 
             <ProfileSection>
                 <ProfileTitle>🧮 מדדים אישיים</ProfileTitle>
-                <BMICalculator />
-                <BodyTypeCalculator />
+                <StyledLink to="/metrics">מעבר לעמוד המדדים</StyledLink>
             </ProfileSection>
+
 
             <ProfileSection>
                 <ProfileTitle>📝 שאלון התאמה אישית</ProfileTitle>

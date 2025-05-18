@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
-
-import BMIHistory from './BMIHistory';
-import WeightHistory from './WeightHistory';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -85,45 +82,14 @@ const LastUpdated = styled.small`
     color: #777;
 `;
 
-
-
 const BMICalculator = () => {
     const { user, updateUser } = useUser();
     const [height, setHeight] = useState(user?.measurements?.height || '');
     const [weight, setWeight] = useState(user?.measurements?.weight || '');
     const [bmi, setBMI] = useState(user?.measurements?.bmi || null);
     const [category, setCategory] = useState(user?.measurements?.bmiCategory || '');
+    const [lastUpdated, setLastUpdated] = useState(user?.measurements?.lastUpdated || null);
     const [loading, setLoading] = useState(false);
-    const [history, setHistory] = useState([]);
-    const [weightHistory, setWeightHistory] = useState([]); // היסטוריית משקל
-
-    const resetInputs = () => {
-        setHeight('');
-        setWeight('');
-    };
-
-    const userId = user?._id || user?.id;
-
-    const fetchHistory = useCallback(async () => {
-        try {
-            if (!userId) return;
-            const res = await axios.get(`${API_URL}/measurement/user/${user?._id || user?.id}`, {
-                withCredentials: true
-            });
-            const sorted = res.data.sort((a, b) => new Date(a.date) - new Date(b.date));
-            setHistory(sorted);
-
-            // חיפוש היסטוריית המשקל
-            const weightSorted = res.data.sort((a, b) => new Date(a.date) - new Date(b.date));
-            setWeightHistory(weightSorted);
-        } catch (error) {
-            console.error("Failed to load history", error);
-        }
-    }, [userId]);
-
-    useEffect(() => {
-        if (user) fetchHistory();
-    }, [user, fetchHistory]);
 
     const calculateAndSaveBMI = async () => {
         const h = Number(height);
@@ -147,16 +113,16 @@ const BMICalculator = () => {
         else bmiCategory = 'השמנה חולנית';
 
         setCategory(bmiCategory);
-
+        const date = new Date();
+        setLastUpdated(date);
 
         try {
             setLoading(true);
             const userId = user?._id || user?.id;
 
             if (!userId) {
-                console.error("❌ userId is missing");
                 alert("שגיאה: לא אותר מזהה משתמש");
-                setLoading(false); // <- חובה להפסיק את מצב הטעינה
+                setLoading(false);
                 return;
             }
 
@@ -166,40 +132,25 @@ const BMICalculator = () => {
                 weight: w,
                 bmi: bmiResult,
                 bmiCategory,
-                date: new Date()
+                date
             }, {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
             });
 
-            const data = new FormData();
-            data.append("height", h);
-            data.append("weight", w);
-            data.append("bmi", bmiResult);
-            data.append("bmiCategory", bmiCategory);
-            data.append("lastUpdated", new Date().toISOString());
-
-            const res = await axios.post(`${API_URL}/user/update/${userId}`, data, {
-                headers: { "Content-Type": "multipart/form-data" },
-                withCredentials: true,
-            });
-
-            await axios.post(`${API_URL}/measurement`, {
-                userId,
+            const res = await axios.post(`${API_URL}/user/update/${userId}`, {
                 height: h,
                 weight: w,
                 bmi: bmiResult,
                 bmiCategory,
-                date: new Date()
+                lastUpdated: date
             }, {
                 headers: { "Content-Type": "application/json" },
-                withCredentials: true
+                withCredentials: true,
             });
 
             updateUser(res.data);
             localStorage.setItem("user", JSON.stringify(res.data));
-            fetchHistory();
-            resetInputs();
         } catch (error) {
             console.error("Error saving BMI data:", error);
             alert("שגיאה בשמירת הנתונים");
@@ -250,17 +201,15 @@ const BMICalculator = () => {
             {bmi && (
                 <ResultContainer>
                     <ResultText>ה-BMI שלך הוא: {bmi}</ResultText>
-                    <CategoryText category={category}>{category}</CategoryText>
-                    {user?.measurements?.lastUpdated && (
+                    <CategoryText $category={category}>{category}</CategoryText>
+                    {lastUpdated && (
                         <LastUpdated>
-                            עודכן לאחרונה ב־{new Date(user.measurements.lastUpdated).toLocaleDateString('he-IL')}
+                            עודכן לאחרונה ב־{new Date(lastUpdated).toLocaleDateString('he-IL')}
                         </LastUpdated>
                     )}
                 </ResultContainer>
             )}
 
-            {history.length > 0 && <BMIHistory user={user} />}
-            {weightHistory.length > 0 && <WeightHistory history={weightHistory} />} {/* היסטוריית משקל */}
         </CalculatorContainer>
     );
 };
