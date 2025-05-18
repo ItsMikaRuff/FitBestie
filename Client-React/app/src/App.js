@@ -1,3 +1,5 @@
+//App.js
+
 import { ThemeProvider } from 'styled-components';
 import {theme} from './themes/theme';
 import React, { useState } from 'react';
