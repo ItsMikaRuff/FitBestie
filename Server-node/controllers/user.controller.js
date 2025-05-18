@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const userModel = require("../models/user.model");
 const trainerModel = require("../models/trainer.model");
 
+// Create a new user
 const createUser = async (data) => {
     try {
         const confirmPassword = data.confirmPassword; // קודם כל לשמור
@@ -63,7 +64,7 @@ const createUser = async (data) => {
 };
 
 
-
+// Read a user by filter
 const readOne = async (filter = {}) => {
     const result = await userModel.findOne(filter);
     return result;
@@ -74,26 +75,28 @@ const read = async (filter = {}) => {
     return result;
 };
 
+// Update a user by filter
 const update = async (filter, data) => {
     try {
-        // נזהה האם המשתמש הוא מאמן או רגיל
         const user = await userModel.findById(filter._id);
         const baseModel = user.role === 'trainer' ? trainerModel : userModel;
 
-        // const user = await baseModel.findByIdAndUpdate(
-        //     filter._id,
-        //     { $set: data },
-        //     { new: true, runValidators: true }
-        // );
+        const updatedUser = await baseModel.findByIdAndUpdate(
+            filter._id,
+            { $set: data },
+            { new: true, runValidators: true }
+        );
 
-        console.log("User updated successfully:", user);
-        return user;
+        console.log("User updated successfully:", updatedUser);
+        return updatedUser;
     } catch (error) {
         console.error("Error updating user:", error);
         throw error;
     }
 };
 
+
+// Delete a user by filter
 const deleteOne = async (filter) => {
     return await userModel.findOneAndDelete(filter);
 };
