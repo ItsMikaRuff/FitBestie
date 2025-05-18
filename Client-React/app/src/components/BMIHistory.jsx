@@ -1,3 +1,5 @@
+// BMIHistory.jsx
+
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';

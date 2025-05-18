@@ -127,14 +127,16 @@ router.post("/login/verify-otp", async (req, res) => {
 
 //enable 2fa 
 
-router.put("/user/:id/2fa", async (req, res) => {
-  const { enabled } = req.body;
-  const user = await UserModel.findByIdAndUpdate(
-    req.params.id,
-    { twoFactorEnabled: enabled },
-    { new: true }
-  );
-  res.json(user);
+router.put("/:id/2fa", async (req, res) => {
+  try {
+    const updatedUser = await userController.update(
+      { _id: req.params.id },
+      { twoFactorEnabled: req.body.enabled }
+    );
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: "שגיאה בעדכון אימות דו־שלבי", error: err.message });
+  }
 });
 
 // Get pending trainers

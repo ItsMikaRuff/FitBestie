@@ -1,3 +1,5 @@
+//loginPage.jsx
+
 import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from 'formik';
 import { LoginButton, LoginDiv, LoginFormComponent, LoginInput, LoginTitle, GlobalError } from "../components/styledComponents";
@@ -16,7 +18,6 @@ const LoginPage = () => {
     const [requireOTP, setRequireOTP] = useState(false);
     const [otpValue, setOtpValue] = useState("");
     const [userIdForOTP, setUserIdForOTP] = useState(null);
-
 
     const { login } = useUser();
     const navigate = useNavigate();
@@ -76,7 +77,7 @@ const LoginPage = () => {
                     return; // לא ממשיכים לניווט עדיין
                 }
 
-                login(data); // שומר את המשתמש בקונטקסט
+                login(data.user); // שומר את המשתמש בקונטקסט
                 setLoading(false);
                 navigate('/');
 

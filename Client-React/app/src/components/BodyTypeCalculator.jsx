@@ -1,3 +1,7 @@
+//BodyTypeCalculator.jsx
+// This component calculates the body type based on user input measurements.
+
+
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
@@ -58,7 +62,7 @@ const ResultContainer = styled.div`
 const BodyTypeText = styled.p`
     font-size: 1.1rem;
     color: ${props => {
-        switch(props.bodyType) {
+        switch (props.bodyType) {
             case 'אקטומורף': return '#3498db';
             case 'מזומורף': return '#2ecc71';
             case 'אנדומורף': return '#e67e22';
@@ -107,21 +111,50 @@ const BodyTypeCalculator = () => {
         const hipWaistRatio = hip / waist;
         const shoulderHipRatio = shoulder / hip;
 
+        // 🧮 ננסה למשוך BMI אם יש
+        const height = user?.measurements?.height;
+        const weight = user?.measurements?.weight;
+        const bmi = height && weight ? weight / (height * height) : null;
+
+        let ectoScore = 0;
+        let mesoScore = 0;
+        let endoScore = 0;
+
+        // יחס שורש כף יד לקרסול
+        if (wristAnkleRatio < 0.85) ectoScore++;
+        else if (wristAnkleRatio > 1.05) endoScore++;
+        else mesoScore++;
+
+        // יחס ירך למותניים
+        if (hipWaistRatio < 1.1) ectoScore++;
+        else if (hipWaistRatio > 1.4) endoScore++;
+        else mesoScore++;
+
+        // יחס כתפיים לירכיים
+        if (shoulderHipRatio > 1.25) mesoScore++;
+        else if (shoulderHipRatio < 1.05) endoScore++;
+        else ectoScore++;
+
+        // 🧠 שקלול BMI רק אם קיים
+        if (bmi) {
+            if (bmi < 18.5) ectoScore++;
+            else if (bmi >= 25) endoScore++;
+            else mesoScore++;
+        }
+
         let newBodyType;
         let newBodyTypeDescription;
 
-        // Body type determination logic
-        if (wristAnkleRatio < 0.85 && hipWaistRatio < 1.2 && shoulderHipRatio > 1.1) {
+        if (ectoScore >= mesoScore && ectoScore >= endoScore) {
             newBodyType = 'אקטומורף';
             newBodyTypeDescription = 'מבנה גוף רזה, מתקשה לעלות במשקל ובמסת שריר. מאופיין בעצמות דקות, כתפיים צרות, ומטבוליזם מהיר.';
-        } else if (wristAnkleRatio >= 0.85 && wristAnkleRatio <= 1.1 && hipWaistRatio >= 1.2 && hipWaistRatio <= 1.4) {
+        } else if (mesoScore >= ectoScore && mesoScore >= endoScore) {
             newBodyType = 'מזומורף';
             newBodyTypeDescription = 'מבנה גוף אתלטי, קל יחסית לבנות שריר. מאופיין בכתפיים רחבות, מותניים צרות, ומטבוליזם מאוזן.';
         } else {
             newBodyType = 'אנדומורף';
             newBodyTypeDescription = 'מבנה גוף רחב, נוטה לעלות במשקל בקלות. מאופיין בעצמות רחבות, כתפיים רחבות, ומטבוליזם איטי.';
         }
-
         setBodyType(newBodyType);
         setBodyTypeDescription(newBodyTypeDescription);
 
@@ -179,7 +212,7 @@ const BodyTypeCalculator = () => {
 
             updateUser(res.data);
             localStorage.setItem("user", JSON.stringify(res.data));
-            
+
             // Reset only input fields after successful save
             resetInputs();
         } catch (error) {

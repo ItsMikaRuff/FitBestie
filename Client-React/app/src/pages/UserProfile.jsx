@@ -1,3 +1,5 @@
+//UserProfile.jsx
+
 import { useUser } from "../context/UserContext";
 import { useState, useRef } from "react";
 import {
@@ -15,8 +17,6 @@ import {
     EnhancedInfo,
 } from "../components/styledComponents";
 import Loader from "../components/Loader";
-import BMICalculator from "../components/BMICalculator";
-import BodyTypeCalculator from "../components/BodyTypeCalculator";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AddressInput from '../components/AddressInput';
@@ -53,6 +53,14 @@ const FormGroup = styled.div`
     text-align: right;
 `;
 
+const CheckboxLabel = styled.label`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    font-weight: 500;
+`;
+
 const UserProfile = () => {
     const { user, updateUser, isLoggedIn, logout } = useUser();
     const navigate = useNavigate();
@@ -62,9 +70,7 @@ const UserProfile = () => {
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [twoFA, setTwoFA] = useState(user?.twoFactorEnabled || false);
 
-
     const editFormRef = useRef(null);
-
     const [formData, setFormData] = useState({
         name: user?.name || "",
         email: user?.email || "",
@@ -183,10 +189,36 @@ const UserProfile = () => {
     };
 
     const handleEditClick = () => {
-        setIsEditing(true);
-        setTimeout(() => {
-            editFormRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+    setFormData({
+        name: user?.name || "",
+        email: user?.email || "",
+        image: null,
+        address: user?.address || {
+            street: '',
+            city: '',
+            state: '',
+            country: '',
+            zipCode: '',
+            coordinates: {
+                lat: null,
+                lng: null
+            }
+        }
+    });
+    setIsEditing(true);
+    setTimeout(() => {
+        editFormRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+};
+
+    const getRoleLabel = (role) => {
+        switch (role) {
+            case 'admin': return 'אדמין';
+            case 'manager': return 'מנהל';
+            case 'superAdmin': return 'סופר־אדמין';
+            case 'worker': return 'עובד';
+            default: return '';
+        }
     };
 
     if (!isLoggedIn) return <p>Unauthorized</p>;
@@ -201,7 +233,9 @@ const UserProfile = () => {
 
                 <TrainerInfo>
                     <TrainerName>{user?.name || "משתמש"}</TrainerName>
-                    <TrainerTitle>משתמש</TrainerTitle>
+                    <TrainerTitle>
+                        משתמש {getRoleLabel(user?.role)}
+                    </TrainerTitle>
                     <div>
                         <EnhancedInfo>אימייל: {user?.email || "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>כתובת: {user?.address?.street ? `${user.address.street}, ${user.address.city}` : "לא זמין"}</EnhancedInfo>
@@ -256,6 +290,11 @@ const UserProfile = () => {
                             />
                         </FormGroup>
 
+                        <CheckboxLabel>
+                            <input type="checkbox" checked={twoFA} onChange={toggle2FA} />
+                            הפעל אימות דו־שלבי
+                        </CheckboxLabel>
+
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                             <ProfileButton type="submit">שמור שינויים</ProfileButton>
                             <ProfileButton type="button" onClick={() => setIsEditing(false)}>
@@ -264,17 +303,12 @@ const UserProfile = () => {
                         </div>
                         {loading && <Loader />}
                     </form>
-
-                    <button onClick={toggle2FA}>
-                        {twoFA ? "כבה אימות דו־שלבי" : "הפעל אימות דו־שלבי"}
-                    </button>
                 </ProfileSection>
             )}
 
             <ProfileSection>
                 <ProfileTitle>🧮 מדדים אישיים</ProfileTitle>
-                <BMICalculator />
-                <BodyTypeCalculator />
+                <StyledLink to="/metrics">מעבר לעמוד המדדים</StyledLink>
             </ProfileSection>
 
             <ProfileSection>

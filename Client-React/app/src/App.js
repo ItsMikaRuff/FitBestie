@@ -23,6 +23,7 @@ import WorkerPage from './pages/WorkerPage';
 import TrainerSignUp from './pages/TrainerSignUp';
 import SignupSuccessful from './pages/SignUpSuccessful';
 import ForgotPassword from './pages/ForgotPassword';
+import UserMetrics from './pages/UserMetrics';
 
 function App() {
 
@@ -48,6 +49,8 @@ function App() {
           <Route path="/trainer-signup" element={<TrainerSignUp />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="/workout-videos" element={<WorkoutVideos />} />
+          <Route path="/metrics" element={<UserMetrics />} />
+
           
         </Route>
 
