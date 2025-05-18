@@ -1,3 +1,5 @@
+// sendOTPEmail.js
+
 const nodemailer = require("nodemailer");
 
 const sendOTPEmail = async (email, otp) => {
