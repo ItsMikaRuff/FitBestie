@@ -213,10 +213,12 @@ const UserProfile = () => {
 
     const getRoleLabel = (role) => {
         switch (role) {
-            case 'admin': return 'אדמין';
-            case 'manager': return 'מנהל';
+            case 'admin': return 'Administrator';
+            case 'manager': return 'מנהלת FitBestie';
             case 'superAdmin': return 'סופר־אדמין';
-            case 'worker': return 'עובד';
+            case 'worker': return 'עובדת FitBestie';
+            case 'trainer': return 'מאמנת כושר';
+            case 'user': return ' מתאמנת';
             default: return '';
         }
     };
