@@ -148,6 +148,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             { to: "/", icon: <FaHome />, label: "דשבורד", roles: ["user", "admin", "superAdmin"] },
             { to: "/profile", icon: <FaUser />, label: "פרופיל", roles: ["user", "admin", "superAdmin"] },
             { to: "/metrics", icon: <FaChartBar />, label: "מדדים", roles: ["user", "admin", "superAdmin"] },
+            { to: "/workout-videos", icon: <FaClipboardList />, label: "סרטוני אימון", roles: ["user", "admin", "superAdmin"] },
+            { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת", roles: ["user", "admin", "superAdmin"] },
             { to: "/manager", icon: <FaClipboardList />, label: "ממשק מנהל", roles: ["admin", "superAdmin"] },
             { to: "/admin", icon: <FaUsers />, label: "ניהול משתמשים", roles: ["superAdmin"] },
             { to: "/worker", icon: <FaCog />, label: "אימות ספקי כושר", roles: ["superAdmin", "manager"] },
@@ -156,6 +158,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             { to: "/", icon: <FaHome />, label: "דף הבית" },
             { to: "/signup", icon: <FaUser />, label: "הרשמה" },
             { to: "/login", icon: <FaUser />, label: "התחברות" },
+            { to: "/body-type", icon: <FaChartBar />, label: "גלי את סוג הגוף" },
+            { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת" },
         ];
 
     return (
