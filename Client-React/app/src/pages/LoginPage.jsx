@@ -77,7 +77,7 @@ const LoginPage = () => {
                     return; // לא ממשיכים לניווט עדיין
                 }
 
-                login(data.user); // שומר את המשתמש בקונטקסט
+                login(data); // שומר את המשתמש בקונטקסט
                 setLoading(false);
                 navigate('/');
 

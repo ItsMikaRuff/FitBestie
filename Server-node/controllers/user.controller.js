@@ -66,8 +66,7 @@ const createUser = async (data) => {
 
 // Read a user by filter
 const readOne = async (filter = {}) => {
-    const result = await userModel.findOne(filter);
-    return result;
+  return await userModel.findOne(filter).lean();
 };
 
 const read = async (filter = {}) => {

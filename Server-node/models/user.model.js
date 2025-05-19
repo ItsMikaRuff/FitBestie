@@ -94,6 +94,10 @@ const userSchema = new mongoose.Schema({
         bodyTypeDescription: { type: String, default: null },
         lastUpdated: { type: Date, default: null }
     },
+    weightHistory: [{
+        date: Date,
+        weight: Number
+    }],
     bodyType: {
         type: { type: String, enum: ['אקטומורף', 'מזומורף', 'אנדומורף', null], default: null },
         description: { type: String, default: null },

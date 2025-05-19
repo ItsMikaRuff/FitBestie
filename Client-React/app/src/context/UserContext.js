@@ -1,79 +1,93 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
-// Context לשיתוף מידע על המשתמש (user), טוקן (token) ומצב ההתחברות
 const UserContext = createContext();
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// Provider לעטיפת היישום וסיפוק ה-Context
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [token, setToken] = useState(null);
 
-    // בעת עליית הקומפוננטה, נטען מ-localStorage אם קיים
-    useEffect(() => {
-        const rawUser = localStorage.getItem('user');
-        const rawToken = localStorage.getItem('token');
-
-        if (rawUser && rawUser !== 'undefined') {
-            try {
-                const parsedUser = JSON.parse(rawUser);
-                setUser(parsedUser);
-                setIsLoggedIn(true);
-            } catch {
-                console.warn('Invalid user in localStorage, clearing');
-                localStorage.removeItem('user');
-            }
-        }
-        if (rawToken && rawToken !== 'undefined') {
-            setToken(rawToken);
-        }
-    }, []);
-
     /**
-     * login: שמירת אובייקט user וטוקן ב-context וב-localStorage
-     * data יכול להיות:
-     * 1. אובייקט user בלבד
-     * 2. אובייקט { user, token }
+     * login: שמירת token וטעינת פרטי המשתמש מהשרת
      */
     const login = (data) => {
-        let userData;
-        let jwt;
+        const userData = data.user || data;
+        const jwt = data.token || null;
 
-        if (data.user && data.token) {
-            userData = data.user;
-            jwt = data.token;
-        } else {
-            userData = data;
-        }
-
-        setUser(userData);
+        setToken(jwt);
         setIsLoggedIn(true);
-        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem("token", jwt);
+        localStorage.setItem("userId", userData._id);
 
-        if (jwt) {
-            setToken(jwt);
-            localStorage.setItem('token', jwt);
+        if (userData?._id && jwt) {
+            axios.get(`${API_URL}/user/${userData._id}`, {
+                headers: { Authorization: `Bearer ${jwt}` }
+            })
+            .then((res) => {
+                setUser(res.data);
+            })
+            .catch((err) => {
+                console.error("❌ Error loading user:", err);
+                logout();
+            });
+        } else {
+            console.warn("⚠️ Missing _id or token");
         }
     };
 
     /**
-     * logout: ניקוי ה-context וה-localStorage
+     * logout: ניקוי הכל
      */
     const logout = () => {
         setUser(null);
         setToken(null);
         setIsLoggedIn(false);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        console.info("🚪 Logged out");
     };
 
     /**
-     * updateUser: עדכון אובייקט user בלבד
+     * updateUser: עדכון פרטי המשתמש בשרת והסטייט
      */
-    const updateUser = (updated) => {
-        setUser(updated);
-        localStorage.setItem('user', JSON.stringify(updated));
+    const updateUser = async (updatedFields) => {
+        if (!user || !token) return;
+
+        try {
+            const res = await axios.put(`${API_URL}/user/${user._id}`, updatedFields, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser(res.data);
+        } catch (err) {
+            console.error("❌ Error updating user:", err);
+        }
     };
+
+    /**
+     * useEffect לטעינה אוטומטית של המשתמש מ-localStorage
+     */
+    useEffect(() => {
+        const savedToken = localStorage.getItem("token");
+        const savedUserId = localStorage.getItem("userId");
+
+        if (savedToken && savedUserId) {
+            setToken(savedToken);
+            setIsLoggedIn(true);
+
+            axios.get(`${API_URL}/user/${savedUserId}`, {
+                headers: { Authorization: `Bearer ${savedToken}` }
+            })
+            .then((res) => {
+                setUser(res.data);
+            })
+            .catch((err) => {
+                console.error("❌ Auto-login failed:", err);
+                logout();
+            });
+        }
+    }, []);
 
     return (
         <UserContext.Provider value={{ user, token, isLoggedIn, login, logout, updateUser }}>
@@ -82,10 +96,5 @@ export const UserProvider = ({ children }) => {
     );
 };
 
-/**
- * Hook נוח לשימוש בתוך קומפוננטות
- */
 export const useUser = () => useContext(UserContext);
-
-// Export ברירת מחדל של ה-Provider
 export default UserProvider;
