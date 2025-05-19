@@ -3,14 +3,14 @@
 import styled, { keyframes } from "styled-components";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-    FaUser,
-    FaHome,
-    FaChartBar,
-    FaCog,
-    FaUsers,
-    FaSignOutAlt,
-    FaTimes,
-    FaClipboardList,
+  FaUser,
+  FaHome,
+  FaChartBar,
+  FaCog,
+  FaUsers,
+  FaSignOutAlt,
+  FaTimes,
+  FaClipboardList,
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext";
 
@@ -37,7 +37,7 @@ const SidebarContainer = styled.aside`
   background-color: #fff;
   border-left: 1px solid #eee;
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.05);
-  transform: ${({ isOpen }) => (isOpen ? "translateX(0)" : "translateX(100%)")};
+  transform: ${({ $isOpen }) => $isOpen ? 'translateX(0)' : 'translateX(100%)'};
   transition: transform 0.3s ease;
   z-index: 9999;
   animation: ${({ isOpen }) => (isOpen ? slideIn : "none")} 0.3s ease forwards;
@@ -139,68 +139,68 @@ const UserGreeting = styled.div`
 `;
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
-    const { user, logout } = useUser();
-    const navigate = useNavigate();
-    const role = user?.role || "";
+  const { user, logout } = useUser();
+  const navigate = useNavigate();
+  const role = user?.role || "";
 
-    const links = user
-        ? [
-            { to: "/", icon: <FaHome />, label: "דשבורד", roles: ["user", "admin", "superAdmin"] },
-            { to: "/profile", icon: <FaUser />, label: "פרופיל", roles: ["user", "admin", "superAdmin"] },
-            { to: "/metrics", icon: <FaChartBar />, label: "מדדים", roles: ["user", "admin", "superAdmin"] },
-            { to: "/workout-videos", icon: <FaClipboardList />, label: "סרטוני אימון", roles: ["user", "admin", "superAdmin"] },
-            { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת", roles: ["user", "admin", "superAdmin"] },
-            { to: "/manager", icon: <FaClipboardList />, label: "ממשק מנהל", roles: ["admin", "superAdmin"] },
-            { to: "/admin", icon: <FaUsers />, label: "ניהול משתמשים", roles: ["superAdmin"] },
-            { to: "/worker", icon: <FaCog />, label: "אימות ספקי כושר", roles: ["superAdmin", "manager"] },
-        ].filter(link => link.roles.includes(role))
-        : [
-            { to: "/", icon: <FaHome />, label: "דף הבית" },
-            { to: "/signup", icon: <FaUser />, label: "הרשמה" },
-            { to: "/login", icon: <FaUser />, label: "התחברות" },
-            { to: "/body-type", icon: <FaChartBar />, label: "גלי את סוג הגוף" },
-            { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת" },
-        ];
+  const links = user
+    ? [
+      { to: "/", icon: <FaHome />, label: "דשבורד", roles: ["user", "admin", "superAdmin"] },
+      { to: "/profile", icon: <FaUser />, label: "פרופיל", roles: ["user", "admin", "superAdmin"] },
+      { to: "/metrics", icon: <FaChartBar />, label: "מדדים", roles: ["user", "admin", "superAdmin"] },
+      { to: "/workout-videos", icon: <FaClipboardList />, label: "סרטוני אימון", roles: ["user", "admin", "superAdmin"] },
+      { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת", roles: ["user", "admin", "superAdmin"] },
+      { to: "/manager", icon: <FaClipboardList />, label: "ממשק מנהל", roles: ["admin", "superAdmin"] },
+      { to: "/admin", icon: <FaUsers />, label: "ניהול משתמשים", roles: ["superAdmin"] },
+      { to: "/worker", icon: <FaCog />, label: "אימות ספקי כושר", roles: ["superAdmin", "manager"] },
+    ].filter(link => link.roles.includes(role))
+    : [
+      { to: "/", icon: <FaHome />, label: "דף הבית" },
+      { to: "/signup", icon: <FaUser />, label: "הרשמה" },
+      { to: "/login", icon: <FaUser />, label: "התחברות" },
+      { to: "/body-type", icon: <FaChartBar />, label: "גלי את סוג הגוף" },
+      { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת" },
+    ];
 
-    return (
-        <SidebarContainer isOpen={isOpen}>
-            <CloseButton onClick={() => setIsOpen(false)} title="סגור תפריט">
-                <FaTimes />
-            </CloseButton>
+  return (
+    <SidebarContainer  $isOpen={isOpen}>
+      <CloseButton onClick={() => setIsOpen(false)} title="סגור תפריט">
+        <FaTimes />
+      </CloseButton>
 
-            {user && (
-                <UserGreeting>
-                    <img src={user.image || "/default-user.jpg"} alt="avatar" />
-                    <span>שלום {user.name || "משתמשת"}</span>
-                </UserGreeting>
-            )}
+      {user && (
+        <UserGreeting>
+          <img src={user.image || "/default-user.jpg"} alt="avatar" />
+          <span>שלום {user.name || "משתמשת"}</span>
+        </UserGreeting>
+      )}
 
-            <NavList>
-                {links.map(link => (
-                    <NavItem
-                        key={link.to}
-                        to={link.to}
-                        onClick={() => window.innerWidth < 768 && setIsOpen(false)}
-                    >
-                        {link.icon}
-                        <span>{link.label}</span>
-                    </NavItem>
-                ))}
-            </NavList>
+      <NavList>
+        {links.map(link => (
+          <NavItem
+            key={link.to}
+            to={link.to}
+            onClick={() => window.innerWidth < 768 && setIsOpen(false)}
+          >
+            {link.icon}
+            <span>{link.label}</span>
+          </NavItem>
+        ))}
+      </NavList>
 
-            {user && (
-                <LogoutButton
-                    onClick={() => {
-                        logout();
-                        navigate("/login");
-                    }}
-                >
-                    <FaSignOutAlt />
-                    <span>התנתקות</span>
-                </LogoutButton>
-            )}
-        </SidebarContainer>
-    );
+      {user && (
+        <LogoutButton
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+        >
+          <FaSignOutAlt />
+          <span>התנתקות</span>
+        </LogoutButton>
+      )}
+    </SidebarContainer>
+  );
 };
 
 export default Sidebar;

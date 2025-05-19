@@ -326,11 +326,6 @@ const UserProfile = () => {
             </ProfileSection>
 
             <ProfileSection>
-                <ProfileTitle>🔧 עריכת פרטים</ProfileTitle>
-                <ProfileButton disabled>בקרוב</ProfileButton>
-            </ProfileSection>
-
-            <ProfileSection>
                 <ProfileTitle>⚠️ מחיקת פרופיל</ProfileTitle>
                 <div style={{ textAlign: 'right' }}>
                     <p>שים לב: מחיקת הפרופיל היא פעולה בלתי הפיכה. כל הנתונים שלך יימחקו לצמיתות.</p>
