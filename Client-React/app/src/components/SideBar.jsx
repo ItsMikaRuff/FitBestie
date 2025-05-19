@@ -11,6 +11,8 @@ import {
   FaSignOutAlt,
   FaTimes,
   FaClipboardList,
+  FaFemale
+
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext";
 
@@ -138,6 +140,18 @@ const UserGreeting = styled.div`
   }
 `;
 
+const DefaultAvatar = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ffe9ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d63384;
+  font-size: 1.2rem;
+`;
+
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const { user, logout } = useUser();
   const navigate = useNavigate();
@@ -145,17 +159,17 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const links = user
     ? [
-      { to: "/", icon: <FaHome />, label: "דשבורד", roles: ["user", "admin", "superAdmin"] },
-      { to: "/profile", icon: <FaUser />, label: "פרופיל", roles: ["user", "admin", "superAdmin"] },
-      { to: "/metrics", icon: <FaChartBar />, label: "מדדים", roles: ["user", "admin", "superAdmin"] },
-      { to: "/workout-videos", icon: <FaClipboardList />, label: "סרטוני אימון", roles: ["user", "admin", "superAdmin"] },
-      { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת", roles: ["user", "admin", "superAdmin"] },
-      { to: "/manager", icon: <FaClipboardList />, label: "ממשק מנהל", roles: ["admin", "superAdmin"] },
-      { to: "/admin", icon: <FaUsers />, label: "ניהול משתמשים", roles: ["superAdmin"] },
-      { to: "/worker", icon: <FaCog />, label: "אימות ספקי כושר", roles: ["superAdmin", "manager"] },
+      { to: "/", icon: <FaHome />, label: "דשבורד", roles: ["user", "admin", "superAdmin","manager","trainer"] },
+      { to: "/profile", icon: <FaUser />, label: "פרופיל", roles: ["user", "admin", "superAdmin","manager","trainer"] },
+      { to: "/metrics", icon: <FaChartBar />, label: "מדדים", roles: ["user", "admin", "superAdmin","manager","trainer"] },
+      { to: "/workout-videos", icon: <FaClipboardList />, label: "סרטוני אימון", roles: ["user", "admin", "superAdmin","trainer"] },
+      { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת", roles: ["user", "admin", "superAdmin","trainer","worker","manager"] },
+      { to: "/manager", icon: <FaClipboardList />, label: "ממשק מנהל", roles: ["admin", "superAdmin","manager"] },
+      { to: "/admin", icon: <FaUsers />, label: "ניהול משתמשים", roles: ["superAdmin","admin"] },
+      { to: "/worker", icon: <FaCog />, label: "אימות ספקי כושר", roles: ["superAdmin", "manager","worker"] },
     ].filter(link => link.roles.includes(role))
     : [
-      { to: "/", icon: <FaHome />, label: "דף הבית" },
+      { to: "/", icon: <FaHome />, label: "דשבורד" },
       { to: "/signup", icon: <FaUser />, label: "הרשמה" },
       { to: "/login", icon: <FaUser />, label: "התחברות" },
       { to: "/body-type", icon: <FaChartBar />, label: "גלי את סוג הגוף" },
@@ -163,14 +177,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     ];
 
   return (
-    <SidebarContainer  $isOpen={isOpen}>
+    <SidebarContainer $isOpen={isOpen}>
       <CloseButton onClick={() => setIsOpen(false)} title="סגור תפריט">
         <FaTimes />
       </CloseButton>
 
       {user && (
         <UserGreeting>
-          <img src={user.image || "/default-user.jpg"} alt="avatar" />
+          {user.image ? (
+            <img src={user.image} alt="avatar" />
+          ) : (
+            <DefaultAvatar>
+              <FaFemale />
+            </DefaultAvatar>
+          )}
           <span>שלום {user.name || "משתמשת"}</span>
         </UserGreeting>
       )}

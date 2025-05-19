@@ -134,6 +134,7 @@ const getColorByBmi = (category) => {
 
 const Home = () => {
     const { isLoggedIn, user } = useUser();
+    const [history, setHistory] = useState([]);
     const navigate = useNavigate();
     const greeting = getGreeting();
 
@@ -152,6 +153,7 @@ const Home = () => {
                     const sortedMeasurements = measurementsRes.data.sort((a, b) => new Date(b.date) - new Date(a.date));
                     const sortedBodyTypes = bodyTypeRes.data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+                    setHistory(sortedMeasurements);
                     setLatestMeasurement(sortedMeasurements[0]);
                     setLatestBodyType(sortedBodyTypes[0]);
 
@@ -216,7 +218,7 @@ const Home = () => {
                     )}
 
                     <div style={{ marginTop: '3rem' }}>
-                        <WeightHistory history={[latestMeasurement]} />
+                        <WeightHistory history={history} />
                         <Button onClick={() => navigate("/metrics")}>
                             ➕ הוספת שקילה חדשה
                         </Button>

@@ -58,7 +58,6 @@ const Header = ({ toggleSidebar }) => {
                 <Button><FiSettings /></Button>
               </Link>
             )}
-            <Link to="/profile"><Button>פרופיל</Button></Link>
             <Button style={{ backgroundColor: "#dc3545" }} onClick={handleLogout}>התנתק</Button>
           </>
         ) : (
