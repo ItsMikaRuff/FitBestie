@@ -1,3 +1,5 @@
+//requireRole.js
+
 module.exports = function requireRole(...allowedRoles) {
     return (req, res, next) => {
         if (!req.user) {

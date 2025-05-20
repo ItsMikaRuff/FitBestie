@@ -90,11 +90,12 @@ const WorkerPage = () => {
     }, [token]);
 
     useEffect(() => {
-        
+
         fetchPendingTrainers();
     }, [user, navigate, fetchPendingTrainers]);
 
     const handleApprove = async (trainerId) => {
+
         if (!token) return;
         try {
             await axios.post(

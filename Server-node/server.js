@@ -8,6 +8,7 @@ const cors = require("cors");
 
 const app = express();
 const port = 5000;
+const cookieParser = require("cookie-parser");
 
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
@@ -39,6 +40,7 @@ app.options('*', cors(corsOptions));    // קריאות Preflight (OPTIONS)
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(cookieParser());
 
 //routes
 app.use('/user', userRouter);
