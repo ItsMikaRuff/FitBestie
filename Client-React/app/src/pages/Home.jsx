@@ -8,6 +8,7 @@ import GymSearch from "../components/GymSearch";
 import heroImage from "../Images/stretch-laptop.jpg";
 import visionImage from "../Images/running.jpg";
 import joinImage from "../Images/highFive.jpg";
+import RecipeChat from "../components/RecipeChat";
 
 const fadeInDown = keyframes`
   from { opacity: 0; transform: translateY(-30px); }
@@ -226,6 +227,10 @@ const Home = () => {
                 </HighlightBox>
             )}
 
+            <Section>
+                <RecipeChat/>
+            </Section>
+                
             <Section>
                 <h2>החזון שלנו</h2>
                 <p>
