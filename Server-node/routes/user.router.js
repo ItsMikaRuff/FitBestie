@@ -180,9 +180,6 @@ router.get("/search", async (req, res) => {
 
 // Approve & Reject trainer
 
-const requireAuth = require("../middleware/requireAuth");
-const requireRole = require("../middleware/requireRole");
-
 router.post(
   "/approve-trainer/:id",
   requireAuth,
@@ -548,7 +545,6 @@ router.get("/search", async (req, res) => {
 });
 
 // Approve & Reject trainer
-const requireRole = require("../middleware/requireRole");
 
 router.post(
   "/approve-trainer/:id",
