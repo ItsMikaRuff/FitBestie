@@ -93,7 +93,7 @@ export default function SmartRecipeChat() {
                 }
             ]);
         }
-    }, [isOpen]);
+    }, [isOpen, messages]);
 
     const toggleChat = () => setIsOpen(!isOpen);
 
@@ -170,7 +170,7 @@ export default function SmartRecipeChat() {
             });
 
             setSavedTitles(prev => [...prev, recipe.title]);
-            alert(`✨ המתכון "${recipe.title}" נשמר למועדפים!`);
+            console.log(`✨ המתכון "${recipe.title}" נשמר למועדפים!`);
         } catch (err) {
             console.error("שגיאה בשמירה:", err);
             alert("😢 שגיאה בשמירה למועדפים");
