@@ -50,27 +50,18 @@ const hotspotsFront = [
   { name: 'oblique-right', top: '43%', left: '60%' },
   { name: 'front-thigh-left', top: '60%', left: '40%' },
   { name: 'front-thigh-right', top: '60%', left: '60%' },
-  { name: 'front-knee-left', top: '70%', left: '42%' },
-  { name: 'front-knee-right', top: '70%', left: '58%' },
-  { name: 'front-foot-left', top: '90%', left: '40%' },
-  { name: 'front-foot-right', top: '90%', left: '60%' },
+  { name: 'front-inner-thighs', top: '60%', left: '50%' },
 ];
 
 const hotspotsBack = [
-  { name: 'back-shoulder-left', top: '12%', left: '28%' },
-  { name: 'back-shoulder-right', top: '12%', left: '72%' },
-  { name: 'back-arm-left', top: '25%', left: '20%' },
-  { name: 'back-arm-right', top: '25%', left: '80%' },
-  { name: 'back', top: '20%', left: '50%' },
-  { name: 'glutes', top: '42%', left: '50%' },
-  { name: 'back-thigh-left', top: '60%', left: '40%' },
-  { name: 'back-thigh-right', top: '60%', left: '60%' },
-  { name: 'back-knee-left', top: '70%', left: '40%' },
-  { name: 'back-knee-right', top: '70%', left: '60%' },
-  { name: 'calf-left', top: '80%', left: '40%' },
-  { name: 'calf-right', top: '80%', left: '60%' },
-  { name: 'back-foot-left', top: '90%', left: '40%' },
-  { name: 'back-foot-right', top: '90%', left: '60%' },
+  { name: 'back-arm-left', top: '30%', left: '30%' },//זרוע אחורית
+  { name: 'back-arm-right', top: '32%', left: '70%' },//זרוע אחורית
+  { name: 'back', top: '30%', left: '50%' },//גב
+  { name: 'glutes', top: '50%', left: '50%' },//ישבן
+  { name: 'back-thigh-left', top: '60%', left: '40%' },//ירך אחורית
+  { name: 'back-thigh-right', top: '60%', left: '60%' },//ירך אחורית
+  { name: 'calf-left', top: '80%', left: '40%' },//ארבע ראשי
+  { name: 'calf-right', top: '80%', left: '60%' },//ארבע ראשי
 ];
 
 const HumanBody = ({ onMuscleHover = () => {}, onMuscleClick = () => {} }) => {
@@ -103,7 +94,10 @@ const HumanBody = ({ onMuscleHover = () => {}, onMuscleClick = () => {} }) => {
               onMuscleHover(null);
             }}
             onClick={() => onMuscleClick(spot.name)}
-          />
+            />
+          
+         
+          
         ))}
       </Container>
     </>

@@ -8,10 +8,13 @@ const bcrypt = require("bcrypt");
 const captcha = require("../utils/captcha");
 const sendOTPEmail = require("../utils/sendOTPEmail");
 
-// const trainerModel = require("../models/trainer.model");
+//const trainerModel = require("../models/trainer.model");
 const UserModel = require("../models/user.model");
 const RecipeModel = require("../models/recipe.model");
 
+
+const requireAuth = require("../middleware/requireAuth");
+const requireRole = require("../middleware/requireRole");
 
 
 const multer = require("multer");
@@ -296,16 +299,65 @@ router.delete('/:id/favoriteRecipes/:recipeId', requireAuth, async (req, res) =>
   }
 });
 
-//get user by id
-router.get("/:id", async (req, res) => {
+// ------------------ Favorite Trainer, update & get ------------------ //
+router.put("/favorites", requireAuth, async (req, res) => {
   try {
-    const user = await userController.readOne({ _id: req.params.id });
-    if (!user) throw { code: 500 };
-    res.send(user);
+    console.log("🎯 נכנסנו ל־/favorites");
+
+    const user = await UserModel.findById(req.user.id);
+    const { trainerId } = req.body;
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (!trainerId) {
+      return res.status(400).json({ message: "Trainer ID required" });
+    }
+
+    const exists = user.favoriteTrainers.includes(trainerId);
+    if (exists) {
+      user.favoriteTrainers = user.favoriteTrainers.filter(id => id.toString() !== trainerId);
+    } else {
+      user.favoriteTrainers.push(trainerId);
+    }
+
+    await user.save();
+    res.json({ favorites: user.favoriteTrainers });
   } catch (err) {
-    res.status(500).send("Error creating user");
+    res.status(500).json({ message: "שגיאה בעדכון מועדפים", error: err.message });
   }
 });
+
+router.get("/favorites", requireAuth, async (req, res) => {
+  try {
+    console.log("🎯 נכנסנו ל־/favorites");
+    const user = await UserModel.findById(req.user.id).populate({
+      path: "favoriteTrainers",
+      model: "User",
+      select: "name image role address expertise rating",
+      options: { strictPopulate: false }, // ✅ זה מאפשר גם אם שדות חסרים
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const favorites = Array.isArray(user.favoriteTrainers)
+      ? user.favoriteTrainers.filter(trainer => trainer && trainer.name)
+      : [];
+
+    res.json({ favorites });
+  } catch (err) {
+    console.error("🔥 Error in GET /favorites:", err);
+    res.status(500).json({
+      message: "שגיאה בשליפת מועדפים",
+      error: err?.message || "Unknown error",
+      stack: err?.stack || null
+    });
+  }
+});
+
+
 
 //get all users
 router.get("/", async (req, res) => {
@@ -475,5 +527,86 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Search trainers by location
+router.get("/search", async (req, res) => {
+  try {
+    const { type } = req.query;
+
+    // Build the search query
+    const query = {
+      role: type || "trainer", // אם לא צוין type, מחפש מאמנים
+    };
+
+    // Search for trainers
+    const results = await userController.searchByTypeAndLocation(query);
+    console.log("Search results:", results); // Add logging
+    res.json(results);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Error searching for trainers" });
+  }
+});
+
+// Approve & Reject trainer
+
+const requireAuth = require("../middleware/requireAuth");
+const requireRole = require("../middleware/requireRole");
+
+router.post(
+  "/approve-trainer/:id",
+  requireAuth,
+  requireRole("worker", "superAdmin"),
+  async (req, res) => {
+    try {
+      // קודם נשלוף את המשתמש לפי ID
+      const trainer = await trainerModel.findById(req.params.id);
+      if (!trainer) {
+        return res.status(404).send("Trainer not found");
+      }
+
+      // נשלח את ה־role כ־filter כדי שה-controller יעדכן בטבלה הנכונה
+      const updatedTrainer = await userController.update(
+        { _id: trainer._id, role: "trainer" },
+        { trainerStatus: "approved" }
+      );
+
+      res.send({
+        message: "Trainer approved successfully",
+        trainer: updatedTrainer,
+      });
+    } catch (error) {
+      console.error("Error approving trainer:", error);
+      res.status(500).send("Error approving trainer");
+    }
+  }
+);
+
+// Reject trainer — רק worker או superAdmin
+router.post(
+  "/reject-trainer/:id",
+  requireAuth,
+  requireRole("worker", "superAdmin"),
+  async (req, res) => {
+    try {
+      const trainer = await trainerModel.findById(req.params.id);
+      if (!trainer) {
+        return res.status(404).send("Trainer not found");
+      }
+
+      const updatedTrainer = await userController.update(
+        { _id: trainer._id, role: "trainer" },
+        { trainerStatus: "rejected" }
+      );
+
+      res.send({
+        message: "Trainer rejected successfully",
+        trainer: updatedTrainer,
+      });
+    } catch (error) {
+      console.error("Error rejecting trainer:", error);
+      res.status(500).send("Error rejecting trainer");
+    }
+  }
+);
 
 module.exports = router;
