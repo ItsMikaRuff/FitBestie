@@ -368,9 +368,7 @@ router.get("/", async (req, res) => {
 });
 
 // update user
-
 router.post("/update/:id", (req, res, next) => {
-
 
   upload.single("image")(req, res, async (err) => {
     if (err) {
@@ -602,5 +600,19 @@ router.post(
     }
   }
 );
+
+// Get user by ID
+router.get("/:id", requireAuth, async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (err) {
+    console.error("❌ Error fetching user by ID:", err.message);
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
+});
+
 
 module.exports = router;
