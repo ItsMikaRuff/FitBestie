@@ -32,7 +32,7 @@ const userRouter = require('./routes/user.router')
 const quizRouter = require('./routes/quiz.router')
 const bodyTypeRouter = require("./routes/bodyType.router");
 const measurementRouter = require("./routes/measurement.router");
-
+const recipeRouter = require('./routes/recipe.router');
 
 //middleware
 app.use(cors(corsOptions));              // קריאות רגילות
@@ -48,6 +48,7 @@ app.use('/search', userRouter);
 app.use('/quiz', quizRouter);
 app.use('/bodyType', bodyTypeRouter);
 app.use('/measurement', measurementRouter);
+app.use('/recipes', recipeRouter);
 
 app.get('/ping', (req, res) => {
     res.send('pong!');

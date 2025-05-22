@@ -110,6 +110,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
 },
+
+    favoriteRecipes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Recipe"
+    }]
 }, baseOptions);
 
 const User = mongoose.model('User', userSchema);

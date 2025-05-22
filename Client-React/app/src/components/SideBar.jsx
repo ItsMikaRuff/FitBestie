@@ -11,7 +11,8 @@ import {
   FaSignOutAlt,
   FaTimes,
   FaClipboardList,
-  FaFemale
+  FaFemale,
+  FaCarrot
 
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext";
@@ -167,6 +168,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       { to: "/manager", icon: <FaClipboardList />, label: "ממשק מנהל", roles: ["admin", "superAdmin","manager"] },
       { to: "/admin", icon: <FaUsers />, label: "ניהול משתמשים", roles: ["superAdmin","admin"] },
       { to: "/worker", icon: <FaCog />, label: "אימות ספקי כושר", roles: ["superAdmin", "manager","worker"] },
+      { to: "/favorite-recipes", icon: <FaCarrot />, label: "המתכונים המועדפים שלי", roles: ["user", "admin", "superAdmin","manager","trainer"] }
     ].filter(link => link.roles.includes(role))
     : [
       { to: "/", icon: <FaHome />, label: "דשבורד" },

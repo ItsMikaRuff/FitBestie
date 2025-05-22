@@ -10,6 +10,8 @@ const sendOTPEmail = require("../utils/sendOTPEmail");
 
 //const trainerModel = require("../models/trainer.model");
 const UserModel = require("../models/user.model");
+const RecipeModel = require("../models/recipe.model");
+
 
 const requireAuth = require("../middleware/requireAuth");
 const requireRole = require("../middleware/requireRole");
@@ -152,6 +154,148 @@ router.get("/pending-trainers", async (req, res) => {
     res.send(pendingTrainers);
   } catch (error) {
     res.status(500).send("Error fetching pending trainers");
+  }
+});
+
+
+// Search trainers by location
+router.get("/search", async (req, res) => {
+  try {
+    const { type } = req.query;
+
+    // Build the search query
+    const query = {
+      role: type || "trainer", // אם לא צוין type, מחפש מאמנים
+    };
+
+    // Search for trainers
+    const results = await userController.searchByTypeAndLocation(query);
+    console.log("Search results:", results); // Add logging
+    res.json(results);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Error searching for trainers" });
+  }
+});
+
+// Approve & Reject trainer
+
+const requireAuth = require("../middleware/requireAuth");
+const requireRole = require("../middleware/requireRole");
+
+router.post(
+  "/approve-trainer/:id",
+  requireAuth,
+  requireRole("worker", "superAdmin"),
+  async (req, res) => {
+    try {
+      // קודם נשלוף את המשתמש לפי ID
+      const trainer = await trainerModel.findById(req.params.id);
+      if (!trainer) {
+        return res.status(404).send("Trainer not found");
+      }
+
+      // נשלח את ה־role כ־filter כדי שה-controller יעדכן בטבלה הנכונה
+      const updatedTrainer = await userController.update(
+        { _id: trainer._id, role: "trainer" },
+        { trainerStatus: "approved" }
+      );
+
+      res.send({
+        message: "Trainer approved successfully",
+        trainer: updatedTrainer,
+      });
+    } catch (error) {
+      console.error("Error approving trainer:", error);
+      res.status(500).send("Error approving trainer");
+    }
+  }
+);
+
+// Reject trainer — רק worker או superAdmin
+router.post(
+  "/reject-trainer/:id",
+  requireAuth,
+  requireRole("worker", "superAdmin"),
+  async (req, res) => {
+    try {
+      const trainer = await trainerModel.findById(req.params.id);
+      if (!trainer) {
+        return res.status(404).send("Trainer not found");
+      }
+
+      const updatedTrainer = await userController.update(
+        { _id: trainer._id, role: "trainer" },
+        { trainerStatus: "rejected" }
+      );
+
+      res.send({
+        message: "Trainer rejected successfully",
+        trainer: updatedTrainer,
+      });
+    } catch (error) {
+      console.error("Error rejecting trainer:", error);
+      res.status(500).send("Error rejecting trainer");
+    }
+  }
+);
+
+
+// add recipe to favorites
+// רק משתמשים מחוברים יכולים לשמור מתכונים למועדפים
+
+router.post('/:id/favoriteRecipes', requireAuth, async (req, res) => {
+  try {
+    const { title, ingredients, instructions, tags } = req.body;
+
+    const recipe = new RecipeModel({
+      title,
+      ingredients,
+      instructions,
+      tags,
+      createdBy: req.params.id
+    });
+
+    await recipe.save();
+
+    const user = await UserModel.findById(req.params.id);
+    user.favoriteRecipes.push(recipe._id);
+    await user.save();
+
+    res.status(201).json({ message: "Recipe saved", recipeId: recipe._id });
+  } catch (err) {
+    console.error("שגיאה בשמירת מתכון:", err.message);
+    res.status(500).json({ message: "Failed to save recipe" });
+  }
+});
+
+
+// get favorite recipes
+router.get('/:id/favoriteRecipes', requireAuth, async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.id).populate('favoriteRecipes');
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user.favoriteRecipes);
+  } catch (err) {
+    console.error("שגיאה בשליפת מועדפים:", err.message);
+    res.status(500).json({ message: "שגיאה בטעינת מועדפים" });
+  }
+});
+
+// remove recipe from favorites
+router.delete('/:id/favoriteRecipes/:recipeId', requireAuth, async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.favoriteRecipes = user.favoriteRecipes.filter(recipeId => recipeId.toString() !== req.params.recipeId);
+    await user.save();
+
+    res.json({ message: "Recipe removed from favorites" });
+  } catch (err) {
+    console.error("שגיאה בהסרת מתכון מהמועדפים:", err.message);
+    res.status(500).json({ message: "Failed to remove recipe from favorites" });
   }
 });
 
@@ -358,6 +502,7 @@ router.post("/update/:id", (req, res, next) => {
   });
 });
 
+
 //delete user
 router.delete("/:id", async (req, res) => {
   try {
@@ -404,6 +549,8 @@ router.get("/search", async (req, res) => {
 
 // Approve & Reject trainer
 
+const requireAuth = require("../middleware/requireAuth");
+const requireRole = require("../middleware/requireRole");
 
 router.post(
   "/approve-trainer/:id",
@@ -412,7 +559,7 @@ router.post(
   async (req, res) => {
     try {
       // קודם נשלוף את המשתמש לפי ID
-      const trainer = await UserModel.findById(req.params.id);
+      const trainer = await trainerModel.findById(req.params.id);
       if (!trainer) {
         return res.status(404).send("Trainer not found");
       }
@@ -461,20 +608,5 @@ router.post(
     }
   }
 );
-
-//get user by id
-router.get("/:id", async (req, res) => {
-  try {
-    const user = await userController.readOne({ _id: req.params.id });
-    if (!user) throw { code: 500 };
-    res.send(user);
-  } catch (err) {
-    res.status(500).send("Error creating user");
-  }
-});
-
-
-
-
 
 module.exports = router;
