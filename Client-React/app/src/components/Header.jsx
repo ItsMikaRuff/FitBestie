@@ -1,7 +1,6 @@
 import { useUser } from "../context/UserContext";
 import {
   HeaderStyle,
-  HeaderText,
   HeaderButtonDiv,
   FooterLink,
   Button,
@@ -21,36 +20,35 @@ const Header = ({ toggleSidebar }) => {
   };
 
   return (
-    <HeaderStyle style={{ direction: "rtl" }}>
-      <div style={{ flex: "0 0 auto", marginLeft: "20px", display: "flex", alignItems: "center", gap: "12px" }}>
-        <button
-          onClick={toggleSidebar}
-          style={{
-            background: "white",
-            border: "1px solid #ccc",
-            borderRadius: "50%",
-            width: "36px",
-            height: "36px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
-        >
-          <FaBars />
-        </button>
-        <FooterLink href="/">
-          <img src={FITBESTIE_LOGO} alt="Logo" />
-        </FooterLink>
-      </div>
+    <HeaderStyle style={{ direction: "rtl", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px" }}>
+      {/* כפתור תפריט צדדי */}
+      <button
+        onClick={toggleSidebar}
+        style={{
+          background: "white",
+          border: "1px solid #ccc",
+          borderRadius: "50%",
+          width: "36px",
+          height: "36px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+        }}
+      >
+        <FaBars />
+      </button>
 
-      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-        <HeaderText>
-          ברוכה הבאה, {isLoggedIn && user?.name ? user.name : "חברה!"}
-        </HeaderText>
-      </div>
+      {/* לוגו במרכז */}
+      <FooterLink href="/" style={{ flex: 1, textAlign: "center" }}>
+        <img
+          src={FITBESTIE_LOGO}
+          alt="Logo"
+        />
+      </FooterLink>
 
-      <HeaderButtonDiv style={{ marginRight: "20px" }}>
+      {/* כפתורים ימניים */}
+      <HeaderButtonDiv style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         {isLoggedIn ? (
           <>
             {(user?.role === "admin" || user?.role === "superadmin") && (

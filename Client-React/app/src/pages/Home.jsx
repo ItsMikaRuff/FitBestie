@@ -8,6 +8,7 @@ import GymSearch from "../components/GymSearch";
 import heroImage from "../Images/stretch-laptop.jpg";
 import visionImage from "../Images/running.jpg";
 import joinImage from "../Images/highFive.jpg";
+// import fitBestieLogo from "../Images/FitBestieLogo.png";
 import RecipeChat from "../components/RecipeChat";
 
 const fadeInDown = keyframes`
@@ -21,7 +22,6 @@ const fadeInUp = keyframes`
 `;
 
 const Hero = styled.section`
-  background-image: url(${heroImage});
   background-size: cover;
   background-position: center;
   height: 100vh;
@@ -50,7 +50,6 @@ const Section = styled.section`
   text-align: center;
   background-color: ${({ theme }) => theme.backgroundColors.primary};
 `;
-
 const Img = styled.img`
   width: 100%;
   max-width: 600px;
@@ -181,6 +180,7 @@ const Home = () => {
 
     return (
         <>
+
             <Hero>
                 <HeroText>
                     <h1>{greeting}{user?.name ? ` ${user.name}` : ""}</h1>
@@ -188,6 +188,16 @@ const Home = () => {
                     {!isLoggedIn && (
                         <Button onClick={() => navigate("/signup")}>הצטרפי עכשיו</Button>
                     )}
+
+                    <Section>
+                        {/* <h2>החזון שלנו</h2>
+                        <p>
+                            העצמה נשית דרך כושר, תזונה ומיינדסט. FitBestie הוקמה עבור נשים ונערות
+                            שמבקשות להשקיע בעצמן ולחיות בתנועה.
+                        </p> */}
+
+                        <Img src={heroImage} alt="religios stretch laptop" />
+                    </Section>
                 </HeroText>
             </Hero>
 
@@ -226,11 +236,16 @@ const Home = () => {
                     </div>
                 </HighlightBox>
             )}
-
             <Section>
-                <RecipeChat/>
+                <h2>🏋️‍♀️ חדרי כושר בסביבתך</h2>
+                <p>מצאי מאמנות, סטודיו או חדר כושר קרוב שמתאים בדיוק לך</p>
+                <GymSearch />
             </Section>
-                
+
+            {isLoggedIn && (<Section>
+                <RecipeChat />
+            </Section>)}
+
             <Section>
                 <h2>החזון שלנו</h2>
                 <p>
@@ -251,11 +266,7 @@ const Home = () => {
                 )}
             </Section>
 
-            <Section>
-                <h2>🏋️‍♀️ חדרי כושר בסביבתך</h2>
-                <p>מצאי מאמנות, סטודיו או חדר כושר קרוב שמתאים בדיוק לך</p>
-                <GymSearch />
-            </Section>
+
         </>
     );
 };

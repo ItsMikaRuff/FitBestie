@@ -45,7 +45,7 @@ const LoginPage = () => {
         },
 
         onSubmit: async (values, formikHelpers) => {
-             console.log("🧪 Values sent to login:", values); // << הוסיפי את זה
+
             const errors = await formikHelpers.validateForm();
 
             if (Object.keys(errors).length > 0) {

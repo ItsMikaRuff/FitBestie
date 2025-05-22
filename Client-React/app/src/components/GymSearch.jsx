@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
 import styled from 'styled-components';
 
@@ -31,7 +31,6 @@ const Inner = styled.div`
   max-width: 1440px;
   margin: 0 auto;
   gap: 2rem;
-  
 `;
 
 const Top = styled.div`
@@ -39,7 +38,6 @@ const Top = styled.div`
   flex-direction: row;
   gap: 2rem;
   flex-wrap: wrap;
-  
 `;
 
 const MapWrapper = styled.div`
@@ -103,7 +101,6 @@ export default function GymSearch() {
     const [error, setError] = useState(null);
     const [radius, setRadius] = useState(3000);
     const [position, setPosition] = useState(null);
-    const mapRef = useRef(null);
 
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -124,26 +121,32 @@ export default function GymSearch() {
                 const location = new window.google.maps.LatLng(lat, lng);
                 setPosition({ lat, lng });
 
-                mapRef.current = new window.google.maps.Map(document.createElement('div'));
-                const service = new window.google.maps.places.PlacesService(mapRef.current);
+                const request = {
+                    location,
+                    radius,
+                    keyword: 'חדר כושר',
+                    type: 'gym'
+                };
 
-                const request = { location, radius, keyword: 'חדר כושר' };
+                const map = new window.google.maps.Map(document.createElement('div'));
+                const service = new window.google.maps.places.PlacesService(map);
                 service.nearbySearch(request, (results, status) => {
-                    if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
+                    if (status !== 'OK') {
                         setError('שגיאת PlacesService: ' + status);
-                    } else {
-                        const filtered = results
-                            .map(place => {
-                                const lat2 = place.geometry.location.lat();
-                                const lng2 = place.geometry.location.lng();
-                                const dist = calculateDistance(lat, lng, lat2, lng2);
-                                return { ...place, distance: dist };
-                            })
-                            .filter(p => p.distance <= radius)
-                            .sort((a, b) => a.distance - b.distance);
-
-                        setGyms(filtered);
+                        setLoading(false);
+                        return;
                     }
+
+                    const filtered = results.map(place => {
+                        const lat2 = place.geometry.location.lat();
+                        const lng2 = place.geometry.location.lng();
+                        const dist = calculateDistance(lat, lng, lat2, lng2);
+                        return { ...place, distance: dist };
+                    })
+                        .filter(p => p.distance <= radius)
+                        .sort((a, b) => a.distance - b.distance);
+
+                    setGyms(filtered);
                     setLoading(false);
                 });
             },

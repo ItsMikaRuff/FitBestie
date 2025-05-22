@@ -72,23 +72,21 @@ export const Container = styled.div`
 
 export const HeaderStyle = styled.header`
   background-color: #333;
-  padding: 0.7rem 1.2rem;
+  color: white;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  position: sticky;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-  box-sizing: border-box;
+  padding: 10px 16px;
 
-  @media (max-width: 700px) {
-    flex-direction: column;
-    gap: 0.7rem;
-    padding: 0.7rem 0.5rem;
+  @media (max-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    img {
+      height: 36px;
+    }
   }
 `;
+
+
 
 export const HeaderText = styled.p`
   color: white;
