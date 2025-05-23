@@ -79,6 +79,14 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    resetToken: {
+        type: String,
+        default: null
+      },
+      resetTokenExpire: {
+        type: Date,
+        default: null
+      },
     favoriteTrainers: {
         type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         default: []
