@@ -7,6 +7,10 @@ const userController = require("../controllers/user.controller");
 const bcrypt = require("bcrypt");
 const captcha = require("../utils/captcha");
 const sendOTPEmail = require("../utils/sendOTPEmail");
+const nodemailer = require("nodemailer");
+
+const crypto = require("crypto");
+const sendResetPasswordEmail = require("../utils/sendResetPasswordEmail");
 
 //const trainerModel = require("../models/trainer.model");
 const UserModel = require("../models/user.model");
@@ -32,6 +36,62 @@ const storage = new CloudinaryStorage({
 });
 
 const upload = multer({ storage });
+
+//  ראוטר חדש לאיפוס סיסמה
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) return res.status(400).json({ message: "יש להזין כתובת מייל" });
+
+  try {
+    const user = await UserModel.findOne({ email });
+    if (!user) return res.status(404).json({ message: "משתמש לא נמצא" });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
+    }); // ✅ יצירת טוקן JWT לתוקף קצר
+
+    await sendResetPasswordEmail(user.email, token); // ✅ שליחת מייל דרך פונקציה נפרדת
+
+    res.json({ message: "קישור לאיפוס סיסמה נשלח למייל שלך." });
+  } catch (err) {
+    console.error("שגיאה בשליחת מייל לאיפוס סיסמה:", err);
+    res.status(500).json({ message: "שגיאה בשליחת מייל." });
+  }
+});
+
+// ✅ ראוטר לאיפוס סיסמה עם טוקן
+router.post("/reset-password", async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ message: "חסרים פרטים לביצוע איפוס" });
+  }
+
+  try {
+    // ✅ בדיקת תוקף הטוקן
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "משתמש לא נמצא" });
+
+    // ✅ הצפנת סיסמה חדשה
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
+    await user.save();
+
+    res.json({ message: "הסיסמה עודכנה בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה באיפוס סיסמה:", err.message);
+    res.status(500).json({ message: "קישור לא חוקי או שפג תוקפו" });
+  }
+});
+
+
+
+
 
 //add user
 
