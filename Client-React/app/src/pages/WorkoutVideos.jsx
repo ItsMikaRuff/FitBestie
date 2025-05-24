@@ -3,10 +3,12 @@ import styled from 'styled-components';
 import HumanBody from '../components/HumanBody';
 
 const Container = styled.div`
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 2rem 1rem;
   min-height: 100vh;
   background: #f5f5f5;
 `;
@@ -18,7 +20,8 @@ const Title = styled.h1`
 `;
 
 const ModelContainer = styled.div`
-  width: 70%;
+  width: 100%;
+  max-width: 600px;
   background: #f5f5f5;
   border-radius: 10px;
   margin-bottom: 2rem;
@@ -26,10 +29,11 @@ const ModelContainer = styled.div`
 
 const VideoGallery = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
   width: 100%;
-  max-width: 1200px;
+  padding: 0 1rem;
+  box-sizing: border-box
 `;
 
 const VideoCard = styled.div`
@@ -55,6 +59,19 @@ const SelectedMuscle = styled.div`
   color: #666;
   margin-bottom: 1rem;
   text-align: center;
+`;
+
+const VideoWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* יחס של 16:9 */
+  iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+  }
 `;
 
 const WorkoutVideos = () => {
@@ -202,6 +219,7 @@ const WorkoutVideos = () => {
             <VideoGallery>
               {videos[selectedMuscle].map((video) => (
                 <VideoCard key={video.id}>
+                  <VideoWrapper>
                   <iframe
                     width="100%"
                     height="200"
@@ -211,6 +229,7 @@ const WorkoutVideos = () => {
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
+                  </VideoWrapper>
                   <VideoTitle>{video.title}</VideoTitle>
                 </VideoCard>
               ))}
