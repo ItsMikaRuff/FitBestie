@@ -52,15 +52,34 @@ export const UserProvider = ({ children }) => {
     };
 
     /**
-     * updateUser: עדכון פרטי המשתמש בשרת והסטייט
+     * updateUser: עדכון פרטי המשתמש בשרת והסטייט (תומך גם בקבצים)
      */
     const updateUser = async (updatedFields) => {
         if (!user || !token) return;
 
+        let formData;
+        let isMultipart = false;
+
+        // אם יש תמונה לעדכן (file/image) — השתמשי ב-FormData
+        if (updatedFields.image || updatedFields.file) {
+            formData = new FormData();
+            for (let key in updatedFields) {
+                formData.append(key, updatedFields[key]);
+            }
+            isMultipart = true;
+        }
+
         try {
-            const res = await axios.put(`${API_URL}/user/${user._id}`, updatedFields, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await axios.post(
+                `${API_URL}/user/update/${user._id}`,
+                isMultipart ? formData : updatedFields,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        ...(isMultipart && { "Content-Type": "multipart/form-data" })
+                    }
+                }
+            );
             setUser(res.data);
         } catch (err) {
             console.error("❌ Error updating user:", err);

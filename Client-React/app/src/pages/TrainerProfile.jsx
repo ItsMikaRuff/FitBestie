@@ -1,3 +1,5 @@
+//TrainerProfile.jsx
+
 import { useUser } from "../context/UserContext";
 import { useState, useRef } from "react";
 import {
@@ -133,6 +135,17 @@ const TrainerProfile = () => {
         }
     });
 
+
+    // בדיקה אם אובייקט הכתובת ריק
+    const isAddressEmpty = (addr) =>
+        !addr ||
+        Object.values(addr).every(
+            v =>
+                (typeof v === "string" && v.trim() === "") ||
+                (typeof v === "object" && v !== null && Object.values(v).every(z => z === null || z === ""))
+        );
+
+
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "image") {
@@ -194,7 +207,13 @@ const TrainerProfile = () => {
         data.append("phone", formData.phone);
         data.append("whatsapp", formData.whatsapp);
         data.append("instagram", formData.instagram);
-        data.append("address", JSON.stringify(formData.address));
+
+        // שינוי כאן!
+        if (!isAddressEmpty(formData.address)) {
+            data.append("address", JSON.stringify(formData.address));
+        }
+        // אחרת - לא שולחים את address בכלל
+
         if (formData.image) {
             data.append("image", formData.image);
         }
@@ -214,7 +233,6 @@ const TrainerProfile = () => {
                 }
             );
 
-
             updateUser(res.data);
             localStorage.setItem("user", JSON.stringify(res.data));
             alert("עודכן בהצלחה 🎉");
@@ -227,6 +245,7 @@ const TrainerProfile = () => {
             setLoading(false);
         }
     };
+
 
     const handleDeleteProfile = async () => {
         if (!showDeleteConfirmation) {

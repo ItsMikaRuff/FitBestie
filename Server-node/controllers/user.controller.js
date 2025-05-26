@@ -7,6 +7,8 @@ const bcrypt = require('bcrypt');
 
 const userModel = require("../models/user.model");
 const trainerModel = require("../models/trainer.model");
+const addressModel = require('../models/address.model');
+
 
 // Create a new user
 const createUser = async (data) => {
@@ -66,31 +68,42 @@ const createUser = async (data) => {
 
 // Read a user by filter
 const readOne = async (filter = {}) => {
-  return await userModel.findOne(filter).lean();
+    return await userModel.findOne(filter).populate('address').lean();
 };
 
 const read = async (filter = {}) => {
-    const result = await userModel.find(filter);
+    const result = await userModel.find(filter).populate('address');
     return result;
 };
+
+
+// Save address and return its ID
+async function saveAddressAndReturnId(addressObj) {
+    const addr = new addressModel(addressObj);
+    await addr.save();
+    return addr._id;
+}
 
 // Update a user by filter
 const update = async (filter, data) => {
     try {
-        const user = await userModel.findById(filter._id);
-        const baseModel = user.role === 'trainer' ? trainerModel : userModel;
-
-        const updatedUser = await baseModel.findByIdAndUpdate(
-            filter._id,
-            { $set: data },
-            { new: true, runValidators: true }
-        );
-
-        console.log("User updated successfully:", updatedUser);
-        return updatedUser;
+        let update = req.body;
+        // ניהול address כמזהה
+        if (update.address && typeof update.address === 'object' && !update.address._id) {
+            // יצירת כתובת חדשה אם מגיע אובייקט ולא ObjectId
+            const addressDoc = await AddressModel.create(update.address);
+            update.address = addressDoc._id;
+        }
+        // עדכון המשתמש
+        const user = await UserModel.findByIdAndUpdate(
+            req.params.id,
+            update,
+            { new: true }
+        ).populate('address'); // כדי להחזיר address מלא בתשובה
+        res.json(user);
     } catch (error) {
-        console.error("Error updating user:", error);
-        throw error;
+        console.error('🔥 Error updating user:', error);
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -108,7 +121,7 @@ const searchByLocation = async (location) => {
                 { role: 'studio' }
             ],
             'address.city': { $regex: location, $options: 'i' }
-        }).select('name email image role expertise address phone whatsapp instagram');
+        }).select('name email image role expertise address phone whatsapp instagram').populate('address');
         return results;
     } catch (error) {
         console.error("Error searching by location:", error);
@@ -119,7 +132,7 @@ const searchByLocation = async (location) => {
 const searchByTypeAndLocation = async (query) => {
     try {
         const results = await userModel.find(query)
-            .select('name email image role expertise address phone whatsapp instagram location');
+            .select('name email image role expertise address phone whatsapp instagram location').populate('address');
 
         console.log('Found trainers:', results.length);
         return results;

@@ -21,60 +21,53 @@ const Input = styled.input`
     }
 `;
 
-// map styling
+const initialAddress = {
+    street: '',
+    city: '',
+    state: '',
+    country: '',
+    zipCode: '',
+    coordinates: {
+        lat: null,
+        lng: null
+    }
+};
 
-// const MapContainer = styled.div`
-//     width: 100%;
-//     height: 200px;
-//     margin: 1rem 0;
-//     border-radius: 8px;
-//     overflow: hidden;
-// `;
+const isEmptyAddress = (addr) => {
+    if (!addr) return true;
+    // בדוק שכל השדות ריקים
+    return (
+        (!addr.street || addr.street.trim() === '') &&
+        (!addr.city || addr.city.trim() === '') &&
+        (!addr.state || addr.state.trim() === '') &&
+        (!addr.country || addr.country.trim() === '') &&
+        (!addr.zipCode || addr.zipCode.trim() === '') &&
+        (!addr.coordinates || (!addr.coordinates.lat && !addr.coordinates.lng))
+    );
+};
 
 const AddressInput = ({ value, onChange }) => {
-    const [address, setAddress] = useState(value || {
-        street: '',
-        city: '',
-        state: '',
-        country: '',
-        zipCode: '',
-        coordinates: {
-            lat: null,
-            lng: null
-        }
-    });
+    const [address, setAddress] = useState(value || initialAddress);
 
+    // עדכונים אוטומטיים לקואורדינטות או רחוב דרך גוגל
     const initializeMap = useCallback(() => {
         if (!window.google || !window.google.maps) return;
 
-        // map
-        
-        // const map = new window.google.maps.Map(document.getElementById('map'), {
-        //     center: { lat: 31.7683, lng: 35.2137 }, // Default to Jerusalem
-        //     zoom: 8
-        // });
-
-        // Create the Autocomplete input
         const input = document.getElementById('autocomplete-input');
         const autocomplete = new window.google.maps.places.Autocomplete(input, {
             types: ['address'],
             componentRestrictions: { country: 'il' }
         });
 
-        // Listen for place changes
         autocomplete.addListener('place_changed', () => {
             const place = autocomplete.getPlace();
             if (place.geometry) {
                 const newAddress = {
                     street: place.name || '',
-                    city: place.address_components.find(component => 
-                        component.types.includes('locality'))?.long_name || '',
-                    state: place.address_components.find(component => 
-                        component.types.includes('administrative_area_level_1'))?.long_name || '',
-                    country: place.address_components.find(component => 
-                        component.types.includes('country'))?.long_name || '',
-                    zipCode: place.address_components.find(component => 
-                        component.types.includes('postal_code'))?.long_name || '',
+                    city: place.address_components?.find(component => component.types.includes('locality'))?.long_name || '',
+                    state: place.address_components?.find(component => component.types.includes('administrative_area_level_1'))?.long_name || '',
+                    country: place.address_components?.find(component => component.types.includes('country'))?.long_name || '',
+                    zipCode: place.address_components?.find(component => component.types.includes('postal_code'))?.long_name || '',
                     coordinates: {
                         lat: place.geometry.location.lat(),
                         lng: place.geometry.location.lng()
@@ -82,21 +75,18 @@ const AddressInput = ({ value, onChange }) => {
                 };
 
                 setAddress(newAddress);
-                onChange(newAddress);
-                // map.setCenter(place.geometry.location);
-                // map.setZoom(15);
+                onChange(isEmptyAddress(newAddress) ? null : newAddress);
             }
         });
     }, [onChange]);
 
     useEffect(() => {
-        // Check if script is already loaded
+        // רק בטעינה ראשונית
         if (document.querySelector('script[src*="maps.googleapis.com"]')) {
             initializeMap();
             return;
         }
 
-        // Load Google Maps script asynchronously
         const loadGoogleMapsScript = () => {
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly`;
@@ -109,7 +99,6 @@ const AddressInput = ({ value, onChange }) => {
         loadGoogleMapsScript();
 
         return () => {
-            // Cleanup
             const script = document.querySelector('script[src*="maps.googleapis.com"]');
             if (script) {
                 script.remove();
@@ -117,6 +106,7 @@ const AddressInput = ({ value, onChange }) => {
         };
     }, [initializeMap]);
 
+    // שינוי שדות ידני
     const handleChange = (e) => {
         const { name, value } = e.target;
         const newAddress = {
@@ -124,7 +114,13 @@ const AddressInput = ({ value, onChange }) => {
             [name]: value
         };
         setAddress(newAddress);
-        onChange(newAddress);
+
+        // רק אם יש ערך אמיתי (עיר או רחוב)
+        if (!isEmptyAddress(newAddress)) {
+            onChange(newAddress);
+        } else {
+            onChange(null); // מחזיר כתובת ריקה
+        }
     };
 
     return (
@@ -134,6 +130,7 @@ const AddressInput = ({ value, onChange }) => {
                 type="text"
                 placeholder="הזן כתובת"
                 style={{ marginBottom: '1rem' }}
+                // לא צריך value כאן, כי autocomplete של גוגל שולט
             />
             <Input
                 name="city"
@@ -153,11 +150,8 @@ const AddressInput = ({ value, onChange }) => {
                 onChange={handleChange}
                 placeholder="מיקוד"
             />
-            
-            {/* map */}
-            {/* <MapContainer id="map" /> */}
         </AddressContainer>
     );
 };
 
-export default AddressInput; 
+export default AddressInput;

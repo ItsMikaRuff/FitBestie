@@ -16,18 +16,12 @@ const TrainerSchema = new mongoose.Schema({
         cvv: String
     },
     expertise: [String],
-    address: {
-        street: String,
-        city: String,
-        state: String,
-        country: String,
-        zipCode: String,
-        coordinates: {
-            lat: Number,
-            lng: Number
-        }
-    },
-    
+    // address: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Address',
+    //     default: null
+    // },
+
     whatsapp: {
         type: String,
         required: false,
