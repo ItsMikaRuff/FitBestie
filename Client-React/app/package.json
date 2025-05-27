@@ -25,6 +25,7 @@
     "formik": "^2.4.6",
     "framer-motion": "^12.11.0",
     "global": "4.4.0",
+    "haversine-distance": "^1.2.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.3",
     "multer": "^1.4.5-lts.2",
