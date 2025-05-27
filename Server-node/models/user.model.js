@@ -105,7 +105,7 @@ const userSchema = new mongoose.Schema({
         weight: Number
     }],
     bodyType: {
-        type: { type: String, enum: ['אקטומורף', 'מזומורף', 'אנדומורף', null], default: null },
+        type: { type: String, enum: ['אקטומורף', 'מזומורף', 'אנדומורף'], default: null },
         description: { type: String, default: null },
         lastCalculated: { type: Date, default: null }
     },

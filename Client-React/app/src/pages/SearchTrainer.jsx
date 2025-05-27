@@ -1,4 +1,4 @@
-//searchTrainerResults.jsx
+//searchTrainer.jsx
 /* eslint-disable react/no-unescaped-entities */
 
 import React, { useState, useEffect } from 'react';
@@ -9,6 +9,7 @@ import { useUser } from '../context/UserContext';
 import Loader from '../components/Loader';
 import { FaFemale } from 'react-icons/fa';
 import haversine from 'haversine-distance';
+import StarRating from '../components/StarRating';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -117,7 +118,7 @@ const Button = styled.button`
   &:hover { background: #5a4dcf; }
 `;
 
-const SearchTrainerResults = () => {
+const SearchTrainer = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isLoggedIn } = useUser();
@@ -128,7 +129,9 @@ const SearchTrainerResults = () => {
     const [locationFilter, setLocationFilter] = useState('');
     const [favorites, setFavorites] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
-    const [distance, setDistance] = useState(10); // ברירת מחדל: 10 ק"מ
+    const [distance, setDistance] = useState(50); // ברירת מחדל: 50 ק"מ
+    const [updating, setUpdating] = useState(false);
+
 
     const searchType = new URLSearchParams(location.search).get('type');
 
@@ -242,8 +245,35 @@ const SearchTrainerResults = () => {
     if (loading) return <Loader />;
     if (error) return <div>{error}</div>;
 
+
+    const handleRate = async (trainerId, value) => {
+        try {
+            setUpdating(true);
+            const token = localStorage.getItem('token');
+            const res = await axios.put(`${API_URL}/user/${trainerId}/rate`, { rating: value }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const { rating, ratingsCount } = res.data;
+            setResults(results =>
+                results.map(t =>
+                    t._id === trainerId
+                        ? { ...t, rating, ratings: Array.from({ length: ratingsCount }) } // אופציונלי: שמרי גם את המספר מדרגים
+                        : t
+                )
+            );
+
+        } catch (err) {
+            alert('שגיאה בשמירת דירוג');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+
     const renderCard = (trainer) => (
+
         <Card key={trainer._id}>
+
             {trainer.image ? (
                 <Image src={trainer.image} alt={trainer.name} />
             ) : (
@@ -258,20 +288,40 @@ const SearchTrainerResults = () => {
                     <FaFemale size={80} color="#6c5ce7" />
                 </div>
             )}
+
             <Content>
+
                 <Name>{trainer.name}</Name>
                 <Type>{trainer.role === 'trainer' ? 'מאמנת אישית' : 'מאמנת קבוצתית'}</Type>
+
                 <Info>
                     📍 {trainer.address?.street && trainer.address?.city
                         ? `${trainer.address.street}, ${trainer.address.city}`
                         : trainer.address?.city || 'לא זמין'}
                 </Info>
+
                 {trainer.expertise?.length > 0 && <Info>💪 {trainer.expertise.join(', ')}</Info>}
-                <Info>⭐ דירוג: {trainer.rating ?? 'ללא'}</Info>
+
+                <Info>
+                    דירוג:
+                    <StarRating
+                        rating={trainer.rating}
+                        onRate={(value) => handleRate(trainer._id, value)}
+                        readOnly={updating}
+                    />
+                    {trainer.rating > 0 && (
+                        <span style={{ marginRight: 6, fontSize: '0.95em', color: '#666' }}>
+                            ({trainer.rating.toFixed(1)}{trainer.ratings?.length ? ` מתוך ${trainer.ratings.length}` : ""})
+                        </span>
+                    )}
+                </Info>
+
                 <Button onClick={() => handleFavoriteToggle(trainer._id)}>
                     {favorites.includes(trainer._id) ? "💖 במועדפים" : "🤍 הוספה למועדפים"}
                 </Button>
+
                 <Button onClick={() => navigate(`/contact/${trainer._id}`)}>📞 צור קשר</Button>
+
             </Content>
         </Card>
     );
@@ -333,4 +383,4 @@ const SearchTrainerResults = () => {
     );
 };
 
-export default SearchTrainerResults;
+export default SearchTrainer;

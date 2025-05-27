@@ -180,6 +180,54 @@ router.get("/search", async (req, res) => {
   }
 });
 
+// דירוג מאמנת
+router.put('/:id/rate', requireAuth, async (req, res) => {
+    const { rating } = req.body;
+    const userId = req.user.id; // מהטוקן, המשתמש המדורג
+
+    if (typeof rating !== 'number' || rating < 0 || rating > 5) {
+        return res.status(400).json({ message: "דירוג לא חוקי" });
+    }
+    try {
+        const trainer = await UserModel.findById(req.params.id);
+        if (!trainer || trainer.role !== 'trainer') {
+            return res.status(404).json({ message: "מאמנת לא נמצאה" });
+        }
+
+        // עדכני/הוסיפי דירוג של המשתמש
+        let found = false;
+        if (!trainer.ratings) trainer.ratings = [];
+        trainer.ratings = trainer.ratings.map(r => {
+            if (r.user.toString() === userId) {
+                found = true;
+                return { user: r.user, value: rating }; // עדכון ערך קיים
+            }
+            return r;
+        });
+        if (!found) {
+            trainer.ratings.push({ user: userId, value: rating });
+        }
+
+        // חישוב ממוצע
+        const avg = trainer.ratings.length
+            ? (trainer.ratings.reduce((sum, r) => sum + r.value, 0) / trainer.ratings.length)
+            : 0;
+
+        trainer.rating = avg;
+        await trainer.save();
+
+        res.json({
+            message: "הדירוג נשמר!",
+            rating: avg,
+            ratingsCount: trainer.ratings.length
+        });
+    } catch (err) {
+        res.status(500).json({ message: "שגיאת שרת", error: err.message });
+    }
+});
+
+
+
 // --------------------- עדכון משתמש ---------------------
 router.post("/update/:id", (req, res, next) => {
   upload.single("image")(req, res, async (err) => {
@@ -267,13 +315,40 @@ router.post("/update/:id", (req, res, next) => {
       }
 
       // Handle body type
-      if (typeof req.body.bodyType === "string" || typeof req.body.bodyTypeDescription === "string") {
+      const allowedBodyTypes = ['אקטומורף', 'מזומורף', 'אנדומורף'];
+      let bodyTypeValue = null;
+      let bodyTypeDescriptionValue = null;
+
+      if (req.body.bodyType) {
+        // אם הגיע אובייקט עם type ו-description
+        if (typeof req.body.bodyType === "object") {
+          if (typeof req.body.bodyType.type === "string" && allowedBodyTypes.includes(req.body.bodyType.type)) {
+            bodyTypeValue = req.body.bodyType.type;
+          }
+          if (typeof req.body.bodyType.description === "string") {
+            bodyTypeDescriptionValue = req.body.bodyType.description;
+          }
+        }
+        // אם הגיע סטרינג בלבד
+        else if (typeof req.body.bodyType === "string" && allowedBodyTypes.includes(req.body.bodyType)) {
+          bodyTypeValue = req.body.bodyType;
+        }
+      }
+
+      // תמיכה ב-bodyTypeDescription שמגיע מחוץ לאובייקט (legacy)
+      if (typeof req.body.bodyTypeDescription === "string") {
+        bodyTypeDescriptionValue = req.body.bodyTypeDescription;
+      }
+
+      // רק אם יש לפחות שדה אחד לעדכן
+      if (bodyTypeValue !== null || bodyTypeDescriptionValue !== null) {
         updates.bodyType = {
-          type: req.body.bodyType || null,
-          description: req.body.bodyTypeDescription || null,
-          lastCalculated: new Date(),
+          type: bodyTypeValue,
+          description: bodyTypeDescriptionValue,
+          lastCalculated: new Date()
         };
       }
+
 
       if (req.file && req.file.path) {
         updates.image = req.file.path;
@@ -389,6 +464,8 @@ router.get("/favorites", requireAuth, async (req, res) => {
     });
   }
 });
+
+
 
 // --------------------- חיפוש לפי עיר ---------------------
 router.get('/searchByCity', async (req, res) => {

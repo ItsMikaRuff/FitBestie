@@ -18,7 +18,7 @@ import UserSignUp from './pages/UserSignUp';
 import UserProfile from './pages/UserProfile';
 import TrainerProfile from './pages/TrainerProfile';
 import PersonalQuiz from './components/PersonalQuiz';
-import SearchTrainerResults from './pages/SearchTrainerResults';
+import SearchTrainer from './pages/SearchTrainer';
 import AdminPage from './pages/AdminPage';
 import ManagerPage from './pages/ManagerPage';
 import WorkerPage from './pages/WorkerPage';
@@ -46,7 +46,7 @@ function App() {
           <Route path="profile" element={user?.role === 'trainer' ? <TrainerProfile /> : <UserProfile />} />
           <Route path="/signup-successful" element={<SignupSuccessful />} />
           <Route path="/quiz" element={<PersonalQuiz />} />
-          <Route path="/search" element={<SearchTrainerResults />} />
+          <Route path="/search" element={<SearchTrainer/>} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/manager" element={<ManagerPage />} />
           <Route path="/worker" element={<WorkerPage />} />
