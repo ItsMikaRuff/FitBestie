@@ -1,4 +1,5 @@
-//  SearchTrainerResults.jsx
+//searchTrainerResults.jsx
+/* eslint-disable react/no-unescaped-entities */
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -7,6 +8,7 @@ import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import Loader from '../components/Loader';
 import { FaFemale } from 'react-icons/fa';
+import haversine from 'haversine-distance';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -115,20 +117,6 @@ const Button = styled.button`
   &:hover { background: #5a4dcf; }
 `;
 
-// פונקציה שמחשבת מרחק בין שתי נקודות ב־km
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-}
-
 const SearchTrainerResults = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -140,11 +128,11 @@ const SearchTrainerResults = () => {
     const [locationFilter, setLocationFilter] = useState('');
     const [favorites, setFavorites] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
-    const [maxDistance, setMaxDistance] = useState('');
+    const [distance, setDistance] = useState(10); // ברירת מחדל: 10 ק"מ
 
     const searchType = new URLSearchParams(location.search).get('type');
 
-    // קבלת מיקום המשתמש
+    // מיקום המשתמש
     useEffect(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -153,12 +141,13 @@ const SearchTrainerResults = () => {
                     lng: pos.coords.longitude
                 }),
                 (err) => {
-                     console.error("Geolocation error", err);
+                    console.error("Geolocation error", err);
                 }
             );
         }
     }, []);
 
+    // טעינת מאמנות
     useEffect(() => {
         const fetchResults = async () => {
             try {
@@ -212,12 +201,13 @@ const SearchTrainerResults = () => {
             await axios.put(`${API_URL}/user/favorites`, { trainerId }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            await fetchFavorites(); // ✅ טען את המועדפים מחדש אחרי העדכון
+            await fetchFavorites(); // טען את המועדפים מחדש אחרי העדכון
         } catch (err) {
             console.error("שגיאה בהוספה למועדפים", err);
         }
     };
 
+    // לוגיקת סינון ומיון
     const filteredResults = results
         .filter(r => {
             if (activeFilter === 'trainers') return r.role === 'trainer';
@@ -230,15 +220,20 @@ const SearchTrainerResults = () => {
             return city.trim().toLowerCase().includes(locationFilter.trim().toLowerCase());
         })
         .filter(r => {
-            // סינון לפי מרחק (אם יש גם מיקום של המשתמש וגם של המאמנת)
-            if (!maxDistance || !userLocation || !r.address?.coordinates?.lat || !r.address?.coordinates?.lng) return true;
-            const distance = getDistanceFromLatLonInKm(
-                userLocation.lat,
-                userLocation.lng,
-                r.address.coordinates.lat,
-                r.address.coordinates.lng
-            );
-            return distance <= maxDistance;
+            // סינון לפי מרחק – מציגים רק מאמנות עם קואורדינטות!
+            if (!userLocation) return true; // אם אין מיקום למשתמש - מציג הכל
+            if (!r.address?.coordinates || typeof r.address.coordinates.lat !== "number" || typeof r.address.coordinates.lng !== "number") return false;
+            const from = userLocation;
+            const to = r.address.coordinates;
+            const dist = haversine(from, to) / 1000;
+            return dist <= distance;
+        })
+
+        .sort((a, b) => {
+            if (!userLocation || !a.address?.location || !b.address?.location) return 0;
+            const distA = haversine(userLocation, a.address.location) / 1000;
+            const distB = haversine(userLocation, b.address.location) / 1000;
+            return distA - distB;
         });
 
     const favoriteTrainers = filteredResults.filter(r => favorites.includes(r._id));
@@ -297,15 +292,19 @@ const SearchTrainerResults = () => {
                     value={locationFilter}
                     onChange={(e) => setLocationFilter(e.target.value)}
                 />
-                <Input
-                    type="number"
-                    placeholder="מרחק בק״מ"
-                    min={1}
-                    max={100}
-                    style={{ width: 200 }}
-                    value={maxDistance}
-                    onChange={e => setMaxDistance(e.target.value)}
-                />
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    מרחק:
+                    <input
+                        type="range"
+                        min={1}
+                        max={50}
+                        step={1}
+                        value={distance}
+                        onChange={e => setDistance(Number(e.target.value))}
+                        style={{ margin: '0 8px' }}
+                    />
+                    <span>{distance} ק"מ</span>
+                </label>
                 <span style={{ alignSelf: 'center', fontSize: 14, color: '#6c5ce7' }}>
                     {userLocation
                         ? "🔎 סינון לפי קרבה פועל"
