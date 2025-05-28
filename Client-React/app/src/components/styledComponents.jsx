@@ -175,7 +175,7 @@ export const LoginDiv = styled.div`
 export const LoginTitle = styled.h1`
     font-size: 1.7rem;
     margin-bottom: 20px;
-    color: #333;
+    color: ${({ theme }) => theme.colors.secondary};
 `;
 
 export const LoginFormComponent = styled.form`

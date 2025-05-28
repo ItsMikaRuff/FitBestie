@@ -1,7 +1,7 @@
 //App.js
 
 import { ThemeProvider } from 'styled-components';
-import {theme} from './themes/theme';
+import { theme } from './themes/theme';
 import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import GlobalStyle from './themes/GlobalStyle';
@@ -27,7 +27,6 @@ import SignupSuccessful from './pages/SignUpSuccessful';
 import ForgotPassword from './pages/ForgotPassword';
 import UserMetrics from './pages/UserMetrics';
 import FavoriteRecipes from './pages/FavoriteRecipesPage';
-import ResetPassword from './pages/ResetPassword';
 
 function App() {
 
@@ -46,24 +45,23 @@ function App() {
           <Route path="profile" element={user?.role === 'trainer' ? <TrainerProfile /> : <UserProfile />} />
           <Route path="/signup-successful" element={<SignupSuccessful />} />
           <Route path="/quiz" element={<PersonalQuiz />} />
-          <Route path="/search" element={<SearchTrainer/>} />
+          <Route path="/search" element={<SearchTrainer />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/manager" element={<ManagerPage />} />
           <Route path="/worker" element={<WorkerPage />} />
           <Route path="/trainer-signup" element={<TrainerSignUp />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="/workout-videos" element={<WorkoutVideos />} />
           <Route path="/metrics" element={<UserMetrics />} />
           <Route path="/favorite-recipes" element={<FavoriteRecipes />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
 
-          
+
         </Route>
 
         {/* עמודים בלי Header/Footer */}
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<UserSignUp />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
 
       </Routes>
     </ThemeProvider>
