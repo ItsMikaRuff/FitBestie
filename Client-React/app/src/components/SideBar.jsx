@@ -55,7 +55,7 @@ const CloseButton = styled.button`
   font-size: 1.4rem;
   color: #666;
   align-self: flex-start;
-  margin: 16px 16px 0 auto;
+  margin: 16px 16px 0 auto;z
   cursor: pointer;
 
   &:hover {
