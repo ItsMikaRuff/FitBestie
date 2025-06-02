@@ -27,6 +27,7 @@ import SignupSuccessful from './pages/SignUpSuccessful';
 import ForgotPassword from './pages/ForgotPassword';
 import UserMetrics from './pages/UserMetrics';
 import FavoriteRecipes from './pages/FavoriteRecipesPage';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
 
@@ -62,7 +63,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<UserSignUp />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
-
+        <Route path="/reset-password" element={<ResetPassword />} />
+        
       </Routes>
     </ThemeProvider>
   );

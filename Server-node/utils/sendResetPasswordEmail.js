@@ -1,7 +1,7 @@
 // sendResetPasswordEmail.js (using Mailgun)
 
 const nodemailer = require("nodemailer");
-
+require("dotenv").config();
 const sendResetPasswordEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
     host: process.env.MAILGUN_HOST, // למשל: smtp.eu.mailgun.org
