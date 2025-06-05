@@ -1,3 +1,5 @@
+//header.jsx
+
 import { useUser } from "../context/UserContext";
 import {
   HeaderStyle,
@@ -46,7 +48,7 @@ const Header = ({ toggleSidebar }) => {
         />
       </a>
 
-      {/* כפתורים ימניים */}
+      {/* כפתורים שמאליים */}
       <HeaderButtonDiv style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         {isLoggedIn ? (
           <>

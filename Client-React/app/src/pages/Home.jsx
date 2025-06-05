@@ -1,3 +1,5 @@
+//home.jsx
+
 import React, { useMemo, useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { useUser } from "../context/UserContext";
@@ -251,9 +253,9 @@ const Home = () => {
                     <GymSearch />
                 </Section>
 
-                {isLoggedIn && (<Section>
+                {isLoggedIn && 
                     <RecipeChat />
-                </Section>)}
+               }
 
                 <Section>
                     <h2>החזון שלנו</h2>

@@ -74,10 +74,8 @@ export const HeaderStyle = styled.header`
 display: flex;
 justify-content:space-between;  
 background-color: #333;
-  color: white;
-  
-  align-items: center;
-  padding: 10px 16px;
+color: white;
+padding: 10px 16px;
 
   img {
       height: 36px;
@@ -490,25 +488,25 @@ export const TrainerStatus = styled.div`
 
   background-color: ${({ status }) =>
     status === 'approved' ? '#d4edda' :
-    status === 'rejected' ? '#f8d7da' :
-    '#fff3cd'};
+      status === 'rejected' ? '#f8d7da' :
+        '#fff3cd'};
 
   color: ${({ status }) =>
     status === 'approved' ? '#155724' :
-    status === 'rejected' ? '#721c24' :
-    '#856404'};
+      status === 'rejected' ? '#721c24' :
+        '#856404'};
 
   border: 1px solid
     ${({ status }) =>
-      status === 'approved' ? '#c3e6cb' :
+    status === 'approved' ? '#c3e6cb' :
       status === 'rejected' ? '#f5c6cb' :
-      '#ffeeba'};
+        '#ffeeba'};
 
   &::before {
     content: ${({ status }) =>
-      status === 'approved' ? '"✅"' :
+    status === 'approved' ? '"✅"' :
       status === 'rejected' ? '"❌"' :
-      '"🔔"'};
+        '"🔔"'};
     font-size: 1.2rem;
   }
 `;

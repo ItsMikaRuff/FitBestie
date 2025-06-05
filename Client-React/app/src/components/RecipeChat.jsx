@@ -9,8 +9,8 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const ChatWrapper = styled.div`
   position: fixed;
-  bottom: 80px;
-  right: 20px;
+  bottom: 100px;
+  right: ${({ sidebarOpen }) => (sidebarOpen ? "260px" : "20px")};
   width: 320px;
   max-height: 500px;
   background: white;
@@ -20,7 +20,9 @@ const ChatWrapper = styled.div`
   display: flex;
   flex-direction: column;
   z-index: 1000;
+  transition: right 0.3s;
 `;
+
 
 const ChatHeader = styled.div`
   background: #ffb6c1;
@@ -64,8 +66,9 @@ const SendButton = styled.button`
 
 const FloatingButton = styled.button`
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 32px;
+   right: ${({ sidebarOpen }) => (sidebarOpen ? "260px" : "32px")};
+  z-index: 2000;
   background: #ffb6c1;
   border: none;
   border-radius: 50%;
@@ -75,10 +78,16 @@ const FloatingButton = styled.button`
   color: white;
   font-size: 24px;
   cursor: pointer;
-  z-index: 1001;
+
+  @media (max-width: 600px) {
+  right: 16px;
+  ${({ sidebarOpen }) => sidebarOpen && "display: none;"}
+}
+
 `;
 
-export default function SmartRecipeChat() {
+export default function SmartRecipeChat({sidebarOpen}) {
+
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
@@ -179,12 +188,12 @@ export default function SmartRecipeChat() {
 
     return (
         <>
-            <FloatingButton onClick={toggleChat}>
+            <FloatingButton sidebarOpen={sidebarOpen}  onClick={toggleChat}>
                 {isOpen ? <FaTimes /> : <FaRobot />}
             </FloatingButton>
 
             {isOpen && (
-                <ChatWrapper>
+                <ChatWrapper sidebarOpen={sidebarOpen}>
                     <ChatHeader>
                         מתכונים לפי מה שיש בבית 🍳
                         <FaTimes style={{ cursor: "pointer" }} onClick={toggleChat} />
