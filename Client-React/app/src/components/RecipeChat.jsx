@@ -81,7 +81,7 @@ const FloatingButton = styled.button`
 
   @media (max-width: 600px) {
   right: 16px;
-  ${({ sidebarOpen }) => sidebarOpen && "display: none;"}
+   right: ${({ sidebarOpen }) => (sidebarOpen ? "260px" : "32px")};
 }
 
 `;
