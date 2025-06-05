@@ -30,13 +30,13 @@ const Layout = () => {
     <div style={containerStyle}>
 
       <div style={contentStyle}>
-        <HeaderComponent toggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
+        <HeaderComponent 
+          toggleSidebar={() => setIsSidebarOpen(prev => !prev)} 
+          sidebarOpen={isSidebarOpen} />
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-        <main style={{ paddingTop: "80px", paddingBottom: "80px" }}>
+        <main style={{ paddingTop: "150px", paddingBottom: "56px" }}>
           <Outlet />
-
           <SmartRecipeChat sidebarOpen={isSidebarOpen} />
-
         </main>
         <FooterComponent />
       </div>

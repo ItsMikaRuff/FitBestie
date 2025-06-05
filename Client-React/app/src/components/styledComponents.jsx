@@ -1,87 +1,31 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-// Global styles
-export const Button = styled.button`
-  background-color: ${({ theme }) => theme.colors.secondary};
-  color: white;
-  padding: 0.3rem 0.6rem;
-  border-radius: 1.2rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-  min-width: 60px;
-  min-height: 32px;
-  text-align: center;
-  display: inline-block;
-  border: none;
-  box-shadow: none;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.accent};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 700px) {
-    width: 90%;
-    font-size: 0.9rem;
-    min-height: 36px;
-    padding: 0.5rem 0;
-  }
-`;
-
-export const Card = styled.div`
-  background: white;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-  }
-`;
-
-export const SectionTitle = styled.h2`
-  font-size: 1.7rem;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: ${({ theme }) => theme.colors.primary};
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    font-size: 1.3rem;
-  }
-`;
-
-export const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.5rem 1rem;
-  }
-`;
-
 
 // Header & Footer styles
 
 export const HeaderStyle = styled.header`
-display: flex;
-justify-content:space-between;  
-background-color: #333;
-color: white;
-padding: 10px 16px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3000;
+  width: 100vw;
+  background-color: #333;
+  color: white;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  transition: margin-right 0.3s;
 
+  margin-right: ${({ sidebarOpen }) => (sidebarOpen ? "240px" : "0")};
+  
   img {
-      height: 36px;
-    }
+    height: 36px;
+  }
 
   @media (max-width: 768px) {
+    margin-right: 0; /* כדי שבמובייל הסיידבר יכסח את הכל, או שיתאים אוטומטית */
     flex-direction: row;
     justify-content: space-between;
     img {
@@ -89,6 +33,8 @@ padding: 10px 16px;
     }
   }
 `;
+
+
 
 
 export const HeaderText = styled.p`
@@ -158,6 +104,75 @@ export const FooterLink = styled.a`
         }
     }
 `;
+
+
+// Global styles
+export const Button = styled.button`
+  background-color: ${({ theme }) => theme.colors.secondary};
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  min-width: 60px;
+  min-height: 32px;
+  text-align: center;
+  display: inline-block;
+  border: none;
+  box-shadow: none;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.accent};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 700px) {
+    width: 90%;
+    font-size: 0.9rem;
+    min-height: 36px;
+    padding: 0.5rem 0;
+  }
+`;
+
+export const Card = styled.div`
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+`;
+
+export const SectionTitle = styled.h2`
+  font-size: 1.7rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.colors.primary};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    font-size: 1.3rem;
+  }
+`;
+
+export const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 1.5rem 1rem;
+  }
+`;
+
+
 
 // Homepage styles
 

@@ -11,7 +11,7 @@ import FITBESTIE_LOGO from "../Images/FITBESTIE_LOGO.jpg";
 import { FiSettings } from "react-icons/fi";
 import { FaBars } from "react-icons/fa";
 
-const Header = ({ toggleSidebar }) => {
+const Header = ({ toggleSidebar, sidebarOpen }) => {
   const { user, isLoggedIn, logout } = useUser();
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ const Header = ({ toggleSidebar }) => {
   };
 
   return (
-    <HeaderStyle >
+    <HeaderStyle sidebarOpen={sidebarOpen}>
       {/* כפתור תפריט צדדי */}
       <button
         onClick={toggleSidebar}
