@@ -2,7 +2,6 @@ import { useUser } from "../context/UserContext";
 import {
   HeaderStyle,
   HeaderButtonDiv,
-  FooterLink,
   Button,
 } from "./styledComponents";
 import { Link, useNavigate } from "react-router-dom";
@@ -20,7 +19,7 @@ const Header = ({ toggleSidebar }) => {
   };
 
   return (
-    <HeaderStyle style={{ direction: "rtl", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px" }}>
+    <HeaderStyle >
       {/* כפתור תפריט צדדי */}
       <button
         onClick={toggleSidebar}
@@ -40,12 +39,12 @@ const Header = ({ toggleSidebar }) => {
       </button>
 
       {/* לוגו במרכז */}
-      <FooterLink href="/" style={{ flex: 1, textAlign: "center" }}>
+      <a href="/" >
         <img
           src={FITBESTIE_LOGO}
           alt="Logo"
         />
-      </FooterLink>
+      </a>
 
       {/* כפתורים ימניים */}
       <HeaderButtonDiv style={{ display: "flex", gap: "8px", alignItems: "center" }}>

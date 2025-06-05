@@ -18,6 +18,7 @@ export const UserProvider = ({ children }) => {
     /**
      * useEffect לטעינה אוטומטית של המשתמש מ-localStorage
      */
+
     useEffect(() => {
 
         const savedToken = localStorage.getItem("token");
@@ -41,8 +42,12 @@ export const UserProvider = ({ children }) => {
                     // אם השאילתא נכשלה, מוציאים את כל הפרטים ומדלגים לסיום
                     logout();
                 }).finally(() => {
-                    // אין token שמור – פשוט מסמנים שטעינת ה־Context הסתיימה
-                    console.info("🔄 No saved token or userId found, user not logged in.");
+                    // אין
+                    //  token 
+                    // שמור 
+                    // – פשוט מסמנים שטעינת ה־
+                    // Context
+                    //  הסתיימה
                     setIsInitialized(true);
                 });
         } else {

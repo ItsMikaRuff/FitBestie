@@ -71,11 +71,17 @@ export const Container = styled.div`
 // Header & Footer styles
 
 export const HeaderStyle = styled.header`
-  background-color: #333;
+display: flex;
+justify-content:space-between;  
+background-color: #333;
   color: white;
-  display: flex;
+  
   align-items: center;
   padding: 10px 16px;
+
+  img {
+      height: 36px;
+    }
 
   @media (max-width: 768px) {
     flex-direction: row;
@@ -85,7 +91,6 @@ export const HeaderStyle = styled.header`
     }
   }
 `;
-
 
 
 export const HeaderText = styled.p`
