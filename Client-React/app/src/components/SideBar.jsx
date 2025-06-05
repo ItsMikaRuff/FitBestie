@@ -33,7 +33,6 @@ const SidebarContainer = styled.aside`
   top: 0;
   left: auto;
   right: 0;
-  
   height: 100vh;
   width: 240px;
   max-width: 90vw;

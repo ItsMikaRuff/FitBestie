@@ -1,8 +1,11 @@
+//Layout.jsx
+
 import { Outlet, useLocation } from "react-router-dom";
 import HeaderComponent from "./Header";
 import FooterComponent from "./Footer";
 import { useState } from "react";
 import Sidebar from "./SideBar";
+import SmartRecipeChat from "./RecipeChat";
 
 const Layout = () => {
   const location = useLocation();
@@ -25,11 +28,15 @@ const Layout = () => {
 
   return (
     <div style={containerStyle}>
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+
       <div style={contentStyle}>
-        <HeaderComponent toggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
-        <main style={{ paddingTop: "80px", paddingBottom: "80px" }}>
+        <HeaderComponent 
+          toggleSidebar={() => setIsSidebarOpen(prev => !prev)} 
+          sidebarOpen={isSidebarOpen} />
+        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <main style={{ paddingTop: "150px", paddingBottom: "56px" }}>
           <Outlet />
+          <SmartRecipeChat sidebarOpen={isSidebarOpen} />
         </main>
         <FooterComponent />
       </div>

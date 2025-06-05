@@ -1,8 +1,9 @@
+//header.jsx
+
 import { useUser } from "../context/UserContext";
 import {
   HeaderStyle,
   HeaderButtonDiv,
-  FooterLink,
   Button,
 } from "./styledComponents";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,7 +11,7 @@ import FITBESTIE_LOGO from "../Images/FITBESTIE_LOGO.jpg";
 import { FiSettings } from "react-icons/fi";
 import { FaBars } from "react-icons/fa";
 
-const Header = ({ toggleSidebar }) => {
+const Header = ({ toggleSidebar, sidebarOpen }) => {
   const { user, isLoggedIn, logout } = useUser();
   const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ const Header = ({ toggleSidebar }) => {
   };
 
   return (
-    <HeaderStyle style={{ direction: "rtl", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px" }}>
+    <HeaderStyle sidebarOpen={sidebarOpen}>
       {/* כפתור תפריט צדדי */}
       <button
         onClick={toggleSidebar}
@@ -40,14 +41,14 @@ const Header = ({ toggleSidebar }) => {
       </button>
 
       {/* לוגו במרכז */}
-      <FooterLink href="/" style={{ flex: 1, textAlign: "center" }}>
+      <a href="/" >
         <img
           src={FITBESTIE_LOGO}
           alt="Logo"
         />
-      </FooterLink>
+      </a>
 
-      {/* כפתורים ימניים */}
+      {/* כפתורים שמאליים */}
       <HeaderButtonDiv style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         {isLoggedIn ? (
           <>

@@ -1,3 +1,5 @@
+//home.jsx
+
 import React, { useMemo, useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { useUser } from "../context/UserContext";
@@ -5,37 +7,38 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import WeightHistory from "../components/WeightHistory";
 import GymSearch from "../components/GymSearch";
-import heroImage from "../Images/stretch-laptop.jpg";
+import HomeBoxImage from "../Images/stretch-laptop.jpg";
 import visionImage from "../Images/running.jpg";
 import joinImage from "../Images/highFive.jpg";
 // import fitBestieLogo from "../Images/FitBestieLogo.png";
 import RecipeChat from "../components/RecipeChat";
+
+
+const HomeContainer = styled.section`
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.primary};
+  padding: 2rem;
+  margin-top: -80px;
+  position: relative;
+
+  @media (max-width: 399px) {
+    padding: 0.5rem;
+    margin-top: -50px;
+    
+  }
+`;
 
 const fadeInDown = keyframes`
   from { opacity: 0; transform: translateY(-30px); }
   to { opacity: 1; transform: translateY(0); }
 `;
 
-const fadeInUp = keyframes`
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
-
-const Hero = styled.section`
-  background-size: cover;
-  background-position: center;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: ${({ theme }) => theme.colors.text};
-  padding: 2rem;
-  margin-top: -80px;
-  position: relative;
-`;
-
-const HeroText = styled.div`
+const HomeBox = styled.div`
   background: ${({ theme }) => theme.backgroundColors.primaryTransparent};
   padding: 2rem;
   border-radius: 16px;
@@ -43,6 +46,12 @@ const HeroText = styled.div`
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   backdrop-filter: blur(4px);
   animation: ${fadeInDown} 1s ease forwards;
+
+    @media (max-width: 399px) {
+    max-width: 90%;
+    padding: 1rem;
+
+  }
 `;
 
 const Section = styled.section`
@@ -73,6 +82,11 @@ const Button = styled.button`
   }
 `;
 
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
 const HighlightBox = styled.div`
   background: white;
   padding: 2rem;
@@ -80,6 +94,7 @@ const HighlightBox = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 1024px;
   margin: -5rem auto 3rem;
+  margin-top:1rem;
   position: relative;
   z-index: 1;
   animation: ${fadeInUp} 0.8s ease forwards;
@@ -142,6 +157,7 @@ const Home = () => {
     const [latestBodyType, setLatestBodyType] = useState(null);
 
     useEffect(() => {
+
         if (user?._id) {
             const fetchData = async () => {
                 try {
@@ -181,92 +197,87 @@ const Home = () => {
     return (
         <>
 
-            <Hero>
-                <HeroText>
+            <HomeContainer>
+                <HomeBox>
                     <h1>{greeting}{user?.name ? ` ${user.name}` : ""}</h1>
                     <p>כאן תמצאי את הכלים לחיים בריאים, חזקים ומאושרים יותר.</p>
                     {!isLoggedIn && (
                         <Button onClick={() => navigate("/signup")}>הצטרפי עכשיו</Button>
                     )}
 
-                    <Section>
-                        {/* <h2>החזון שלנו</h2>
-                        <p>
-                            העצמה נשית דרך כושר, תזונה ומיינדסט. FitBestie הוקמה עבור נשים ונערות
-                            שמבקשות להשקיע בעצמן ולחיות בתנועה.
-                        </p> */}
 
-                        <Img src={heroImage} alt="religios stretch laptop" />
-                    </Section>
-                </HeroText>
-            </Hero>
+                </HomeBox>
 
-            {isLoggedIn && latestMeasurement && (
-                <HighlightBox>
-                    <h2>✨ המדדים שלך</h2>
-                    <MetricsGrid>
-                        <MetricBox color={boxColor}><h3>BMI</h3><p>{bmi || "—"}</p></MetricBox>
-                        <MetricBox><h3>קטגוריה</h3><p>{category || "—"}</p></MetricBox>
-                        <MetricBox><h3>גובה</h3><p>{height ? `${height} ס"מ` : "—"}</p></MetricBox>
-                        <MetricBox><h3>משקל</h3><p>{weight ? `${weight} ק"ג` : "—"}</p></MetricBox>
-                        <MetricBox><h3>עודכן</h3><p>{updatedDate || "—"}</p></MetricBox>
-                    </MetricsGrid>
 
-                    <div style={{ textAlign: 'right', marginTop: '2rem' }}>
-                        <h3>🍽 המלצות תזונה ואימון עבורך</h3>
-                        <ul style={{ lineHeight: '1.8', paddingRight: '1rem' }}>
-                            {bmiTips.map((tip, index) => (
-                                <li key={index}>{tip}</li>
-                            ))}
-                        </ul>
-                    </div>
+                <Img src={HomeBoxImage} alt="religios stretch laptop" />
 
-                    {latestBodyType && (
-                        <div style={{ marginTop: '2rem', textAlign: 'right' }}>
-                            <h3>💪 מבנה גוף</h3>
-                            <p><strong>{latestBodyType.bodyType}</strong>: {latestBodyType.bodyTypeDescription}</p>
+
+                {isLoggedIn && latestMeasurement && (
+                    <HighlightBox>
+                        <h2>✨ המדדים שלך</h2>
+                        <MetricsGrid>
+                            <MetricBox color={boxColor}><h3>BMI</h3><p>{bmi || "—"}</p></MetricBox>
+                            <MetricBox><h3>קטגוריה</h3><p>{category || "—"}</p></MetricBox>
+                            <MetricBox><h3>גובה</h3><p>{height ? `${height} ס"מ` : "—"}</p></MetricBox>
+                            <MetricBox><h3>משקל</h3><p>{weight ? `${weight} ק"ג` : "—"}</p></MetricBox>
+                            <MetricBox><h3>עודכן</h3><p>{updatedDate || "—"}</p></MetricBox>
+                        </MetricsGrid>
+
+                        <div style={{ textAlign: 'right', marginTop: '2rem' }}>
+                            <h3>🍽 המלצות תזונה ואימון עבורך</h3>
+                            <ul style={{ lineHeight: '1.8', paddingRight: '1rem' }}>
+                                {bmiTips.map((tip, index) => (
+                                    <li key={index}>{tip}</li>
+                                ))}
+                            </ul>
                         </div>
-                    )}
 
-                    <div style={{ marginTop: '3rem' }}>
-                        <WeightHistory history={history} />
-                        <Button onClick={() => navigate("/metrics")}>
-                            ➕ הוספת שקילה חדשה
-                        </Button>
-                    </div>
-                </HighlightBox>
-            )}
-            <Section>
-                <h2>🏋️‍♀️ חדרי כושר בסביבתך</h2>
-                <p>מצאי מאמנות, סטודיו או חדר כושר קרוב שמתאים בדיוק לך</p>
-                <GymSearch />
-            </Section>
+                        {latestBodyType && (
+                            <div style={{ marginTop: '2rem', textAlign: 'right' }}>
+                                <h3>💪 מבנה גוף</h3>
+                                <p><strong>{latestBodyType.bodyType}</strong>: {latestBodyType.bodyTypeDescription}</p>
+                            </div>
+                        )}
 
-            {isLoggedIn && (<Section>
-                <RecipeChat />
-            </Section>)}
-
-            <Section>
-                <h2>החזון שלנו</h2>
-                <p>
-                    העצמה נשית דרך כושר, תזונה ומיינדסט. FitBestie הוקמה עבור נשים ונערות
-                    שמבקשות להשקיע בעצמן ולחיות בתנועה.
-                </p>
-                <Img src={visionImage} alt="החזון שלנו" />
-            </Section>
-
-            <Section>
-                <h2>{isLoggedIn ? "מה מחכה לך באתר" : "הצטרפי לקהילה שלנו"}</h2>
-                <p>
-                    מצאי מאמנות כושר, סרטונים מותאמים אישית, וקהילה תומכת שמלווה אותך במסע.
-                </p>
-                <Img src={joinImage} alt={isLoggedIn ? "מה באתר" : "הצטרפי אלינו"} />
-                {!isLoggedIn && (
-                    <Button onClick={() => navigate("/signup")}>להצטרפות</Button>
+                        <div style={{ marginTop: '3rem' }}>
+                            <WeightHistory history={history} />
+                            <Button onClick={() => navigate("/metrics")}>
+                                ➕ הוספת שקילה חדשה
+                            </Button>
+                        </div>
+                    </HighlightBox>
                 )}
-            </Section>
+                <Section>
+                    <h2>🏋️‍♀️ חדרי כושר בסביבתך</h2>
+                    <p>מצאי מאמנות, סטודיו או חדר כושר קרוב שמתאים בדיוק לך</p>
+                    <GymSearch />
+                </Section>
 
+                {isLoggedIn && 
+                    <RecipeChat />
+               }
 
+                <Section>
+                    <h2>החזון שלנו</h2>
+                    <p>
+                        העצמה נשית דרך כושר, תזונה ומיינדסט. FitBestie הוקמה עבור נשים ונערות
+                        שמבקשות להשקיע בעצמן ולחיות בתנועה.
+                    </p>
+                    <Img src={visionImage} alt="החזון שלנו" />
+                </Section>
+
+                <Section>
+                    <h2>{isLoggedIn ? "מה מחכה לך באתר" : "הצטרפי לקהילה שלנו"}</h2>
+                    <p>
+                        מצאי מאמנות כושר, סרטונים מותאמים אישית, וקהילה תומכת שמלווה אותך במסע.
+                    </p>
+                    <Img src={joinImage} alt={isLoggedIn ? "מה באתר" : "הצטרפי אלינו"} />
+                    {!isLoggedIn && (
+                        <Button onClick={() => navigate("/signup")}>להצטרפות</Button>
+                    )}
+                </Section>
+
+            </HomeContainer>
         </>
     );
 };
