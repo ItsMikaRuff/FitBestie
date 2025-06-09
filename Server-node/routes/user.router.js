@@ -525,4 +525,41 @@ router.get("/:id", requireAuth, async (req, res) => {
   }
 });
 
+
+
+// --------------------- איפוס סיסמה ע"י אדמין ---------------------
+router.post("/admin-reset-password", requireAuth, requireRole(["admin", "superAdmin"]), async (req, res) => {
+  const { userId, newPassword } = req.body;
+  if (!userId || !newPassword) {
+    return res.status(400).json({ message: "חסרים פרטים" });
+  }
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const user = await UserModel.findByIdAndUpdate(userId, { password: hashedPassword });
+    if (!user) return res.status(404).json({ message: "משתמש לא נמצא" });
+    res.json({ message: "הסיסמה אופסה בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה באיפוס סיסמה ע״י אדמין:", err.message);
+    res.status(500).json({ message: "שגיאה באיפוס סיסמה" });
+  }
+});
+
+
+// --------------------- שליחת קישור איפוס סיסמה למייל ע"י אדמין ---------------------
+router.post("/admin-send-reset-link", requireAuth, requireRole(["admin", "superAdmin"]), async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "יש להזין כתובת מייל" });
+  try {
+    const user = await UserModel.findOne({ email });
+    if (!user) return res.status(404).json({ message: "משתמש לא נמצא" });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    await sendResetPasswordEmail(user.email, token);
+    res.json({ message: "קישור איפוס נשלח בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בשליחת קישור ע״י אדמין:", err.message);
+    res.status(500).json({ message: "שגיאה בשליחת קישור" });
+  }
+});
+
 module.exports = router;

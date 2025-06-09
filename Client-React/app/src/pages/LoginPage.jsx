@@ -66,7 +66,7 @@ const LoginPage = () => {
             try {
                 setLoading(true);
 
-                const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/user/login`, {
+                const { data } = await axios.post(`${process.env.REACT_APP_API_URL } || http://localhost:5000/user/login`, {
                     ...values,
                     captchaToken
                 });
