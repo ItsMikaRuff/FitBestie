@@ -290,6 +290,37 @@ const AdminPage = () => {
     }
   };
 
+  // Send reset link
+  const handleSendResetLink = async (email) => {
+    try {
+      await axios.post(`${API_URL}/user/admin-send-reset-link`, { email });
+      alert("קישור לאיפוס סיסמה נשלח למייל של המשתמש.");
+    } catch (err) {
+      alert("אירעה שגיאה בשליחת הקישור.");
+    }
+  };
+
+  // Reset password by admin
+  const handleResetPasswordByAdmin = async (userId, newPassword) => {
+    if (!newPassword) {
+      alert("אנא הזן סיסמה חדשה.");
+      return;
+    }
+  
+    if (!window.confirm("האם לאפס את הסיסמה של המשתמש?")) return;
+  
+    try {
+      await axios.post(`${API_URL}/user/admin-reset-password`, {
+        userId,
+        newPassword,
+      }, { withCredentials: true });
+  
+      alert("הסיסמה אופסה בהצלחה.");
+    } catch (err) {
+      alert("שגיאה באיפוס הסיסמה.");
+    }
+  };
+
   // Cancel edit
   const handleEditCancel = () => setEditId(null);
 
@@ -464,6 +495,28 @@ const AdminPage = () => {
                         </ActionButton>
                       </>
                     )}
+
+                     {/* הצגת כפתורי איפוס סיסמה תמיד, גם בעריכה */}
+                     <div style={{ marginTop: "0.5rem" }}>
+                      <ActionButton onClick={() => handleSendResetLink(u.email)}>
+                        שליחת קישור איפוס סיסמא
+                      </ActionButton>
+                    </div>
+
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <input
+                        type="password"
+                        placeholder="סיסמה חדשה"
+                        onChange={(e) => u.newPassword = e.target.value}
+                        style={{ padding: "0.3rem", marginRight: "0.5rem" }}
+                      />
+                      <ActionButton
+                        onClick={() => handleResetPasswordByAdmin(u._id, u.newPassword)}
+                        color="#17a2b8"
+                      >
+                        אפס סיסמה ידנית
+                      </ActionButton>
+                    </div>
                   </td>
                 </tr>
               ))}
