@@ -5,28 +5,25 @@ import styled from 'styled-components';
 // Header & Footer styles
 
 export const HeaderStyle = styled.header`
-  position: fixed;
+
+  position: sticky;
   top: 0;
   right: 0;
   left: 0;
-  z-index: 3000;
-  width: 100vw;
+  z-index: 1000;
+  display: flex;
   background-color: #333;
   color: white;
   padding: 10px 16px;
-  display: flex;
   justify-content: space-between;
   transition: margin-right 0.3s;
 
-  margin-right: ${({ sidebarOpen }) => (sidebarOpen ? "240px" : "0")};
-  
   img {
     height: 36px;
   }
 
   @media (max-width: 768px) {
     margin-right: 0; /* כדי שבמובייל הסיידבר יכסח את הכל, או שיתאים אוטומטית */
-    flex-direction: row;
     justify-content: space-between;
     img {
       height: 36px;

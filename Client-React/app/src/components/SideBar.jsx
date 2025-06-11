@@ -31,7 +31,6 @@ const slideIn = keyframes`
 const SidebarContainer = styled.aside`
   position: fixed;
   top: 0;
-  left: auto;
   right: 0;
   height: 100vh;
   width: 240px;
@@ -41,7 +40,7 @@ const SidebarContainer = styled.aside`
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.05);
   transform: ${({ $isOpen }) => $isOpen ? 'translateX(0)' : 'translateX(100%)'};
   transition: transform 0.3s ease;
-  z-index: 9999;
+  z-index: 1000;
   animation: ${({ isOpen }) => (isOpen ? slideIn : "none")} 0.3s ease forwards;
   display: flex;
   flex-direction: column;

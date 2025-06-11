@@ -17,7 +17,6 @@ const BubbleButton = styled.button`
   height: 52px;
   border-radius: 50%;
   background: linear-gradient(135deg, #f8bbd0 80%, #fdf6fa 100%);
-  border: 2.5px solid #f6c1d6;
   box-shadow: 0 3px 12px rgba(236, 72, 153, 0.10);
   display: flex;
   align-items: center;

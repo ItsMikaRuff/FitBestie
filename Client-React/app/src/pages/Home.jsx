@@ -97,7 +97,6 @@ const HighlightBox = styled.div`
   margin: -5rem auto 3rem;
   margin-top:1rem;
   position: relative;
-  z-index: 1;
   animation: ${fadeInUp} 0.8s ease forwards;
 `;
 
@@ -157,6 +156,8 @@ const Home = () => {
 
     const [latestMeasurement, setLatestMeasurement] = useState(null);
     const [latestBodyType, setLatestBodyType] = useState(null);
+
+    //const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
 

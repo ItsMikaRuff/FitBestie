@@ -9,8 +9,8 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const ChatWrapper = styled.div`
   position: fixed;
-  bottom: 100px;
-  right: ${({ sidebarOpen }) => (sidebarOpen ? "260px" : "20px")};
+  bottom: 140px;
+  left: 28px;
   width: 320px;
   max-height: 500px;
   background: white;
@@ -66,18 +66,23 @@ const SendButton = styled.button`
 
 const FloatingButton = styled.button`
   position: fixed;
-  bottom: 32px;
-   right: ${({ sidebarOpen }) => (sidebarOpen ? "260px" : "32px")};
+  bottom: 82px;
+  left: 24px;
   z-index: 2000;
   background: #ffb6c1;
   border: none;
   border-radius: 50%;
-  width: 56px;
-  height: 56px;
+width: 52px;
+  height: 52px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   color: white;
   font-size: 24px;
   cursor: pointer;
+
+  &:hover {
+    background: linear-gradient(135deg,rgb(206, 167, 189) 90%,rgb(190, 173, 182) 100%);
+    box-shadow: 0 6px 24px rgba(236, 72, 153, 0.18);
+  }
 
   @media (max-width: 600px) {
   right: 16px;
