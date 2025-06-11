@@ -1,18 +1,19 @@
 //Layout.jsx
 
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import HeaderComponent from "./Header";
 import FooterComponent from "./Footer";
 import { useState } from "react";
 import Sidebar from "./SideBar";
-import SmartRecipeChat from "./RecipeChat";
+// import SmartRecipeChat from "./RecipeChat";
 
 const Layout = () => {
-  const location = useLocation();
+  // const location = useLocation();
+  // const {user} = useContext(UserContext)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const hideLayout = ["/login", "/signup", "/trainer-signup"].includes(location.pathname);
-  if (hideLayout) return <Outlet />;
+  // const hideLayout = ["/login", "/signup", "/trainer-signup"].includes(location.pathname);
+  // if (hideLayout) return <Outlet />;
 
   const containerStyle = {
     display: "flex",
@@ -36,7 +37,7 @@ const Layout = () => {
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         <main style={{ paddingTop: "150px", paddingBottom: "56px" }}>
           <Outlet />
-          <SmartRecipeChat sidebarOpen={isSidebarOpen} />
+          {/* <SmartRecipeChat sidebarOpen={isSidebarOpen} /> */}
         </main>
         <FooterComponent />
       </div>

@@ -86,7 +86,7 @@ const FloatingButton = styled.button`
 
 `;
 
-export default function SmartRecipeChat({sidebarOpen}) {
+export default function SmartRecipeChat({ sidebarOpen }) {
 
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -188,7 +188,7 @@ export default function SmartRecipeChat({sidebarOpen}) {
 
     return (
         <>
-            <FloatingButton sidebarOpen={sidebarOpen}  onClick={toggleChat}>
+            <FloatingButton sidebarOpen={sidebarOpen} onClick={toggleChat}>
                 {isOpen ? <FaTimes /> : <FaRobot />}
             </FloatingButton>
 
