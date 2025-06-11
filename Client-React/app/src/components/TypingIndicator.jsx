@@ -1,3 +1,5 @@
+//TypingIndicator.jsx
+
 import styled, { keyframes } from "styled-components";
 
 const bounce = keyframes`
