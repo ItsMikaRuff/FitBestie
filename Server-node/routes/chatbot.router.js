@@ -1,7 +1,9 @@
 const express = require('express');
-const { askAI } = require('../controllers/chatbot.controller');
 const router = express.Router();
+const requireAuth = require("../middleware/requireAuth");
+const { askAIWithMetrics } = require('../controllers/chatbot.controller');
 
-router.post('/', askAI);
+// תמיד עם requireAuth (שיהיה לך את req.user.id)
+router.post('/', requireAuth, askAIWithMetrics);
 
 module.exports = router;

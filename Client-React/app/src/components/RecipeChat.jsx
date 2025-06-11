@@ -1,4 +1,6 @@
-// SmartRecipeChat.jsx
+//RecipeChat.jsx
+
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaRobot, FaTimes } from "react-icons/fa";
@@ -114,6 +116,8 @@ export default function SmartRecipeChat({ sidebarOpen }) {
     const handleSend = async () => {
         const userMessage = input.trim();
         if (!userMessage) return;
+
+        
 
         setInput("");
 
