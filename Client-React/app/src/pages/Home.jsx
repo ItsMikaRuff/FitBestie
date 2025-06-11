@@ -12,6 +12,7 @@ import visionImage from "../Images/running.jpg";
 import joinImage from "../Images/highFive.jpg";
 // import fitBestieLogo from "../Images/FitBestieLogo.png";
 import RecipeChat from "../components/RecipeChat";
+import SmartChatBot from "../components/SmartChatBot";
 
 
 const HomeContainer = styled.section`
@@ -148,6 +149,7 @@ const getColorByBmi = (category) => {
 };
 
 const Home = () => {
+
     const { isLoggedIn, user } = useUser();
     const [history, setHistory] = useState([]);
     const navigate = useNavigate();
@@ -193,6 +195,10 @@ const Home = () => {
     const updatedDate = latestMeasurement?.date ? new Date(latestMeasurement.date).toLocaleDateString("he-IL") : null;
     const bmiTips = useMemo(() => getBmiRecommendations(category), [category]);
     const boxColor = getColorByBmi(category);
+
+    
+    //testing
+    console.log("isLoggedIn = ",isLoggedIn);
 
     return (
         <>
@@ -253,9 +259,8 @@ const Home = () => {
                     <GymSearch />
                 </Section>
 
-                {isLoggedIn && 
-                    <RecipeChat />
-               }
+                
+
 
                 <Section>
                     <h2>החזון שלנו</h2>
@@ -278,6 +283,12 @@ const Home = () => {
                 </Section>
 
             </HomeContainer>
+
+        {/* <SmartChatBot/> */}
+        {isLoggedIn && <SmartChatBot />}
+
+        {isLoggedIn && <RecipeChat />}
+
         </>
     );
 };

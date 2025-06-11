@@ -33,6 +33,7 @@ const quizRouter = require('./routes/quiz.router')
 const bodyTypeRouter = require("./routes/bodyType.router");
 const measurementRouter = require("./routes/measurement.router");
 const recipeRouter = require('./routes/recipe.router');
+const chatbotRouter = require('./routes/chatbot.router');
 
 //middleware
 app.use(cors(corsOptions));              // קריאות רגילות
@@ -42,6 +43,10 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 
+
+
+
+
 //routes
 app.use('/user', userRouter);
 app.use('/search', userRouter);
@@ -49,6 +54,7 @@ app.use('/quiz', quizRouter);
 app.use('/bodyType', bodyTypeRouter);
 app.use('/measurement', measurementRouter);
 app.use('/recipes', recipeRouter);
+app.use('/api/chatbot', chatbotRouter);
 
 app.get('/ping', (req, res) => {
     res.send('pong!');

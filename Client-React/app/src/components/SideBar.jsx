@@ -172,9 +172,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     : [
       { to: "/", icon: <FaHome />, label: "דשבורד" },
       { to: "/signup", icon: <FaUser />, label: "הרשמה" },
-      { to: "/login", icon: <FaUser />, label: "התחברות" },
-      { to: "/body-type", icon: <FaChartBar />, label: "גלי את סוג הגוף" },
-      { to: "/search?type=trainer", icon: <FaUsers />, label: "חיפוש מאמנת" },
+      { to: "/login", icon: <FaUser />, label: "התחברות" }
     ];
 
   return (
