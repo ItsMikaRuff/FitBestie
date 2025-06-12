@@ -32,8 +32,6 @@ export const HeaderStyle = styled.header`
 `;
 
 
-
-
 export const HeaderText = styled.p`
   color: white;
   margin: 0;
@@ -66,7 +64,6 @@ export const HeaderButtonDiv = styled.div`
     gap: 0.5rem;
   }
 `;
-
 
 
 export const FooterStyle = styled.footer`
@@ -170,11 +167,7 @@ export const Container = styled.div`
 `;
 
 
-
 // Homepage styles
-
-
-
 
 // LoginForm styles
 

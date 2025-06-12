@@ -1,19 +1,15 @@
-//RecipeChat.jsx
-
-
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { FaRobot, FaTimes } from "react-icons/fa";
 import TypingIndicator from "./TypingIndicator";
 import styled from "styled-components";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const ChatWrapper = styled.div`
-  position: fixed;
   bottom: 140px;
   left: 28px;
-  width: 320px;
+  width: 520px;
+  height:300px;
   max-height: 500px;
   background: white;
   border-radius: 16px;
@@ -24,7 +20,6 @@ const ChatWrapper = styled.div`
   z-index: 1000;
   transition: right 0.3s;
 `;
-
 
 const ChatHeader = styled.div`
   background: #ffb6c1;
@@ -66,42 +61,16 @@ const SendButton = styled.button`
   cursor: pointer;
 `;
 
-const FloatingButton = styled.button`
-  position: fixed;
-  bottom: 82px;
-  left: 24px;
-  z-index: 2000;
-  background: #ffb6c1;
-  border: none;
-  border-radius: 50%;
-width: 52px;
-  height: 52px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-
-  &:hover {
-    background: linear-gradient(135deg,rgb(206, 167, 189) 90%,rgb(190, 173, 182) 100%);
-    box-shadow: 0 6px 24px rgba(236, 72, 153, 0.18);
-  }
-
-  @media (max-width: 600px) {
-  right: 16px;
-   right: ${({ sidebarOpen }) => (sidebarOpen ? "260px" : "32px")};
-}
-
-`;
-
 export default function SmartRecipeChat({ sidebarOpen }) {
 
-    const [isOpen, setIsOpen] = useState(false);
+    // לא צריך את isOpen בכלל!
+    // const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [savedTitles, setSavedTitles] = useState([]);
 
     useEffect(() => {
-        if (isOpen && messages.length === 0) {
+        if (messages.length === 0) {
             setMessages([
                 {
                     from: "bot",
@@ -109,15 +78,25 @@ export default function SmartRecipeChat({ sidebarOpen }) {
                 }
             ]);
         }
-    }, [isOpen, messages]);
+    }, [messages]);
 
-    const toggleChat = () => setIsOpen(!isOpen);
+    function isRealRecipe(recipe) {
+        if (!recipe) return false;
+        if (!recipe.title || recipe.title === "ללא שם") return false;
+        if (!recipe.ingredients || recipe.ingredients.length < 2) return false;
+        if (!recipe.instructions || recipe.instructions.length < 2) return false;
+        const badTitles = [
+            "אני כאן כדי לעזור למצוא מתכונים",
+            "כתוב לי מה יש לך בבית",
+            "אני כאן לעזור לך למצוא מתכונים"
+        ];
+        if (badTitles.some(t => recipe.title.includes(t))) return false;
+        return true;
+    }
 
     const handleSend = async () => {
         const userMessage = input.trim();
         if (!userMessage) return;
-
-        
 
         setInput("");
 
@@ -196,57 +175,48 @@ export default function SmartRecipeChat({ sidebarOpen }) {
     };
 
     return (
-        <>
-            <FloatingButton sidebarOpen={sidebarOpen} onClick={toggleChat}>
-                {isOpen ? <FaTimes /> : <FaRobot />}
-            </FloatingButton>
+        <ChatWrapper $sidebarOpen={sidebarOpen}>
+            <ChatHeader>
+                מתכונים לפי מה שיש בבית 🍳
+            </ChatHeader>
 
-            {isOpen && (
-                <ChatWrapper sidebarOpen={sidebarOpen}>
-                    <ChatHeader>
-                        מתכונים לפי מה שיש בבית 🍳
-                        <FaTimes style={{ cursor: "pointer" }} onClick={toggleChat} />
-                    </ChatHeader>
-
-                    <ChatBody>
-                        {messages.map((msg, i) => (
-                            <div key={i} dir="rtl" style={{ marginBottom: "12px", textAlign: msg.from === "user" ? "right" : "left" }}>
-                                <div style={{ display: "inline-block", background: msg.from === "user" ? "#ffe4e1" : "#f0f0f0", padding: "8px 12px", borderRadius: "12px", maxWidth: "90%" }}>
-                                    {msg.text === "__typing__" ? (
-                                        <TypingIndicator />
-                                    ) : msg.from === "bot" && msg.recipe ? (
-                                        <div>
-                                            <div dangerouslySetInnerHTML={{ __html: formatBotMessage(msg.recipe.raw) }} />
-                                            {savedTitles.includes(msg.recipe.title) ? (
-                                                <div style={{ marginTop: "8px", color: "green", fontWeight: "bold" }}>✅ נשמר למועדפים</div>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleSaveFavorite(msg.recipe)}
-                                                    style={{ marginTop: "8px", background: "#ff69b4", color: "white", border: "none", borderRadius: "12px", padding: "6px 12px", cursor: "pointer" }}
-                                                >
-                                                    ❤️ שמור למועדפים
-                                                </button>
-                                            )}
-                                        </div>
+            <ChatBody>
+                {messages.map((msg, i) => (
+                    <div key={i} dir="rtl" style={{ marginBottom: "12px", textAlign: msg.from === "user" ? "right" : "left" }}>
+                        <div style={{ display: "inline-block", background: msg.from === "user" ? "#ffe4e1" : "#f0f0f0", padding: "8px 12px", borderRadius: "12px", maxWidth: "90%" }}>
+                            {msg.text === "__typing__" ? (
+                                <TypingIndicator />
+                            ) : msg.from === "bot" && msg.recipe && isRealRecipe(msg.recipe) ? (
+                                <div>
+                                    <div dangerouslySetInnerHTML={{ __html: formatBotMessage(msg.recipe.raw) }} />
+                                    {savedTitles.includes(msg.recipe.title) ? (
+                                        <div style={{ marginTop: "8px", color: "green", fontWeight: "bold" }}>✅ נשמר למועדפים</div>
                                     ) : (
-                                        <div>{msg.text}</div>
+                                        <button
+                                            onClick={() => handleSaveFavorite(msg.recipe)}
+                                            style={{ marginTop: "8px", background: "#ff69b4", color: "white", border: "none", borderRadius: "12px", padding: "6px 12px", cursor: "pointer" }}
+                                        >
+                                            ❤️ שמור למתכונים מועדפים
+                                        </button>
                                     )}
                                 </div>
-                            </div>
-                        ))}
-                    </ChatBody>
+                            ) : (
+                                <div>{msg.text}</div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </ChatBody>
 
-                    <ChatFooter>
-                        <Input
-                            placeholder="מה יש לך בבית?"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                        />
-                        <SendButton onClick={handleSend}>שלחי</SendButton>
-                    </ChatFooter>
-                </ChatWrapper>
-            )}
-        </>
+            <ChatFooter>
+                <Input
+                    placeholder="מה יש לך בבית?"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                />
+                <SendButton onClick={handleSend}>שלחי</SendButton>
+            </ChatFooter>
+        </ChatWrapper>
     );
 }

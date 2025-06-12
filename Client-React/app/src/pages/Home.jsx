@@ -11,28 +11,32 @@ import HomeBoxImage from "../Images/stretch-laptop.jpg";
 import visionImage from "../Images/running.jpg";
 import joinImage from "../Images/highFive.jpg";
 // import fitBestieLogo from "../Images/FitBestieLogo.png";
-import RecipeChat from "../components/RecipeChat";
 import SmartChatBot from "../components/SmartChatBot";
+import SmartRecipeChat from "../components/SmartRecipeChat";
 
 
 const HomeContainer = styled.section`
-
+  width: 100vw; /* דואג שהרוחב לא יעבור את המסך */
+  box-sizing: border-box;
+  width: 100%;
+max-width: 100vw;
+  min-width: 0;
+  overflow-x: hidden;  /* מבטל גלילה לצדדים */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: ${({ theme }) => theme.colors.primary};
+  margin-top: 20px;
   padding: 2rem;
-  margin-top: -80px;
-  position: relative;
+  color: ${({ theme }) => theme.colors.primary};
 
-  @media (max-width: 399px) {
+  @media (max-width: 600px) {
     padding: 0.5rem;
-    margin-top: -50px;
-    
+    margin-top: 20px;
   }
 `;
+
 
 const fadeInDown = keyframes`
   from { opacity: 0; transform: translateY(-30px); }
@@ -44,29 +48,42 @@ const HomeBox = styled.div`
   padding: 2rem;
   border-radius: 16px;
   max-width: 700px;
+  width: 100%;
+  box-sizing: border-box;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   backdrop-filter: blur(4px);
   animation: ${fadeInDown} 1s ease forwards;
 
-    @media (max-width: 399px) {
-    max-width: 90%;
+  @media (max-width: 399px) {
+    max-width: 95vw;
     padding: 1rem;
-
   }
 `;
+
 
 const Section = styled.section`
   padding: 4rem 2rem;
   text-align: center;
   background-color: ${({ theme }) => theme.backgroundColors.primary};
+
+  @media (max-width: 600px) {
+    padding: 1.5rem 0.4rem;
+  }
 `;
+
+
 const Img = styled.img`
   width: 100%;
   max-width: 600px;
   border-radius: 16px;
   margin: 2rem auto;
   display: block;
+
+  @media (max-width: 600px) {
+    max-width: 96vw;
+  }
 `;
+
 
 const Button = styled.button`
   background-color: ${({ theme }) => theme.colors.accent};
@@ -198,12 +215,9 @@ const Home = () => {
     const boxColor = getColorByBmi(category);
 
     
-    //testing
-    console.log("isLoggedIn = ",isLoggedIn);
 
     return (
         <>
-
             <HomeContainer>
                 <HomeBox>
                     <h1>{greeting}{user?.name ? ` ${user.name}` : ""}</h1>
@@ -260,7 +274,13 @@ const Home = () => {
                     <GymSearch />
                 </Section>
 
-                
+                   {isLoggedIn &&
+                    <Section>
+
+                        <h2>תמצאי ארוחה לפי המצרכים שיש לך בבית!</h2>
+                        <SmartRecipeChat />
+                    </Section>
+                }
 
 
                 <Section>
@@ -287,8 +307,6 @@ const Home = () => {
 
         {/* <SmartChatBot/> */}
         {isLoggedIn && <SmartChatBot />}
-
-        {isLoggedIn && <RecipeChat />}
 
         </>
     );
