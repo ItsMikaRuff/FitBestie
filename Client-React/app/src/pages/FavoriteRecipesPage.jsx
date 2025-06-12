@@ -2,8 +2,62 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import styled from 'styled-components';
+import SmartRecipeChat from "../components/SmartRecipeChat";
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+const RecipesGrid = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: flex-start;
+    padding: 1rem;
+
+    @media (max-width: 800px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+`;
+const RecipeCard = styled.div`
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1rem;
+    min-width: 280px;
+    max-width: 350px;
+    background: #fff0f5;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.08);
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+`;
+
+const FilterButton = styled.button`
+    background: ${({ $active }) => $active ? "#ffb6c1" : "#f8f8f8"};
+    color: ${({ $active }) => $active ? "white" : "#c94f7c"};
+    border: none;
+    padding: 7px 14px;
+    margin-left: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+
+    &:hover {
+        background: #ffd1e3;
+    }
+`;
+
+const ChatContainer = styled.div`
+
+    display:flex;
+
+`
+
+
+
 
 function FavoriteRecipes() {
     const [recipes, setRecipes] = useState([]);
@@ -57,59 +111,57 @@ function FavoriteRecipes() {
 
 
     return (
-        <div style={{ padding: "2rem" }}>
-            <h2>📌 המועדפים שלי</h2>
+        <>
+            <RecipesGrid>
+                <h2>📌 המועדפים שלי</h2>
 
-            <div style={{ marginBottom: "1rem" }}>
-                <button onClick={() => setFilter("הכל")}>הכל</button>
-                {uniqueTags.map((tag, i) => (
-                    <button key={i} onClick={() => setFilter(tag)} style={{ marginLeft: "0.5rem" }}>
-                        {tag}
-                    </button>
-                ))}
-            </div>
-
-            {filtered.map((recipe, i) => (
-                <div
-                    key={i}
-                    style={{
-                        border: "1px solid #eee",
-                        borderRadius: "12px",
-                        padding: "1rem",
-                        marginBottom: "1.5rem",
-                        background: "#fff0f5"
-                    }}
-                >
-                    <h3>{recipe.title}</h3>
-
-                    <p><strong>🛒 מרכיבים:</strong></p>
-                    <ul>
-                        {recipe.ingredients.map((item, idx) => <li key={idx}>{item}</li>)}
-                    </ul>
-
-                    <p><strong>👩‍🍳 הוראות:</strong></p>
-                    <ol>
-                        {recipe.instructions.map((step, idx) => <li key={idx}>{step}</li>)}
-                    </ol>
-
-                    <p><strong>🏷 תגיות:</strong> {recipe.tags.join(", ") || "ללא"}</p>
-                    <button
-                        onClick={() => handleRemove(recipe._id)}
-                        style={{
-                            background: "#ffcccc",
-                            border: "none",
-                            padding: "6px 10px",
-                            borderRadius: "10px",
-                            cursor: "pointer",
-                            marginTop: "0.5rem"
-                        }}
-                    >
-                        ❌ הסר ממועדפים
-                    </button>
+                <div style={{ marginBottom: "1rem" }}>
+                    <FilterButton onClick={() => setFilter("הכל")} $active={filter === "הכל"}>הכל</FilterButton>
+                    {uniqueTags.map((tag, i) => (
+                        <FilterButton key={i} onClick={() => setFilter(tag)} $active={filter === tag}>
+                            {tag}
+                        </FilterButton>
+                    ))}
 
                 </div>
-            ))}
-        </div>
+
+                {filtered.map((recipe, i) => (
+                    <RecipeCard key={i}>
+                        <h3>{recipe.title}</h3>
+
+                        <p><strong>🛒 מרכיבים:</strong></p>
+                        <ul>
+                            {recipe.ingredients.map((item, idx) => <li key={idx}>{item}</li>)}
+                        </ul>
+
+                        <p><strong>👩‍🍳 הוראות:</strong></p>
+                        <ul>
+                            {recipe.instructions.map((step, idx) => <li key={idx}>{step}</li>)}
+                        </ul>
+
+                        <p><strong>🏷 תגיות:</strong> {recipe.tags.join(", ") || "ללא"}</p>
+                        <button
+                            onClick={() => handleRemove(recipe._id)}
+                            style={{
+                                background: "#ffcccc",
+                                border: "none",
+                                padding: "6px 10px",
+                                borderRadius: "10px",
+                                cursor: "pointer",
+                                marginTop: "0.5rem"
+                            }}
+                        >
+                            ❌ הסר ממועדפים
+                        </button>
+
+                    </RecipeCard>
+                ))}
+            </RecipesGrid>
+
+            <ChatContainer>
+                <SmartRecipeChat />
+            </ChatContainer>
+        </>
     );
 }
 

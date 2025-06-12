@@ -34,7 +34,7 @@ const SidebarContainer = styled.aside`
   right: 0;
   height: 100vh;
   width: 240px;
-  max-width: 90vw;
+  max-width: 100vw;
   background-color: #fff;
   border-left: 1px solid #eee;
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.05);
@@ -45,6 +45,11 @@ const SidebarContainer = styled.aside`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+
+    @media (max-width: 700px) {
+    width: 85vw;    // או פחות, אם את רוצה סיידבר יותר צר במובייל
+    max-width: 100vw;
+  }
 `;
 
 const CloseButton = styled.button`

@@ -13,10 +13,10 @@ const ping = keyframes`
 
 const BubbleButton = styled.button`
   position: fixed;
-  bottom: 24px;
-  left: 24px;
-  width: 52px;
-  height: 52px;
+  bottom: 30px;
+  left: 30px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   background: linear-gradient(135deg, #f8bbd0 80%, #fdf6fa 100%);
   box-shadow: 0 3px 12px rgba(236, 72, 153, 0.10);

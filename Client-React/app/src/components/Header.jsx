@@ -21,7 +21,7 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
   };
 
   return (
-    <HeaderStyle sidebarOpen={sidebarOpen}>
+    <HeaderStyle $sidebarOpen={sidebarOpen}>
       {/* כפתור תפריט צדדי */}
       <button
         onClick={toggleSidebar}
