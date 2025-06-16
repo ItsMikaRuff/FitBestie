@@ -128,7 +128,7 @@ const TrainerSignUp = () => {
                 ...formData,
                 role: 'trainer',
                 trainerStatus: 'pending'
-            }, {withCredentials:true});
+            });
 
             login(response.data);
             navigate('/signup-successful');
@@ -231,10 +231,10 @@ const TrainerSignUp = () => {
                 />
                 {touched.phone && !formData.phone && <GlobalError>מספר טלפון הוא שדה חובה</GlobalError>}
 
-                <div style={{ margin: '10px 0', textAlign: 'right' }}>
+                {/* <div style={{ margin: '10px 0', textAlign: 'right' }}>
                     <h3 style={{ marginBottom: '10px', fontSize: '1.1rem' }}>תחומי מומחיות</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                        {/* {expertiseOptions.map(option => (
+                        {expertiseOptions.map(option => (
                             <label key={option.value} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <input
                                     type="checkbox"
@@ -245,9 +245,9 @@ const TrainerSignUp = () => {
                                 />
                                 {option.label}
                             </label>
-                        ))} */}
+                        ))}
                     </div>
-                </div>
+                </div> */}
 
                 <AddressInput
                     value={formData.location}
