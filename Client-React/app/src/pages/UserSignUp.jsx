@@ -89,7 +89,7 @@ const UserSignUp = () => {
 
         const response = await axios.post(
           `${process.env.REACT_APP_API_URL}/user/`,
-          values
+          values , {withCredentials: true}
         );
         console.log("Signup success");
         setLoading(false);

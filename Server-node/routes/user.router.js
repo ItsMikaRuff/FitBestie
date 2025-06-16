@@ -34,6 +34,25 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage });
 
+
+// יצירת טוקנים
+
+function generateTokens(user) {
+  const payload = { id: user._id, role: user.role };
+
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "15m"
+  });
+
+  const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
+    expiresIn: "7d"
+  });
+
+  return { accessToken, refreshToken };
+}
+
+
+
 // --------------------- איפוס סיסמה ---------------------
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
@@ -73,12 +92,20 @@ router.post("/reset-password", async (req, res) => {
 // --------------------- הרשמה ---------------------
 router.post("/", async (req, res) => {
   console.log("📝 received data:", req.body);
-  try {
-    const user = await userController.createUser(req.body);
-    const payload = { id: user._id, role: user.role };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
 
-    res.status(201).json({ user, token });
+  try {
+
+    const user = await userController.createUser(req.body);
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.status(201).json({ user, token: accessToken });
   } catch (err) {
     console.error("❌ create error:", err.message);
     res.status(500).json({ message: err.message });
@@ -88,6 +115,7 @@ router.post("/", async (req, res) => {
 // --------------------- התחברות ---------------------
 router.post("/login", async (req, res) => {
   try {
+
     const { email, password, captchaToken } = req.body;
     const isHuman = await captcha(captchaToken);
     if (!isHuman) {
@@ -114,9 +142,18 @@ router.post("/login", async (req, res) => {
         userId: user._id,
       });
     }
-    const payload = { id: user._id, role: user.role };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
-    res.json({ user, token });
+
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({ user, token: accessToken });
+
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "שגיאה בשרת בעת התחברות" });
@@ -135,9 +172,18 @@ router.post("/login/verify-otp", async (req, res) => {
   user.otpCode = undefined;
   user.otpExpiresAt = undefined;
   await user.save();
-  const payload = { id: user._id, role: user.role };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
-  res.json({ user, token });
+
+  const { accessToken, refreshToken } = generateTokens(user);
+
+  res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "Strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000
+});
+
+  res.json({ user, token: accessToken });
+
 });
 
 // --------------------- הפעלת 2FA ---------------------
@@ -564,5 +610,35 @@ router.post("/admin-send-reset-link", requireAuth, requireRole(["admin", "superA
     res.status(500).json({ message: "שגיאה בשליחת קישור" });
   }
 });
+
+// חידוש טוקן של משתמש מחובר
+router.post("/refresh-token", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) return res.status(401).json({ message: "No token" });
+
+  try {
+    const payload = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+    const accessToken = jwt.sign({ id: payload.id, role: payload.role }, process.env.JWT_SECRET, { expiresIn: "15m" });
+
+    const user = await UserModel.findById(payload.id).lean();
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ token: accessToken, user }); // ✅ גם user וגם token
+  } catch (err) {
+    console.error("❌ Refresh error:", err.message);
+    res.status(403).json({ message: "Invalid refresh token" });
+  }
+});
+
+//מחיקת הטוקן אחרי התנתקות
+router.post("/logout", (req, res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    sameSite: "Strict"
+  });
+  res.status(200).json({ message: "Logged out" });
+});
+
 
 module.exports = router;

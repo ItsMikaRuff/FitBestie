@@ -128,7 +128,7 @@ const TrainerSignUp = () => {
                 ...formData,
                 role: 'trainer',
                 trainerStatus: 'pending'
-            });
+            }, {withCredentials:true});
 
             login(response.data);
             navigate('/signup-successful');
