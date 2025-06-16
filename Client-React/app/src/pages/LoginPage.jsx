@@ -69,7 +69,7 @@ const LoginPage = () => {
                 const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/user/login` || `http://localhost:5000/user/login`, {
                     ...values,
                     captchaToken
-                });
+                } , {withCredentials: true});
 
                 if (data.requireOTP) {
                     setRequireOTP(true);
@@ -98,7 +98,7 @@ const LoginPage = () => {
             const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/user/login/verify-otp`, {
                 userId: userIdForOTP,
                 otp: otpValue
-            });
+            }, {withCredentials:true});
 
             login(data);
             navigate('/');

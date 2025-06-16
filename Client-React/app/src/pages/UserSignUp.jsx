@@ -16,6 +16,7 @@ import Loader from "../components/Loader";
 import { useUser } from "../context/UserContext";
 
 const UserSignUp = () => {
+
   const [loading, setLoading] = useState(false); // State to manage loading status
   const { login } = useUser(); // Import the login function from the context
   const navigate = useNavigate();
@@ -88,15 +89,16 @@ const UserSignUp = () => {
 
         const response = await axios.post(
           `${process.env.REACT_APP_API_URL}/user/`,
-          values
+          values , {withCredentials: true}
         );
         console.log("Signup success");
         setLoading(false);
 
         // log the user in immediately after signup
-        login(response.data);
-
+        const { user, token } = response.data;
+        login({ user, token });
         navigate("/signup-successful");
+
       } catch (error) {
         setLoading(false);
         console.error(

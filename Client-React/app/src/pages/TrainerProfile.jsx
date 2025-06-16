@@ -320,8 +320,8 @@ const TrainerProfile = () => {
                     alt="תמונת פרופיל"
                 />
                 <TrainerInfo>
-                    <TrainerName>{user?.name || "מאמן"}</TrainerName>
-                    <TrainerTitle>מאמן כושר</TrainerTitle>
+                    <TrainerName>{user?.name || "שם לא זמין"}</TrainerName>
+                    <TrainerTitle>פרופיל מאמנת כושר</TrainerTitle>
                     <div>
                         <EnhancedInfo>אימייל: {user?.email || "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>כתובת: {user?.address?.street ? `${user.address.street}, ${user.address.city}` : "לא זמין"}</EnhancedInfo>

@@ -180,10 +180,16 @@ const Home = () => {
 
         if (user?._id) {
             const fetchData = async () => {
+                const token = localStorage.getItem("token");
+
                 try {
+                    const headers = {
+                        Authorization: `Bearer ${token}`,
+                    };
+
                     const [measurementsRes, bodyTypeRes] = await Promise.all([
-                        axios.get(`${process.env.REACT_APP_API_URL}/measurement/user/${user._id}`, { timeout: 10000 }),
-                        axios.get(`${process.env.REACT_APP_API_URL}/bodyType/user/${user._id}`, { timeout: 10000 })
+                        axios.get(`${process.env.REACT_APP_API_URL}/measurement/user/${user._id}`, { headers, timeout: 10000, withCredentials: true }),
+                        axios.get(`${process.env.REACT_APP_API_URL}/bodyType/user/${user._id}`, { headers, timeout: 10000, withCredentials: true })
                     ]);
 
                     const sortedMeasurements = measurementsRes.data.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -194,13 +200,40 @@ const Home = () => {
                     setLatestBodyType(sortedBodyTypes[0]);
 
                 } catch (err) {
-                    if (err.code === 'ECONNABORTED') {
+                    if (err.response?.status === 401) {
+                        try {
+                            // 🔁 מנסים לרענן טוקן
+                            const refreshRes = await axios.post(`${process.env.REACT_APP_API_URL}/user/refresh-token`, {}, { withCredentials: true });
+                            const newToken = refreshRes.data.token;
+                            localStorage.setItem("token", newToken);
+
+                            const retryHeaders = {
+                                Authorization: `Bearer ${newToken}`,
+                            };
+
+                            const [measurementsRes, bodyTypeRes] = await Promise.all([
+                                axios.get(`${process.env.REACT_APP_API_URL}/measurement/user/${user._id}`, { headers: retryHeaders, timeout: 10000 }),
+                                axios.get(`${process.env.REACT_APP_API_URL}/bodyType/user/${user._id}`, { headers: retryHeaders, timeout: 10000 })
+                            ]);
+
+                            const sortedMeasurements = measurementsRes.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+                            const sortedBodyTypes = bodyTypeRes.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                            setHistory(sortedMeasurements);
+                            setLatestMeasurement(sortedMeasurements[0]);
+                            setLatestBodyType(sortedBodyTypes[0]);
+                        } catch (refreshErr) {
+                            console.error("🔁 Refresh token failed:", refreshErr);
+                            // אפשר לקרוא ל־logout() אם תרצי
+                        }
+                    } else if (err.code === 'ECONNABORTED') {
                         console.error("⏱ אחת הקריאות לשרת נמשכה יותר מדי זמן (timeout)");
                     } else {
                         console.error("❌ שגיאה בטעינת מדדים או מבנה גוף:", err);
                     }
                 }
             };
+
 
             fetchData();
         }
@@ -214,7 +247,7 @@ const Home = () => {
     const bmiTips = useMemo(() => getBmiRecommendations(category), [category]);
     const boxColor = getColorByBmi(category);
 
-    
+
 
     return (
         <>
@@ -274,7 +307,7 @@ const Home = () => {
                     <GymSearch />
                 </Section>
 
-                   {isLoggedIn &&
+                {isLoggedIn &&
                     <Section>
 
                         <h2>תמצאי ארוחה לפי המצרכים שיש לך בבית!</h2>
@@ -305,8 +338,8 @@ const Home = () => {
 
             </HomeContainer>
 
-        {/* <SmartChatBot/> */}
-        {isLoggedIn && <SmartChatBot />}
+            {/* <SmartChatBot/> */}
+            {isLoggedIn && <SmartChatBot />}
 
         </>
     );

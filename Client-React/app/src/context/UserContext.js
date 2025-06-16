@@ -19,42 +19,38 @@ export const UserProvider = ({ children }) => {
      * useEffect לטעינה אוטומטית של המשתמש מ-localStorage
      */
 
-    useEffect(() => {
-
+useEffect(() => {
+    const tryAutoLogin = async () => {
         const savedToken = localStorage.getItem("token");
         const savedUserId = localStorage.getItem("userId");
 
         if (savedToken && savedUserId) {
-
             axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
-
             setToken(savedToken);
             setIsLoggedIn(true);
 
-            axios.get(`${API_URL}/user/${savedUserId}`, {
-                headers: { Authorization: `Bearer ${savedToken}` }
-            })
-                .then((res) => {
-                    setUser(res.data);
-                })
-                .catch((err) => {
-                    console.warn('❌ Auto-login failed (token פג תוקף למשל):', err);
-                    // אם השאילתא נכשלה, מוציאים את כל הפרטים ומדלגים לסיום
-                    logout();
-                }).finally(() => {
-                    // אין
-                    //  token 
-                    // שמור 
-                    // – פשוט מסמנים שטעינת ה־
-                    // Context
-                    //  הסתיימה
-                    setIsInitialized(true);
+            try {
+                const res = await axios.get(`${API_URL}/user/${savedUserId}`, {
+                    headers: { Authorization: `Bearer ${savedToken}` }
                 });
+                setUser(res.data);
+            } catch (err) {
+                console.warn('❌ Auto-login failed (token פג תוקף למשל):', err);
+                logout();
+            } finally {
+                setIsInitialized(true);
+            }
         } else {
-            console.info("🔄 No saved token or userId found, user not logged in.");
-            setIsInitialized(true); // סיימנו לטעון גם אם לא היה משתמש
+            console.info("🔄 No saved token, trying refresh...");
+            await refreshToken(); // ⬅️ זה מה שחשוב!
+            setIsInitialized(true);
         }
-    }, []);
+    };
+
+    tryAutoLogin();
+}, []);
+
+
 
     /**
  * login: שמירת token וטעינת פרטי המשתמש מהשרת
@@ -145,8 +141,46 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    // רענון טוקן של חיבור משתמש
+    const refreshToken = async () => {
+    try {
+        const res = await axios.post(`${API_URL}/user/refresh-token`, null, {
+            withCredentials: true,
+        });
+
+        const newToken = res.data.token;
+        setToken(newToken);
+        localStorage.setItem("token", newToken);
+        const userId = res.data.user?._id;
+
+        if (userId) {
+            const userRes = await axios.get(`${API_URL}/user/${userId}`, {
+                headers: { Authorization: `Bearer ${newToken}` }
+            });
+            setUser(userRes.data);
+            setIsLoggedIn(true);
+        }
+    } catch (err) {
+        console.warn("🔁 רענון טוקן נכשל:", err.message);
+        logout(); // או פשוט לא לעשות כלום אם רוצים להישאר בעילום שם
+    }
+};
+
+
+    // רענון אוטומטי של הטוקן כל 13 דקות
+    useEffect(() => {
+        if (isLoggedIn) {
+            const interval = setInterval(() => {
+                refreshToken();
+            }, 13 * 60 * 1000); // 13 דקות
+
+            return () => clearInterval(interval); // מנקה את הטיימר כשמתנתקים
+        }
+    }, [isLoggedIn]);
+
+
     return (
-        <UserContext.Provider value={{ user, token, isLoggedIn, isInitialized,login, logout, updateUser }}>
+        <UserContext.Provider value={{ user, token, isLoggedIn, isInitialized, login, logout, updateUser }}>
             {children}
         </UserContext.Provider>
     );

@@ -45,7 +45,7 @@ ${bodyType ? `סוג גוף: ${bodyType}${bodyTypeDesc ? ` (${bodyTypeDesc})` : 
                     { role: 'system', content: 'אתה מאמן כושר ותזונה אישי לנשים ונערות. תן תשובות מקצועיות ומעצימות בלבד.' },
                     { role: 'user', content: prompt }
                 ],
-                max_tokens: 250,
+                max_tokens: 4000,
                 temperature: 0.7
             },
             { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } }
