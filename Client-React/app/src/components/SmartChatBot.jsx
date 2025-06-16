@@ -5,6 +5,7 @@ import styled, { keyframes } from 'styled-components';
 import axios from 'axios';
 import dumbbellIcon from '../Images/dumbbell.png';
 import TypingIndicator from './TypingIndicator';
+
 const ping = keyframes`
   0% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.25); opacity: 0.8; }
@@ -26,14 +27,9 @@ const BubbleButton = styled.button`
   font-size: 28px;
   color: #ec4899;
   cursor: pointer;
-  z-index: 9999;
+  z-index: 10000;
   transition: background 0.2s, box-shadow 0.22s;
   outline: none;
-
-  &:hover {
-    background: linear-gradient(135deg, #fbcfe8 90%, #fdf6fa 100%);
-    box-shadow: 0 6px 24px rgba(236, 72, 153, 0.18);
-  }
 `;
 
 const NotifyBadge = styled.div`
@@ -71,26 +67,30 @@ const BubbleIconImg = styled.img`
   filter: drop-shadow(0 2px 4px #f8bbd0cc);
 `;
 
-const ChatWindow = styled.div`
+const ChatWrapper = styled.div`
   position: fixed;
   bottom: 24px;
   left: 24px;
+  z-index: 9999;
+`;
+
+const ChatWindow = styled.div`
   width: 355px;
   max-width: 99vw;
   max-height: 80vh;
+  left:24px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 4px 32px rgba(236, 72, 153, 0.16);
-  z-index: 9999;
   display: flex;
   flex-direction: column;
   font-family: inherit;
   overflow: hidden;
+  position: absolute;
+  bottom: 70px;
+
   @media (max-width: 500px) {
-    width: 97vw;
-    left: 4px;
-    bottom: 4px;
-    border-radius: 13px;
+    width: 77vw;
   }
 `;
 
@@ -122,10 +122,8 @@ const ChatBody = styled.div`
 
 const ChatMsgRow = styled.div`
   display: flex;
-  flex-direction: ${({ $user }) => ($user ? 'row' : 'row-reverse')};
-  justify-content: ${({ $user }) => ($user ? 'flex-end' : 'flex-start')};
+  justify-content: ${({ $user }) => ($user ? 'flex-start' : 'flex-end')};
 `;
-
 
 const ChatMsg = styled.div`
   background: ${({ $user }) => ($user ? '#fbcfe8' : '#ffe6e6')};
@@ -134,26 +132,23 @@ const ChatMsg = styled.div`
   border-radius: 17px;
   max-width: 86%;
   font-size: 1rem;
-  text-align: ${({ $user }) => ($user ? 'right' : 'left')};
+  text-align: right;
   direction: rtl;
   font-family: inherit;
   box-shadow: 0 2px 10px rgba(236, 72, 153, 0.08);
   word-break: break-word;
   line-height: 1.7;
-  border-bottom-${({ $user }) => ($user ? 'right' : 'left')}-radius: 3px;
+  border-bottom-${({ $user }) => ($user ? 'left' : 'right')}-radius: 3px;
   display: inline-block;
 `;
-
 
 const NameLabel = styled.span`
   font-size: 0.95em;
   font-weight: bold;
   color: ${({ $user }) => ($user ? '#883377' : '#b41750')};
-  margin-${({ $user }) => ($user ? 'left' : 'right')}: 6px;
-  white-space: nowrap;
+  display: block;
+  margin-bottom: 6px;
 `;
-
-
 
 const ChatInputRow = styled.div`
   display: flex;
@@ -193,8 +188,6 @@ const SendBtn = styled.button`
   }
 `;
 
-// ======================== קומפוננטת הצ'אט ========================
-
 const SmartChatBot = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -203,17 +196,14 @@ const SmartChatBot = () => {
   const [notify, setNotify] = useState(false);
   const lastMsgRef = useRef(null);
 
-  // אוטומטי לשרת שלך
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-  // גלילה להודעה האחרונה תמיד
   useEffect(() => {
     if (open && lastMsgRef.current) {
       lastMsgRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, open, loading]);
 
-  // ESC לסגירה
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
@@ -221,12 +211,10 @@ const SmartChatBot = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
-  // חיווי הודעה חדשה
   useEffect(() => {
     if (open && notify) setNotify(false);
   }, [open, notify]);
 
-  // מסיר את הטקסט מיד אחרי שליחה (ולא מחכה לשרת)
   const handleInputSend = () => {
     if (!input.trim() || loading) return;
     setMessages((prev) => [...prev, { sender: 'user', text: input }]);
@@ -234,7 +222,6 @@ const SmartChatBot = () => {
     setInput('');
   };
 
-  // שליחת הודעה
   const sendMessage = async (userMessage) => {
     setLoading(true);
     try {
@@ -252,36 +239,47 @@ const SmartChatBot = () => {
     setLoading(false);
   };
 
+  const formatBotResponse = (text) => {
+    const lines = text.split(/\n+/).filter(Boolean);
+    const formatted = lines.map((line, i) => {
+      if (/^###\s?/.test(line)) {
+        return <h4 key={i} style={{ margin: '8px 0 4px', color: '#9b2146' }}>{line.replace(/^###\s?/, '')}</h4>;
+      }
+      const boldPattern = /\*\*(.*?)\*\*/g;
+      const cleaned = line.replace(boldPattern, (_, inner) => `<strong>${inner}</strong>`);
+      return <p key={i} style={{ margin: '4px 0' }} dangerouslySetInnerHTML={{ __html: cleaned }} />;
+    });
+
+    return <div style={{ paddingRight: '1rem', textAlign: 'right', direction: 'rtl' }}>{formatted}</div>;
+  };
+
   return (
-    <>
-      {!open && (
-        <BubbleButton onClick={() => setOpen(true)} title="יועצת כושר & תזונה">
-          <IconContainer>
-            <BubbleIconImg src={dumbbellIcon} alt="אייקון משקולת" />
-            {notify && <NotifyBadge>!</NotifyBadge>}
-          </IconContainer>
-        </BubbleButton>
-      )}
+    <ChatWrapper>
+      <BubbleButton onClick={() => setOpen(!open)} title="יועצת כושר & תזונה">
+        <IconContainer>
+          <BubbleIconImg src={dumbbellIcon} alt="אייקון משקולת" />
+          {notify && <NotifyBadge>!</NotifyBadge>}
+        </IconContainer>
+      </BubbleButton>
       {open && (
-        <ChatWindow dir="rtl">
+        <ChatWindow dir="ltr">
           <CloseBtn onClick={() => setOpen(false)} title="סגירה">×</CloseBtn>
           <ChatBody>
             {messages.map((msg, i) => (
-              <ChatMsgRow $user={msg.sender === 'user'} key={i}>
+              <ChatMsgRow $user={msg.sender !== 'user'} key={i}>
                 <ChatMsg
-                  $user={msg.sender === 'user'}
+                  $user={msg.sender !== 'user'}
                   ref={i === messages.length - 1 ? lastMsgRef : undefined}
                 >
-                  <NameLabel $user={msg.sender === 'user'}>
-                    {msg.sender === 'user' ? 'את' : 'מאמנת'}:
+                  <NameLabel $user={msg.sender !== 'user'}>
+                    {msg.sender === 'user' ? 'את:' : 'מאמנת:'}
                   </NameLabel>
-                  {msg.text}
+                  {msg.sender === 'bot' ? formatBotResponse(msg.text) : msg.text}
                 </ChatMsg>
               </ChatMsgRow>
             ))}
             {loading && <TypingIndicator />}
           </ChatBody>
-
           <ChatInputRow>
             <Input
               value={input}
@@ -302,7 +300,7 @@ const SmartChatBot = () => {
           </ChatInputRow>
         </ChatWindow>
       )}
-    </>
+    </ChatWrapper>
   );
 };
 
