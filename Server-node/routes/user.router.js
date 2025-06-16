@@ -75,7 +75,10 @@ router.post("/", async (req, res) => {
   console.log("📝 received data:", req.body);
   try {
     const user = await userController.createUser(req.body);
-    res.status(201).json(user);
+    const payload = { id: user._id, role: user.role };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
+
+    res.status(201).json({ user, token });
   } catch (err) {
     console.error("❌ create error:", err.message);
     res.status(500).json({ message: err.message });
@@ -182,48 +185,48 @@ router.get("/search", async (req, res) => {
 
 // דירוג מאמנת
 router.put('/:id/rate', requireAuth, async (req, res) => {
-    const { rating } = req.body;
-    const userId = req.user.id; // מהטוקן, המשתמש המדורג
+  const { rating } = req.body;
+  const userId = req.user.id; // מהטוקן, המשתמש המדורג
 
-    if (typeof rating !== 'number' || rating < 0 || rating > 5) {
-        return res.status(400).json({ message: "דירוג לא חוקי" });
+  if (typeof rating !== 'number' || rating < 0 || rating > 5) {
+    return res.status(400).json({ message: "דירוג לא חוקי" });
+  }
+  try {
+    const trainer = await UserModel.findById(req.params.id);
+    if (!trainer || trainer.role !== 'trainer') {
+      return res.status(404).json({ message: "מאמנת לא נמצאה" });
     }
-    try {
-        const trainer = await UserModel.findById(req.params.id);
-        if (!trainer || trainer.role !== 'trainer') {
-            return res.status(404).json({ message: "מאמנת לא נמצאה" });
-        }
 
-        // עדכני/הוסיפי דירוג של המשתמש
-        let found = false;
-        if (!trainer.ratings) trainer.ratings = [];
-        trainer.ratings = trainer.ratings.map(r => {
-            if (r.user.toString() === userId) {
-                found = true;
-                return { user: r.user, value: rating }; // עדכון ערך קיים
-            }
-            return r;
-        });
-        if (!found) {
-            trainer.ratings.push({ user: userId, value: rating });
-        }
-
-        // חישוב ממוצע
-        const avg = trainer.ratings.length
-            ? (trainer.ratings.reduce((sum, r) => sum + r.value, 0) / trainer.ratings.length)
-            : 0;
-
-        trainer.rating = avg;
-        await trainer.save();
-
-        res.json({
-            message: "הדירוג נשמר!",
-            rating: avg,
-            ratingsCount: trainer.ratings.length
-        });
-    } catch (err) {
-        res.status(500).json({ message: "שגיאת שרת", error: err.message });
+    // עדכני/הוסיפי דירוג של המשתמש
+    let found = false;
+    if (!trainer.ratings) trainer.ratings = [];
+    trainer.ratings = trainer.ratings.map(r => {
+      if (r.user.toString() === userId) {
+        found = true;
+        return { user: r.user, value: rating }; // עדכון ערך קיים
+      }
+      return r;
+    });
+    if (!found) {
+      trainer.ratings.push({ user: userId, value: rating });
     }
+
+    // חישוב ממוצע
+    const avg = trainer.ratings.length
+      ? (trainer.ratings.reduce((sum, r) => sum + r.value, 0) / trainer.ratings.length)
+      : 0;
+
+    trainer.rating = avg;
+    await trainer.save();
+
+    res.json({
+      message: "הדירוג נשמר!",
+      rating: avg,
+      ratingsCount: trainer.ratings.length
+    });
+  } catch (err) {
+    res.status(500).json({ message: "שגיאת שרת", error: err.message });
+  }
 });
 
 

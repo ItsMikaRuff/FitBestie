@@ -234,9 +234,9 @@ const UserProfile = () => {
                 />
 
                 <TrainerInfo>
-                    <TrainerName>{user?.name || "משתמש"}</TrainerName>
+                    <TrainerName>{user?.name || "הפרופיל שלי"}</TrainerName>
                     <TrainerTitle>
-                        משתמש {getRoleLabel(user?.role)}
+                        פרופיל {getRoleLabel(user?.role)}
                     </TrainerTitle>
                     <div>
                         <EnhancedInfo>אימייל: {user?.email || "לא זמין"}</EnhancedInfo>

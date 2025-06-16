@@ -64,15 +64,15 @@ const TrainerSignUp = () => {
         }
     };
 
-    const handleExpertiseChange = (e) => {
-        const { value, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            expertise: checked
-                ? [...prev.expertise, value]
-                : prev.expertise.filter(item => item !== value)
-        }));
-    };
+    // const handleExpertiseChange = (e) => {
+    //     const { value, checked } = e.target;
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         expertise: checked
+    //             ? [...prev.expertise, value]
+    //             : prev.expertise.filter(item => item !== value)
+    //     }));
+    // };
 
     const handlePaymentChange = (paymentDetails) => {
         setFormData(prev => ({
@@ -147,16 +147,16 @@ const TrainerSignUp = () => {
         setTouched(prev => ({ ...prev, [e.target.name]: true }));
     };
 
-    const expertiseOptions = [
-        { value: 'fitness', label: 'כושר גופני' },
-        { value: 'yoga', label: 'יוגה' },
-        { value: 'pilates', label: 'פילאטיס' },
-        { value: 'dance', label: 'ריקוד' },
-        { value: 'nutrition', label: 'תזונה' },
-        { value: 'weight-loss', label: 'ירידה במשקל' },
-        { value: 'muscle-gain', label: 'בניית שריר' },
-        { value: 'rehabilitation', label: 'שיקום' }
-    ];
+    // const expertiseOptions = [
+    //     { value: 'fitness', label: 'כושר גופני' },
+    //     { value: 'yoga', label: 'יוגה' },
+    //     { value: 'pilates', label: 'פילאטיס' },
+    //     { value: 'dance', label: 'ריקוד' },
+    //     { value: 'nutrition', label: 'תזונה' },
+    //     { value: 'weight-loss', label: 'ירידה במשקל' },
+    //     { value: 'muscle-gain', label: 'בניית שריר' },
+    //     { value: 'rehabilitation', label: 'שיקום' }
+    // ];
 
     return (
         <div style={{
@@ -234,7 +234,7 @@ const TrainerSignUp = () => {
                 <div style={{ margin: '10px 0', textAlign: 'right' }}>
                     <h3 style={{ marginBottom: '10px', fontSize: '1.1rem' }}>תחומי מומחיות</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                        {expertiseOptions.map(option => (
+                        {/* {expertiseOptions.map(option => (
                             <label key={option.value} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <input
                                     type="checkbox"
@@ -245,7 +245,7 @@ const TrainerSignUp = () => {
                                 />
                                 {option.label}
                             </label>
-                        ))}
+                        ))} */}
                     </div>
                 </div>
 
