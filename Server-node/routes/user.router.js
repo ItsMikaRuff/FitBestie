@@ -54,6 +54,46 @@ function generateTokens(user) {
 
 
 // --------------------- איפוס סיסמה ---------------------
+
+router.post("/reset-password", async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ message: "חסרים פרטים לביצוע איפוס" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "משתמש לא נמצא" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    //  יצירת טוקנים
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    // שליחת refreshToken ב־cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None", // חשוב אם אתה עובד מ־localhost ל־onrender
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ימים
+    });
+
+    //  החזרת גישה מיידית
+    res.json({ user, token: accessToken, message: "הסיסמה עודכנה בהצלחה" });
+
+  } catch (err) {
+    console.error("שגיאה באיפוס סיסמה:", err.message);
+    res.status(500).json({ message: "קישור לא חוקי או שפג תוקפו" });
+  }
+});
+
+// --------------------- שכחתי סיסמה ---------------------
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "יש להזין כתובת מייל" });
