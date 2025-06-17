@@ -4,6 +4,8 @@
 const express = require("express");
 const router = express.Router();
 const measurementController = require("../controllers/measurement.controller");
+const MeasurementModel = require('../models/measurement.model');
+
 
 // יצירת מדידה חדשה
 router.post("/", async (req, res) => {
@@ -55,15 +57,17 @@ router.put("/:id", async (req, res) => {
 });
 
 // מחיקת מדידה לפי ID
-router.delete("/:id", async (req, res) => {
-    try {
-        const result = await measurementController.deleteOne({ _id: req.params.id });
-        if (!result) throw new Error("Measurement not found");
-        res.send(result);
-    } catch (err) {
-        console.error("Error deleting measurement:", err);
-        res.status(500).send("Error deleting measurement");
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await MeasurementModel.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'מדידה לא נמצאה' });
     }
+    res.status(200).json({ message: 'המדידה נמחקה בהצלחה' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'שגיאה בשרת בעת המחיקה' });
+  }
 });
 
 module.exports = router;

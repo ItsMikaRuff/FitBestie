@@ -5,7 +5,7 @@ import axios from "axios";
 import styled from "styled-components";
 import BMICalculator from "../components/BMICalculator";
 import BodyTypeCalculator from "../components/BodyTypeCalculator";
-import BMIHistory from "../components/BMIHistory";
+// import BMIHistory from "../components/BMIHistory";
 import WeightHistory from "../components/WeightHistory";
 import { DashboardContainer, ProfileButton } from "../components/styledComponents";
 
@@ -106,7 +106,7 @@ const UserMetrics = () => {
 
             {latestMeasurement && (
                 <>
-                    <BMIHistory user={user} />
+                    {/* <BMIHistory user={user} /> */}
                     <WeightHistory history={history} />
                 </>
             )}

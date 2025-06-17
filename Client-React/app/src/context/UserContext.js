@@ -14,7 +14,6 @@ export const UserProvider = ({ children }) => {
 
     useEffect(() => {
         const tryAutoLogin = async () => {
-            // ✅ דגל חדש למניעת התחברות מחדש אחרי Logout
             if (localStorage.getItem("loggedOut") === "true") {
                 console.info("⛔ המשתמש בחר להתנתק. לא מנסים להתחבר אוטומטית.");
                 setIsInitialized(true);
@@ -36,13 +35,13 @@ export const UserProvider = ({ children }) => {
                     setUser(res.data);
                 } catch (err) {
                     console.warn('❌ Auto-login failed (token פג תוקף למשל):', err);
-                    logout();
+                    await refreshToken();
                 } finally {
                     setIsInitialized(true);
                 }
             } else {
                 console.info("🔄 No saved token, trying refresh...");
-                await refreshToken(); // ⬅️ זה מה שחשוב!
+                await refreshToken();
                 setIsInitialized(true);
             }
         };
@@ -58,7 +57,7 @@ export const UserProvider = ({ children }) => {
         setIsLoggedIn(true);
         localStorage.setItem("token", jwt);
         localStorage.setItem("userId", userData._id);
-        localStorage.removeItem("loggedOut"); // ✅ מבטל את הדגל אם המשתמש מתחבר מחדש
+        localStorage.removeItem("loggedOut");
 
         if (userData?._id && jwt) {
             axios.get(`${API_URL}/user/${userData._id}`, {
@@ -80,7 +79,7 @@ export const UserProvider = ({ children }) => {
         setUser(null);
         setToken(null);
         setIsLoggedIn(false);
-        localStorage.setItem("loggedOut", "true"); // ✅ דגל שמונע התחברות אוטומטית
+        localStorage.setItem("loggedOut", "true");
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
         delete axios.defaults.headers.common['Authorization'];
@@ -138,7 +137,7 @@ export const UserProvider = ({ children }) => {
             }
         } catch (err) {
             console.warn("🔁 רענון טוקן נכשל:", err.message);
-            logout(); // או לא לעשות כלום אם רוצים לא להיכנס
+            logout();
         }
     };
 
@@ -146,7 +145,7 @@ export const UserProvider = ({ children }) => {
         if (isLoggedIn) {
             const interval = setInterval(() => {
                 refreshToken();
-            }, 13 * 60 * 1000); // 13 דקות
+            }, 13 * 60 * 1000);
 
             return () => clearInterval(interval);
         }
