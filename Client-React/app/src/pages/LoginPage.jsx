@@ -174,7 +174,7 @@ const LoginPage = () => {
                 {/* NEW: CAPTCHA component */}
                 <div style={{ margin: '15px 0' }}>
                     <ReCAPTCHA
-                        sitekey="6LdyKzsrAAAAAB4-WBWTLifFkpyi-fSU26QSYuN1"// 👈 שימי כאן את המפתח מ־Google
+                        sitekey="6LdyKzsrAAAAAB4-WBWTLifFkpyi-fSU26QSYuN1"// 👈 שימי כאן את המפתח מ־Google 
                         onChange={(token) => setCaptchaToken(token)}
                     />
                 </div>
