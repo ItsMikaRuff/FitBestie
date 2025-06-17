@@ -13,6 +13,7 @@ import joinImage from "../Images/highFive.jpg";
 // import fitBestieLogo from "../Images/FitBestieLogo.png";
 import SmartChatBot from "../components/SmartChatBot";
 import SmartRecipeChat from "../components/SmartRecipeChat";
+import BMICalculator from "../components/BMICalculator";
 
 
 const HomeContainer = styled.section`
@@ -173,6 +174,8 @@ const Home = () => {
 
     const [latestMeasurement, setLatestMeasurement] = useState(null);
     const [latestBodyType, setLatestBodyType] = useState(null);
+    const [showBMICalculator, setShowBMICalculator] = useState(false);
+
 
     //const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -295,10 +298,17 @@ const Home = () => {
 
                         <div style={{ marginTop: '3rem' }}>
                             <WeightHistory history={history} />
-                            <Button onClick={() => navigate("/metrics")}>
+                            <Button onClick={() => setShowBMICalculator(true)}>
                                 ➕ הוספת שקילה חדשה
                             </Button>
+                            {showBMICalculator && (
+                                <div style={{ marginTop: '2rem' }}>
+                                    <BMICalculator />
+                                </div>
+                            )}
                         </div>
+
+
                     </HighlightBox>
                 )}
                 <Section>

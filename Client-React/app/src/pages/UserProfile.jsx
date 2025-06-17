@@ -7,7 +7,7 @@ import {
     ProfileButton,
     ProfileSection,
     ProfileTitle,
-    Info,
+    // Info,
     StyledLink,
     TrainerHeader,
     TrainerImage,
@@ -308,24 +308,24 @@ const UserProfile = () => {
                 </ProfileSection>
             )}
 
-            <ProfileSection>
+            {/* <ProfileSection>
                 <ProfileTitle>🧮 מדדים אישיים</ProfileTitle>
                 <StyledLink to="/metrics">מעבר לעמוד המדדים</StyledLink>
-            </ProfileSection>
+            </ProfileSection> */}
 
-            <ProfileSection>
+            {/* <ProfileSection>
                 <ProfileTitle>📝 שאלון התאמה אישית</ProfileTitle>
                 <StyledLink to="/quiz">מעבר לשאלון</StyledLink>
-            </ProfileSection>
+            </ProfileSection> */}
 
-            <ProfileSection>
+            {/* <ProfileSection>
                 <ProfileTitle>📦 תוכן מותאם</ProfileTitle>
                 {user?.role === "trainer" ? (
                     <Info>תוכן ייעודי למאמנים (בהמשך)</Info>
                 ) : (
                     <Info>המלצות ותוכן מותאם אישית למשתמש</Info>
                 )}
-            </ProfileSection>
+            </ProfileSection> */}
 
             <ProfileSection>
                 <ProfileTitle>⚠️ מחיקת פרופיל</ProfileTitle>
