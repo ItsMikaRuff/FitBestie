@@ -27,15 +27,16 @@ export default function ResetPassword() {
     e.preventDefault();
     setMessage("");
     setError("");
-
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL} || http://localhost:5000/user/reset-password`, {
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const res = await fetch(`${apiUrl}/user/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),
       });
-
+    
       const data = await res.json();
+    
       if (res.ok) {
         setMessage("הסיסמה אופסה בהצלחה!");
         setTimeout(() => navigate("/login"), 3000);
@@ -45,6 +46,24 @@ export default function ResetPassword() {
     } catch (err) {
       setError("שגיאה בחיבור לשרת.");
     }
+
+  //   try {
+  //     const res = await fetch(`${process.env.REACT_APP_API_URL} || http://localhost:5000/user/reset-password`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ token, password }),
+  //     });
+
+  //     const data = await res.json();
+  //     if (res.ok) {
+  //       setMessage("הסיסמה אופסה בהצלחה!");
+  //       setTimeout(() => navigate("/login"), 3000);
+  //     } else {
+  //       setError(data.message || "אירעה שגיאה.");
+  //     }
+  //   } catch (err) {
+  //     setError("שגיאה בחיבור לשרת.");
+    
   };
 
   return (

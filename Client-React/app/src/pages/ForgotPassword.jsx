@@ -110,14 +110,15 @@ export default function ForgotPassword() {
       setError("");
       setIsLoading(true);
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL} || http://localhost:5000/user/forgot-password`, {
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+        const res = await fetch(`${apiUrl}/user/forgot-password`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: values.email }),
         });
-
+      
         const data = await res.json();
-
+      
         if (res.ok) {
           setMessage("קישור לאיפוס סיסמא נשלח למייל שלך.");
         } else {
@@ -127,6 +128,24 @@ export default function ForgotPassword() {
         setError("שגיאה בחיבור לשרת.");
       }
       setIsLoading(false);
+  //     try {
+  //       const res = await fetch(`${process.env.REACT_APP_API_URL} || http://localhost:5000/user/forgot-password`, {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ email: values.email }),
+  //       });
+
+  //       const data = await res.json();
+
+  //       if (res.ok) {
+  //         setMessage("קישור לאיפוס סיסמא נשלח למייל שלך.");
+  //       } else {
+  //         setError(data.message || "אירעה שגיאה. נסי שוב.");
+  //       }
+  //     } catch (err) {
+  //       setError("שגיאה בחיבור לשרת.");
+  //     }
+  //     setIsLoading(false);
     },
   });
 

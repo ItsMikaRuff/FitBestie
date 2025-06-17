@@ -34,7 +34,7 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage });
 
-// --------------------- איפוס סיסמה ---------------------
+// --------------------- שכחתי סיסמה ---------------------
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "יש להזין כתובת מייל" });
@@ -49,7 +49,7 @@ router.post("/forgot-password", async (req, res) => {
     res.status(500).json({ message: "שגיאה בשליחת מייל." });
   }
 });
-
+// --------------------- איפוס סיסמה ---------------------
 router.post("/reset-password", async (req, res) => {
   const { token, password } = req.body;
   if (!token || !password) {
