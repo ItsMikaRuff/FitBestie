@@ -216,11 +216,11 @@ router.post("/login/verify-otp", async (req, res) => {
   const { accessToken, refreshToken } = generateTokens(user);
 
   res.cookie("refreshToken", refreshToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "None",
-  maxAge: 7 * 24 * 60 * 60 * 1000
-});
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "None",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 
   res.json({ user, token: accessToken });
 
@@ -326,6 +326,7 @@ router.post("/update/:id", (req, res, next) => {
     }
     try {
       const user = await UserModel.findById(req.params.id);
+
       if (!user) throw new Error("User not found");
       const updates = {};
 
@@ -338,8 +339,19 @@ router.post("/update/:id", (req, res, next) => {
       if (req.body.instagram) updates.instagram = req.body.instagram;
       if (req.body.role) updates.role = req.body.role;
 
+      // ניסיון תעסוקתי
+      if (req.body.previousGyms !== undefined) {
+        try {
+          updates.previousGyms = typeof req.body.previousGyms === "string"
+            ? JSON.parse(req.body.previousGyms)
+            : req.body.previousGyms;
+        } catch {
+          updates.previousGyms = [];
+        }
+      }
+
+
       // Handle address (Separate Table)
-      let addressId;
 
       if (req.body.address) {
         try {
@@ -360,8 +372,6 @@ router.post("/update/:id", (req, res, next) => {
           console.error("Error parsing address:", e);
         }
       }
-
-
 
       // Handle expertise
       if (req.body.expertise) {
@@ -437,7 +447,6 @@ router.post("/update/:id", (req, res, next) => {
           lastCalculated: new Date()
         };
       }
-
 
       if (req.file && req.file.path) {
         updates.image = req.file.path;
@@ -604,16 +613,21 @@ router.delete("/:id", async (req, res) => {
 
 // --------------------- שליפת משתמש לפי ID ---------------------
 router.get("/:id", requireAuth, async (req, res) => {
+
   try {
-    const user = await UserModel.findById(req.params.id).populate("address");
+
+    const user = await UserModel.findById(req.params.id)
+    .populate("address")
+    .select("+previousGyms");
+
     if (!user) return res.status(404).json({ message: "User not found" });
+
     res.json(user);
   } catch (err) {
     console.error("❌ Error fetching user by ID:", err.message);
     res.status(500).json({ message: "Failed to fetch user" });
   }
 });
-
 
 
 // --------------------- איפוס סיסמה ע"י אדמין ---------------------
@@ -652,6 +666,7 @@ router.post("/admin-send-reset-link", requireAuth, requireRole(["admin", "superA
 });
 
 // חידוש טוקן של משתמש מחובר
+
 router.post("/refresh-token", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) return res.status(401).json({ message: "No token" });

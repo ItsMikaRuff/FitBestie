@@ -13,6 +13,7 @@ export const UserProvider = ({ children }) => {
     const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
+
         const tryAutoLogin = async () => {
             if (localStorage.getItem("loggedOut") === "true") {
                 console.info("⛔ המשתמש בחר להתנתק. לא מנסים להתחבר אוטומטית.");
@@ -144,6 +145,7 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         if (isLoggedIn) {
             const interval = setInterval(() => {
+                console.log("🔁 Refresh interval started")
                 refreshToken();
             }, 13 * 60 * 1000);
 
@@ -152,7 +154,7 @@ export const UserProvider = ({ children }) => {
     }, [isLoggedIn]);
 
     return (
-        <UserContext.Provider value={{ user, token, isLoggedIn, isInitialized, login, logout, updateUser }}>
+        <UserContext.Provider value={{ user, token, isLoggedIn, isInitialized, login, logout, updateUser, setUser }}>
             {children}
         </UserContext.Provider>
     );

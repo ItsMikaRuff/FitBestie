@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
         required: function () { return this.role === 'trainer'; },
         default: []
     },
-    
+
     address: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address',
@@ -62,6 +62,15 @@ const userSchema = new mongoose.Schema({
         required: false,
         default: ''
     },
+    whatsapp: {
+        type: String,
+        default: ''
+    },
+    instagram: {
+        type: String,
+        default: ''
+    },
+
     twoFactorEnabled: {
         type: Boolean,
         default: false
@@ -109,6 +118,17 @@ const userSchema = new mongoose.Schema({
         description: { type: String, default: null },
         lastCalculated: { type: Date, default: null }
     },
+
+    experienceYears: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
+    previousGyms: {
+        type: [String],
+        default: []
+    },
+
     createdAt: {
         type: Date,
         default: Date.now,

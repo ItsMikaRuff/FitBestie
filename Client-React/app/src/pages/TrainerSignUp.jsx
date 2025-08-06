@@ -1,3 +1,5 @@
+// TrainerSignUp.jsx
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -141,6 +143,8 @@ const TrainerSignUp = () => {
         } finally {
             setLoading(false);
         }
+        
+
     };
 
     const handleBlur = (e) => {

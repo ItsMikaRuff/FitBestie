@@ -84,7 +84,7 @@ async function saveAddressAndReturnId(addressObj) {
     return addr._id;
 }
 
-// Update a user by filter
+//Update a user by filter
 const update = async (filter, data) => {
     try {
         let update = req.body;
@@ -95,7 +95,7 @@ const update = async (filter, data) => {
             update.address = addressDoc._id;
         }
         // עדכון המשתמש
-        const user = await UserModel.findByIdAndUpdate(
+        const user = await userModel.findByIdAndUpdate(
             req.params.id,
             update,
             { new: true }
@@ -106,6 +106,7 @@ const update = async (filter, data) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 
 // Delete a user by filter

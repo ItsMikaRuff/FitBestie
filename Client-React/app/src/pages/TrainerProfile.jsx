@@ -56,6 +56,7 @@ const ExpertiseGrid = styled.div`
     gap: 10px;
     margin: 10px 0;
     direction: rtl;
+    
 `;
 
 const ExpertiseOption = styled.label`
@@ -106,7 +107,7 @@ const expertiseOptions = [
 ];
 
 const TrainerProfile = () => {
-    const { user, updateUser, isLoggedIn, logout } = useUser();
+    const { user, updateUser, isLoggedIn, logout, setUser, token } = useUser();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -122,6 +123,8 @@ const TrainerProfile = () => {
         phone: user?.phone || "",
         whatsapp: user?.whatsapp || "",
         instagram: user?.instagram || "",
+        experienceYears: user?.experienceYears || 0,
+        previousGyms: user?.previousGyms || [""],
         address: user?.address || {
             street: '',
             city: '',
@@ -207,6 +210,9 @@ const TrainerProfile = () => {
         data.append("phone", formData.phone);
         data.append("whatsapp", formData.whatsapp);
         data.append("instagram", formData.instagram);
+        data.append("experienceYears", formData.experienceYears);
+        data.append("previousGyms", JSON.stringify(formData.previousGyms));
+
 
         // שינוי כאן!
         if (!isAddressEmpty(formData.address)) {
@@ -223,20 +229,22 @@ const TrainerProfile = () => {
             const userId = user?._id || user?.id;
 
             const res = await axios.post(
-                `${API_URL}/user/update/${userId}`,
-                data,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    withCredentials: true,
-                }
-            );
+    `${API_URL}/user/update/${userId}`,
+    data,
+    {
+        headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`, // מוסיף את הטוקן
+        },
+        withCredentials: true,
+    }
+);
 
-            updateUser(res.data);
-            localStorage.setItem("user", JSON.stringify(res.data));
-            alert("עודכן בהצלחה 🎉");
-            setIsEditing(false);
+// עדכון המשתמש ישירות מהשרת
+updateUser({}); // קריאה ריקה שלא תשלח שוב לשרת
+setUser(res.data); // 👈 תוודאי שזה זמין מהקונטקסט. אם לא - נעשה עדכון לקונטקסט
+alert("עודכן בהצלחה 🎉");
+setIsEditing(false);
 
         } catch (error) {
             console.error("Axios error:", error);
@@ -244,6 +252,8 @@ const TrainerProfile = () => {
         } finally {
             setLoading(false);
         }
+
+        window.location.reload();
     };
 
 
@@ -299,6 +309,7 @@ const TrainerProfile = () => {
     if (!isLoggedIn || user?.role !== "trainer") return <p>Unauthorized</p>;
 
     return (
+
         <TrainerDashboardContainer style={{ direction: 'rtl' }}>
 
             <TrainerStatus status={user.trainerStatus}>
@@ -326,9 +337,25 @@ const TrainerProfile = () => {
                         <EnhancedInfo>אימייל: {user?.email || "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>כתובת: {user?.address?.street ? `${user.address.street}, ${user.address.city}` : "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>טלפון: {user?.phone || "לא זמין"}</EnhancedInfo>
+                        <EnhancedInfo>תחומי התמחות: {user?.expertise?.join(', ') || "לא זמין"}</EnhancedInfo>
+                        <EnhancedInfo>שנות ניסיון: {user?.experienceYears || 0}</EnhancedInfo>
+                        <EnhancedInfo>
+                            מקומות עבודה קודמים:
+                            <ul>
+                                {user?.previousGyms?.length > 0 && (
+                                    <div>
+                                        <ul>
+                                            {user.previousGyms.map((gym, idx) => (
+                                                <li key={idx}>{gym}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </ul>
+                        </EnhancedInfo>
+
                         <EnhancedInfo>WhatsApp: {user?.whatsapp || "לא זמין"}</EnhancedInfo>
                         <EnhancedInfo>Instagram: {user?.instagram || "לא זמין"}</EnhancedInfo>
-                        <EnhancedInfo>תחומי התמחות: {user?.expertise?.join(', ') || "לא זמין"}</EnhancedInfo>
                     </div>
                     <ProfileButton onClick={handleEditClick}>
                         עריכת פרטים
@@ -402,6 +429,74 @@ const TrainerProfile = () => {
                                     value={formData.address}
                                     onChange={(address) => setFormData(prev => ({ ...prev, address }))}
                                 />
+                            </FormGroup>
+
+                            <FormGroup>
+                                <FormLabel>שנות ניסיון</FormLabel>
+                                <FormInput
+                                    type="number"
+                                    name="experienceYears"
+                                    value={formData.experienceYears}
+                                    onChange={handleChange}
+                                    min="0"
+                                />
+                            </FormGroup>
+
+                            <FormGroup>
+                                <FormLabel>מקומות עבודה קודמים</FormLabel>
+                                {formData.previousGyms.map((gym, idx) => (
+                                    <div key={idx} style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px" }}>
+                                        <FormInput
+                                            type="text"
+                                            value={gym}
+                                            onChange={(e) => {
+                                                const newGyms = [...formData.previousGyms];
+                                                newGyms[idx] = e.target.value;
+                                                setFormData(prev => ({ ...prev, previousGyms: newGyms }));
+                                            }}
+                                            placeholder={`מקום עבודה ${idx + 1}`}
+                                            style={{ flexGrow: 1 }}
+                                        />
+                                        {formData.previousGyms.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const filteredGyms = formData.previousGyms.filter((_, i) => i !== idx);
+                                                    setFormData(prev => ({ ...prev, previousGyms: filteredGyms }));
+                                                }}
+                                                style={{
+                                                    backgroundColor: "#ff6b6b",
+                                                    color: "white",
+                                                    border: "none",
+                                                    borderRadius: "5px",
+                                                    padding: "6px 10px",
+                                                    cursor: "pointer",
+                                                }}
+                                                title="מחק מקום עבודה"
+                                            >
+                                                🗑
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({
+                                        ...prev,
+                                        previousGyms: [...prev.previousGyms, ""]
+                                    }))}
+                                    style={{
+                                        marginTop: "10px",
+                                        backgroundColor: "#6c5ce7",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "8px 12px",
+                                        borderRadius: "6px",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    ➕ הוסף מקום עבודה
+                                </button>
                             </FormGroup>
 
                             <FormGroup>
