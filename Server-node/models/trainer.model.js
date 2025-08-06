@@ -31,6 +31,7 @@ const TrainerSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+
     ratings: [
         {
             user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
