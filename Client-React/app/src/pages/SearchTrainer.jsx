@@ -1,6 +1,5 @@
 //searchTrainer.jsx
 /* eslint-disable react/no-unescaped-entities */
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -118,6 +117,37 @@ const Button = styled.button`
   &:hover { background: #5a4dcf; }
 `;
 
+// 🔹 POPUP להצגת פרטי קשר
+const ContactPopup = ({ trainer, onClose }) => {
+    if (!trainer) return null;
+
+    return (
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex',
+            justifyContent: 'center', alignItems: 'center', zIndex: 1000
+        }}>
+            <div style={{
+                background: '#fff', padding: '2rem', borderRadius: '12px',
+                maxWidth: '400px', width: '100%', position: 'relative'
+            }}>
+                <button onClick={onClose} style={{
+                    position: 'absolute', top: 8, right: 8,
+                    background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer'
+                }}>×</button>
+
+                <h2 style={{ marginBottom: '1rem' }}>פרטי קשר - {trainer.name}</h2>
+                {trainer.phone && <p>📞 טלפון: {trainer.phone}</p>}
+                {trainer.whatsapp && <p>💬 וואטסאפ: <a href={`https://wa.me/${trainer.whatsapp}`} target="_blank" rel="noreferrer">{trainer.whatsapp}</a></p>}
+                {trainer.email && <p>📧 מייל: <a href={`mailto:${trainer.email}`}>{trainer.email}</a></p>}
+                {!trainer.phone && !trainer.whatsapp && !trainer.email && (
+                    <p>לא קיימים פרטי קשר זמינים</p>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const SearchTrainer = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -129,13 +159,12 @@ const SearchTrainer = () => {
     const [locationFilter, setLocationFilter] = useState('');
     const [favorites, setFavorites] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
-    const [distance, setDistance] = useState(50); // ברירת מחדל: 50 ק"מ
+    const [distance, setDistance] = useState(50);
     const [updating, setUpdating] = useState(false);
-
+    const [selectedTrainer, setSelectedTrainer] = useState(null);
 
     const searchType = new URLSearchParams(location.search).get('type');
 
-    // מיקום המשתמש
     useEffect(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -150,7 +179,6 @@ const SearchTrainer = () => {
         }
     }, []);
 
-    // טעינת מאמנות
     useEffect(() => {
         const fetchResults = async () => {
             try {
@@ -163,6 +191,7 @@ const SearchTrainer = () => {
                         _id: r._id?.toString?.() ?? r._id
                     }));
                 setResults(filtered);
+                  console.log("RESULTS:", filtered);
             } catch (err) {
                 console.error("❌ שגיאה בטעינת תוצאות", err);
                 setResults([]);
@@ -177,8 +206,7 @@ const SearchTrainer = () => {
         } else {
             setError("נא לבחור סוג חיפוש");
         }
-        // eslint-disable-next-line
-    }, [searchType, isLoggedIn]);
+    }, [searchType, isLoggedIn, location.search]);
 
     const fetchFavorites = async () => {
         try {
@@ -204,13 +232,34 @@ const SearchTrainer = () => {
             await axios.put(`${API_URL}/user/favorites`, { trainerId }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            await fetchFavorites(); // טען את המועדפים מחדש אחרי העדכון
+            await fetchFavorites();
         } catch (err) {
             console.error("שגיאה בהוספה למועדפים", err);
         }
     };
 
-    // לוגיקת סינון ומיון
+    const handleRate = async (trainerId, value) => {
+        try {
+            setUpdating(true);
+            const token = localStorage.getItem('token');
+            const res = await axios.put(`${API_URL}/user/${trainerId}/rate`, { rating: value }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const { rating, ratingsCount } = res.data;
+            setResults(results =>
+                results.map(t =>
+                    t._id === trainerId
+                        ? { ...t, rating, ratings: Array.from({ length: ratingsCount }) }
+                        : t
+                )
+            );
+        } catch (err) {
+            alert('שגיאה בשמירת דירוג');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     const filteredResults = results
         .filter(r => {
             if (activeFilter === 'trainers') return r.role === 'trainer';
@@ -223,15 +272,13 @@ const SearchTrainer = () => {
             return city.trim().toLowerCase().includes(locationFilter.trim().toLowerCase());
         })
         .filter(r => {
-            // סינון לפי מרחק – מציגים רק מאמנות עם קואורדינטות!
-            if (!userLocation) return true; // אם אין מיקום למשתמש - מציג הכל
+            if (!userLocation) return true;
             if (!r.address?.coordinates || typeof r.address.coordinates.lat !== "number" || typeof r.address.coordinates.lng !== "number") return false;
             const from = userLocation;
             const to = r.address.coordinates;
             const dist = haversine(from, to) / 1000;
             return dist <= distance;
         })
-
         .sort((a, b) => {
             if (!userLocation || !a.address?.location || !b.address?.location) return 0;
             const distA = haversine(userLocation, a.address.location) / 1000;
@@ -245,35 +292,8 @@ const SearchTrainer = () => {
     if (loading) return <Loader />;
     if (error) return <div>{error}</div>;
 
-
-    const handleRate = async (trainerId, value) => {
-        try {
-            setUpdating(true);
-            const token = localStorage.getItem('token');
-            const res = await axios.put(`${API_URL}/user/${trainerId}/rate`, { rating: value }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const { rating, ratingsCount } = res.data;
-            setResults(results =>
-                results.map(t =>
-                    t._id === trainerId
-                        ? { ...t, rating, ratings: Array.from({ length: ratingsCount }) } // אופציונלי: שמרי גם את המספר מדרגים
-                        : t
-                )
-            );
-
-        } catch (err) {
-            alert('שגיאה בשמירת דירוג');
-        } finally {
-            setUpdating(false);
-        }
-    };
-
-
     const renderCard = (trainer) => (
-
         <Card key={trainer._id}>
-
             {trainer.image ? (
                 <Image src={trainer.image} alt={trainer.name} />
             ) : (
@@ -290,7 +310,6 @@ const SearchTrainer = () => {
             )}
 
             <Content>
-
                 <Name>{trainer.name}</Name>
                 <Type>{trainer.role === 'trainer' ? 'מאמנת אישית' : 'מאמנת קבוצתית'}</Type>
 
@@ -320,8 +339,9 @@ const SearchTrainer = () => {
                     {favorites.includes(trainer._id) ? "💖 במועדפים" : "🤍 הוספה למועדפים"}
                 </Button>
 
-                <Button onClick={() => navigate(`/contact/${trainer._id}`)}>📞 צור קשר</Button>
+                <Button onClick={() => setSelectedTrainer(trainer)}>📞 צור קשר</Button>
 
+                <Button onClick={() => navigate(`/trainer/${trainer._id}`)}>👤 צפייה בפרופיל</Button>
             </Content>
         </Card>
     );
@@ -378,6 +398,10 @@ const SearchTrainer = () => {
                     <h3>כל שאר התוצאות:</h3>
                     <Grid>{otherTrainers.map(renderCard)}</Grid>
                 </>
+            )}
+
+            {selectedTrainer && (
+                <ContactPopup trainer={selectedTrainer} onClose={() => setSelectedTrainer(null)} />
             )}
         </Container>
     );

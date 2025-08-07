@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+        select: false
     },
 
     name: {
@@ -31,15 +32,18 @@ const userSchema = new mongoose.Schema({
     paymentDetails: {
         cardNumber: {
             type: String,
-            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; },
+            select: false
         },
         expiryDate: {
             type: String,
-            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; },
+            select: false
         },
         cvv: {
             type: String,
-            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; }
+            required: function () { return this.role === 'trainer' && this.trainerStatus === 'pending'; },
+            select: false
         }
     },
     image: {
@@ -77,19 +81,23 @@ const userSchema = new mongoose.Schema({
     },
     otpCode: {
         type: String,
-        default: null
+        default: null,
+        select: false
     },
     otpExpiresAt: {
         type: Date,
-        default: null
+        default: null,
+        select: false
     },
     resetToken: {
         type: String,
-        default: null
+        default: null,
+        select: false
     },
     resetTokenExpire: {
         type: Date,
-        default: null
+        default: null,
+        select: false
     },
     favoriteTrainers: {
         type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

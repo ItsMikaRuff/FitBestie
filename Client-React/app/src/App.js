@@ -28,7 +28,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import UserMetrics from './pages/UserMetrics';
 import FavoriteRecipes from './pages/FavoriteRecipesPage';
 import ResetPassword from './pages/ResetPassword';
-
+import TrainerPublicProfile from './pages/TrainerPublicProfile';
 function App() {
 
   const [mainTheme] = useState(theme);
@@ -54,6 +54,7 @@ function App() {
           <Route path="/workout-videos" element={<WorkoutVideos />} />
           <Route path="/metrics" element={<UserMetrics />} />
           <Route path="/favorite-recipes" element={<FavoriteRecipes />} />
+          <Route path="/trainer/:id" element={<TrainerPublicProfile />} />
 
 
         </Route>

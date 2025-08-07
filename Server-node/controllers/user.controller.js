@@ -1,8 +1,6 @@
 //user.controller.js 
 // CRUD - Create Read Update Delete
 
-const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcrypt');
 
 const userModel = require("../models/user.model");
@@ -39,6 +37,7 @@ const createUser = async (data) => {
         userData.password = hashedPassword;
 
         let createdUser;
+
         if (userData.role === 'trainer') {
             if (!userData.paymentDetails?.cardNumber) missingFields.push('מספר כרטיס אשראי');
             if (!userData.paymentDetails?.expiryDate) missingFields.push('תוקף כרטיס אשראי');
@@ -50,7 +49,9 @@ const createUser = async (data) => {
             }
 
             createdUser = await trainerModel.create(userData);
+
         } else {
+
             createdUser = await userModel.create(userData);
         }
 
@@ -67,7 +68,11 @@ const createUser = async (data) => {
 
 
 // Read a user by filter
-const readOne = async (filter = {}) => {
+const readOne = async (filter = {},includePassword = false) => {
+    
+    if (includePassword) {
+        return await userModel.findOne(filter).select('+password').populate('address').lean();
+    }
     return await userModel.findOne(filter).populate('address').lean();
 };
 
