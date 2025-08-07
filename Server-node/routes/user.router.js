@@ -155,16 +155,20 @@ router.post("/", async (req, res) => {
 // --------------------- התחברות ---------------------
 router.post("/login", async (req, res) => {
   try {
-
     const { email, password, captchaToken } = req.body;
     const isHuman = await captcha(captchaToken);
     if (!isHuman) {
       return res.status(403).json({ message: "אימות CAPTCHA נכשל. אנא אשר שאתה לא רובוט." });
     }
-    const user = await userController.readOne({ email });
+    const user = await userController.readOne({ email }, true);
     if (!user) {
       return res.status(401).json({ message: "אימייל או סיסמה שגויים" });
     }
+
+    if (!user.password) {
+      return res.status(400).json({ message: "לא קיימת סיסמה למשתמש זה. אנא אפס/י סיסמה או הירשם/י מחדש." });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "אימייל או סיסמה שגויים" });
@@ -199,6 +203,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: "שגיאה בשרת בעת התחברות" });
   }
 });
+
 
 router.post("/login/verify-otp", async (req, res) => {
   const { userId, otp } = req.body;
@@ -611,6 +616,46 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+
+// --------------------- פרופיל ציבורי של מאמנת ---------------------
+router.get("/public/:id", async (req, res) => {
+  console.log("🔍 בקשה לפרופיל ציבורי ל-ID:", req.params.id);
+  try {
+    const trainer = await UserModel.findById(req.params.id);
+    console.log('💬 Trainer raw from DB:', trainer);
+
+    // השאר את שורת הסלקט אחרי הקונסול
+    if (!trainer) {
+      return res.status(404).json({ message: "מאמנת לא נמצאה (לא נמצאה במסד)" });
+    }
+    if (trainer.role !== "trainer") {
+      return res.status(404).json({ message: "מאמנת לא נמצאה (לא role=trainer)" });
+    }
+
+    // מחזירים רק את השדות שרצית
+    const publicFields = {
+      name: trainer.name,
+      image: trainer.image,
+      address: trainer.address,
+      expertise: trainer.expertise,
+      rating: trainer.rating,
+      experienceYears: trainer.experienceYears,
+      previousGyms: trainer.previousGyms,
+      instagram: trainer.instagram,
+      bodyType: trainer.bodyType,
+      whatsapp: trainer.whatsapp,
+      phone: trainer.phone,
+      email: trainer.email,
+    };
+
+    res.json(publicFields);
+  } catch (err) {
+    console.error("❌ שגיאה בנתיב ציבורי:", err.message);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+
+
 // --------------------- שליפת משתמש לפי ID ---------------------
 router.get("/:id", requireAuth, async (req, res) => {
 
@@ -628,6 +673,7 @@ router.get("/:id", requireAuth, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch user" });
   }
 });
+
 
 
 // --------------------- איפוס סיסמה ע"י אדמין ---------------------

@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+axios.defaults.withCredentials = true; // ✅ שליחת cookies בכל הבקשות
+
 const UserContext = createContext();
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -13,7 +15,6 @@ export const UserProvider = ({ children }) => {
     const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
-
         const tryAutoLogin = async () => {
             if (localStorage.getItem("loggedOut") === "true") {
                 console.info("⛔ המשתמש בחר להתנתק. לא מנסים להתחבר אוטומטית.");
@@ -118,29 +119,33 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    const refreshToken = async () => {
-        try {
-            const res = await axios.post(`${API_URL}/user/refresh-token`, null, {
-                withCredentials: true,
-            });
+   const refreshToken = async () => {
+    try {
+        const res = await axios.post(`${API_URL}/user/refresh-token`);
 
-            const newToken = res.data.token;
-            setToken(newToken);
-            localStorage.setItem("token", newToken);
-            const userId = res.data.user?._id;
+        const newToken = res.data.token;
+        const userId = res.data.user?._id;
 
-            if (userId) {
-                const userRes = await axios.get(`${API_URL}/user/${userId}`, {
-                    headers: { Authorization: `Bearer ${newToken}` }
-                });
-                setUser(userRes.data);
-                setIsLoggedIn(true);
-            }
-        } catch (err) {
-            console.warn("🔁 רענון טוקן נכשל:", err.message);
-            logout();
+        if (!newToken || !userId) {
+            throw new Error("Missing token or user data");
         }
-    };
+
+        setToken(newToken);
+        localStorage.setItem("token", newToken);
+        localStorage.setItem("userId", userId);
+
+        axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
+        const userRes = await axios.get(`${API_URL}/user/${userId}`, {
+            headers: { Authorization: `Bearer ${newToken}` }
+        });
+        setUser(userRes.data);
+        setIsLoggedIn(true);
+    } catch (err) {
+        console.warn("🔁 רענון טוקן נכשל:", err?.response?.data || err.message);
+        logout();
+    }
+};
 
     useEffect(() => {
         if (isLoggedIn) {
