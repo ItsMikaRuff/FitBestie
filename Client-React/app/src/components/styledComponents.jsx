@@ -1,3 +1,5 @@
+//styledComponents.jsx
+
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -5,29 +7,22 @@ import styled from 'styled-components';
 // Header & Footer styles
 
 export const HeaderStyle = styled.header`
-
   position: sticky;
-  top: 0;
-  right: 0;
-  left: 0;
+  top: 0; right: 0; left: 0;
   z-index: 1000;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* שמאל | לוגו | ימין */
+  align-items: center;
   background-color: #333;
   color: white;
   padding: 10px 16px;
-  justify-content: space-between;
   transition: margin-right 0.3s;
 
-  img {
-    height: 36px;
-  }
-
+  img { height: 36px; display: block; }
+  
   @media (max-width: 768px) {
-    margin-right: 0; /* כדי שבמובייל הסיידבר יכסח את הכל, או שיתאים אוטומטית */
-    justify-content: space-between;
-    img {
-      height: 36px;
-    }
+    grid-template-columns: 1fr auto 1fr;
+    padding: 10px 12px;
   }
 `;
 
@@ -54,9 +49,11 @@ export const HeaderTitle = styled.h1`
 
 export const HeaderButtonDiv = styled.div`
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-
+  justify-content: flex-end;   /* לא לפזר — להצמיד לימין */
+  gap: 0.5rem;
+  align-items: center;
+  justify-self: end;  
+  
   @media (max-width: 700px) {
     flex-direction: row;
     align-items: center;

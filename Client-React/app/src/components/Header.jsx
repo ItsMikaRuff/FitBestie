@@ -41,7 +41,7 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
       </button>
 
       {/* לוגו במרכז */}
-      <a href="/" >
+      <a href="/" style={{justifySelf: 'center'}} >
         <img
           src={FITBESTIE_LOGO}
           alt="Logo"
