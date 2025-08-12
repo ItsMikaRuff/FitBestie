@@ -35,6 +35,7 @@ export const UserProvider = ({ children }) => {
                         headers: { Authorization: `Bearer ${savedToken}` }
                     });
                     setUser(res.data);
+                    try { localStorage.setItem("user", JSON.stringify(res.data)); } catch (e) { console.debug("localStorage set user failed (auto-login)", e); }
                 } catch (err) {
                     console.warn('❌ Auto-login failed (token פג תוקף למשל):', err);
                     await refreshToken();
@@ -67,6 +68,7 @@ export const UserProvider = ({ children }) => {
             })
                 .then((res) => {
                     setUser(res.data);
+                    try { localStorage.setItem("user", JSON.stringify(res.data)); } catch (e) { console.debug("localStorage set user failed (login)", e); }
                 })
                 .catch((err) => {
                     console.error("❌ Error loading user:", err);
@@ -84,6 +86,7 @@ export const UserProvider = ({ children }) => {
         localStorage.setItem("loggedOut", "true");
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
+        localStorage.removeItem("user");
         delete axios.defaults.headers.common['Authorization'];
         console.info("🚪 Logged out");
     };
@@ -96,8 +99,14 @@ export const UserProvider = ({ children }) => {
 
         if (updatedFields.image || updatedFields.file) {
             formData = new FormData();
-            for (let key in updatedFields) {
-                formData.append(key, updatedFields[key]);
+            for (const [key, value] of Object.entries(updatedFields)) {
+                if (value instanceof File || value instanceof Blob) {
+                    formData.append(key, value);
+                } else if (value !== null && typeof value === "object") {
+                    formData.append(key, JSON.stringify(value));
+                } else {
+                    formData.append(key, value);
+                }
             }
             isMultipart = true;
         }
@@ -110,42 +119,45 @@ export const UserProvider = ({ children }) => {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         ...(isMultipart && { "Content-Type": "multipart/form-data" })
-                    }
+                    },
+                    withCredentials: true,
                 }
             );
             setUser(res.data);
+            try { localStorage.setItem("user", JSON.stringify(res.data)); } catch (e) { console.debug("localStorage set user failed (updateUser)", e); }
         } catch (err) {
             console.error("❌ Error updating user:", err);
         }
     };
 
-   const refreshToken = async () => {
-    try {
-        const res = await axios.post(`${API_URL}/user/refresh-token`);
+    const refreshToken = async () => {
+        try {
+            const res = await axios.post(`${API_URL}/user/refresh-token`);
 
-        const newToken = res.data.token;
-        const userId = res.data.user?._id;
+            const newToken = res.data.token;
+            const userId = res.data.user?._id;
 
-        if (!newToken || !userId) {
-            throw new Error("Missing token or user data");
+            if (!newToken || !userId) {
+                throw new Error("Missing token or user data");
+            }
+
+            setToken(newToken);
+            localStorage.setItem("token", newToken);
+            localStorage.setItem("userId", userId);
+
+            axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
+            const userRes = await axios.get(`${API_URL}/user/${userId}`, {
+                headers: { Authorization: `Bearer ${newToken}` }
+            });
+            setUser(userRes.data);
+            try { localStorage.setItem("user", JSON.stringify(userRes.data)); } catch (e) { console.debug("localStorage set user failed (refreshToken)", e); }
+            setIsLoggedIn(true);
+        } catch (err) {
+            console.warn("🔁 רענון טוקן נכשל:", err?.response?.data || err.message);
+            logout();
         }
-
-        setToken(newToken);
-        localStorage.setItem("token", newToken);
-        localStorage.setItem("userId", userId);
-
-        axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-
-        const userRes = await axios.get(`${API_URL}/user/${userId}`, {
-            headers: { Authorization: `Bearer ${newToken}` }
-        });
-        setUser(userRes.data);
-        setIsLoggedIn(true);
-    } catch (err) {
-        console.warn("🔁 רענון טוקן נכשל:", err?.response?.data || err.message);
-        logout();
-    }
-};
+    };
 
     useEffect(() => {
         if (isLoggedIn) {
