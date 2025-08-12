@@ -11,7 +11,7 @@ const MeasurementModel = require('../models/measurement.model');
 router.post("/", async (req, res) => {
     try {
         const result = await measurementController.create(req.body);
-        res.send(result);
+        res.status(201).send(result);
     } catch (err) {
         console.error("Error creating measurement:", err);
         res.status(500).send({ message: "Error creating measurement", code: err.code });
@@ -59,11 +59,16 @@ router.put("/:id", async (req, res) => {
 // מחיקת מדידה לפי ID
 router.delete('/:id', async (req, res) => {
   try {
-    const deleted = await MeasurementModel.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ message: 'מדידה לא נמצאה' });
-    }
-    res.status(200).json({ message: 'המדידה נמחקה בהצלחה' });
+    // const deleted = await MeasurementModel.findByIdAndDelete(req.params.id);
+    // if (!deleted) {
+    //   return res.status(404).json({ message: 'מדידה לא נמצאה' });
+    // }
+    // res.status(200).json({ message: 'המדידה נמחקה בהצלחה' });
+
+    const result = await measurementController.deleteOne({ _id: req.params.id });
+    if (!result) return res.status(404).json({ message: 'מדידה לא נמצאה' });
+    res.status(200).json({ message: 'המדידה נמחקה בהצלחה', ...result });
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'שגיאה בשרת בעת המחיקה' });

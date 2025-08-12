@@ -62,7 +62,7 @@ const ResultContainer = styled.div`
 const BodyTypeText = styled.p`
     font-size: 1.1rem;
     color: ${props => {
-        switch (props.bodyType) {
+        switch (props.$bodyType) {
             case 'אקטומורף': return '#3498db';
             case 'מזומורף': return '#2ecc71';
             case 'אנדומורף': return '#e67e22';

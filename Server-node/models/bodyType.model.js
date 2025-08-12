@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const bodyTypeSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: 'User',
         required: true
     },
     // BMI snapshot at time of body type calculation

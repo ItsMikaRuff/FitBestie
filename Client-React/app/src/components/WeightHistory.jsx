@@ -1,5 +1,5 @@
-// WeightHistory.js
-import React, { useState } from 'react';
+// WeightHistory.jsx 
+import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import {
@@ -37,14 +37,26 @@ const ChartLabel = styled.div`
   color: #636e72;
 `;
 
-const CustomTooltip = ({ hoveredPoint, onDelete }) => {
+const Empty = styled.div`
+  text-align: center;
+  color: #636e72;
+  padding: 1rem 0;
+`;
+
+const CustomTooltip = ({ hoveredPoint, onDelete, onDeleted }) => {
   if (!hoveredPoint) return null;
 
   const handleDelete = async () => {
     if (!window.confirm('למחוק את השקילה מתאריך זה?')) return;
     try {
-      await axios.delete(`${API_URL}/measurement/${hoveredPoint._id}`);
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_URL}/measurement/${hoveredPoint._id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        withCredentials: true,
+        timeout: 10000,
+      });
       onDelete(hoveredPoint._id);
+      onDeleted && onDeleted(hoveredPoint._id);
     } catch (err) {
       alert('שגיאה במחיקה ❌');
     }
@@ -90,60 +102,82 @@ const CustomTooltip = ({ hoveredPoint, onDelete }) => {
   );
 };
 
-const WeightHistory = ({ history }) => {
-  const sorted = [...history]
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(-10);
+const WeightHistory = ({ history, onDeleted }) => {
+  const sorted = useMemo(() => {
+    return (history || [])
+      .slice()
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(-10);
+  }, [history]);
 
   const [data, setData] = useState(sorted);
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
-  const weights = data.map((e) => e.weight);
-  const minWeight = Math.floor(Math.min(...weights) / 10) * 10 - 5;
-  const maxWeight = Math.ceil(Math.max(...weights) / 10) * 10 + 5;
+  useEffect(() => {
+    setData(sorted);
+  }, [sorted]);
 
-  const chartData = data.map((entry) => ({
-    _id: entry._id,
-    date: new Date(entry.date).toLocaleDateString('he-IL'),
-    weight: entry.weight,
-    bmi: entry.bmi,
-  }));
+  const chartData = useMemo(() => {
+    return data.map((entry) => ({
+      _id: entry._id,
+      date: new Date(entry.date).toLocaleDateString('he-IL'),
+      weight: Number(entry.weight),
+      bmi: entry.bmi,
+    }));
+  }, [data]);
+
+  const weights = chartData.map(e => e.weight).filter(v => Number.isFinite(v));
+  const hasData = chartData.length > 0;
+  const minWeight = hasData && weights.length ? Math.floor(Math.min(...weights) / 10) * 10 - 5 : 'auto';
+  const maxWeight = hasData && weights.length ? Math.ceil(Math.max(...weights) / 10) * 10 + 5 : 'auto';
 
   return (
     <HistoryContainer>
       <HistoryTitle>📈 היסטוריית משקל</HistoryTitle>
-      <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={chartData}>
-          <CartesianGrid stroke="#f4d6df" strokeDasharray="3 3" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-          <YAxis domain={[minWeight, maxWeight]} tick={{ fontSize: 12 }} />
-          <Line
-            type="monotone"
-            dataKey="weight"
-            stroke="#e5508b"
-            strokeWidth={3}
-            dot={({ cx, cy, payload }) => (
-              <circle
-                cx={cx}
-                cy={cy}
-                r={5}
-                fill="#fff"
-                stroke="#c44569"
-                strokeWidth={2}
-                onMouseEnter={() => setHoveredPoint({ ...payload, x: cx, y: cy })}
-                style={{ cursor: 'pointer' }}
+
+      {!hasData ? (
+        <Empty>עדיין אין נתונים להצגה.</Empty>
+      ) : (
+        <>
+          <ResponsiveContainer width="100%" height={280}>
+            <LineChart data={chartData}>
+              <CartesianGrid stroke="#f4d6df" strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis domain={[minWeight, maxWeight]} tick={{ fontSize: 12 }} />
+              <Line
+                type="monotone"
+                dataKey="weight"
+                stroke="#e5508b"
+                strokeWidth={3}
+                dot={({ cx, cy, payload }) => (
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={5}
+                    fill="#fff"
+                    stroke="#c44569"
+                    strokeWidth={2}
+                    onMouseEnter={() => setHoveredPoint({ ...payload, x: cx, y: cy })}
+                    style={{ cursor: 'pointer' }}
+                  />
+                )}
+                activeDot={false}
               />
-            )}
-            activeDot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-      <ChartLabel>תאריך</ChartLabel>
-      <CustomTooltip hoveredPoint={hoveredPoint} onDelete={(id) => {
-        if (id === null) return setHoveredPoint(null);
-        setData((prev) => prev.filter((item) => item._id !== id));
-        setHoveredPoint(null);
-      }} />
+            </LineChart>
+          </ResponsiveContainer>
+          <ChartLabel>תאריך</ChartLabel>
+        </>
+      )}
+
+      <CustomTooltip
+        hoveredPoint={hoveredPoint}
+        onDelete={(id) => {
+          if (id === null) return setHoveredPoint(null);
+          setData((prev) => prev.filter((item) => item._id !== id));
+          setHoveredPoint(null);
+        }}
+        onDeleted={onDeleted}
+      />
     </HistoryContainer>
   );
 };

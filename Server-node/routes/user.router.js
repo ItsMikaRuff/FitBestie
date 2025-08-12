@@ -257,6 +257,38 @@ router.get("/pending-trainers", async (req, res) => {
   }
 });
 
+// --------------------- אישור/דחיית מאמנת ---------------------
+router.post("/approve-trainer/:id", requireAuth, requireRole(["worker", "superAdmin"]), async (req, res) => {
+  try {
+    const trainer = await UserModel.findById(req.params.id);
+    if (!trainer || trainer.role !== "trainer") {
+      return res.status(404).json({ message: "מאמנת לא נמצאה" });
+    }
+    trainer.trainerStatus = "approved";
+    await trainer.save();
+    res.json({ message: "המאמנת אושרה", trainerId: trainer._id });
+  } catch (err) {
+    console.error("❌ Error approving trainer:", err.message);
+    res.status(500).json({ message: "שגיאת שרת באישור מאמנת" });
+  }
+});
+
+router.post("/reject-trainer/:id", requireAuth, requireRole(["worker", "superAdmin"]), async (req, res) => {
+  try {
+    const trainer = await UserModel.findById(req.params.id);
+    if (!trainer || trainer.role !== "trainer") {
+      return res.status(404).json({ message: "מאמנת לא נמצאה" });
+    }
+    trainer.trainerStatus = "rejected"; // אפשר לשנות ל"pending" כדי להחזיר לתור, או למחוק פרטי תשלום אם צריך
+    await trainer.save();
+    res.json({ message: "הבקשה נדחתה", trainerId: trainer._id });
+  } catch (err) {
+    console.error("❌ Error rejecting trainer:", err.message);
+    res.status(500).json({ message: "שגיאת שרת בדחיית מאמנת" });
+  }
+});
+
+
 // --------------------- חיפוש מאמנות לפי סוג ---------------------
 router.get("/search", async (req, res) => {
   try {
