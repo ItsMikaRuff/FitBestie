@@ -34,6 +34,8 @@ const bodyTypeRouter = require("./routes/bodyType.router");
 const measurementRouter = require("./routes/measurement.router");
 const recipeRouter = require('./routes/recipe.router');
 const chatbotRouter = require('./routes/chatbot.router');
+const videosRouter = require('./routes/videos.router');
+
 
 //middleware
 app.use(cors(corsOptions));              // קריאות רגילות
@@ -51,6 +53,8 @@ app.use('/bodyType', bodyTypeRouter);
 app.use('/measurement', measurementRouter);
 app.use('/recipes', recipeRouter);
 app.use('/api/chatbot', chatbotRouter);
+app.use('/videos', videosRouter);
+
 
 app.get('/ping', (req, res) => {
     res.send('pong!');
