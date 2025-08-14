@@ -175,6 +175,7 @@ const getColorByBmi = (category) => {
 };
 
 const Home = () => {
+  
   const { isLoggedIn, user } = useUser();
   const [history, setHistory] = useState([]);
   const [latestMeasurement, setLatestMeasurement] = useState(null);

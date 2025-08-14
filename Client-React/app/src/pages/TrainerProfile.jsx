@@ -1,7 +1,7 @@
-//TrainerProfile.jsx
+// TrainerProfile.jsx
 
 import { useUser } from "../context/UserContext";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
     TrainerDashboardContainer,
     TrainerHeader,
@@ -56,7 +56,6 @@ const ExpertiseGrid = styled.div`
     gap: 10px;
     margin: 10px 0;
     direction: rtl;
-    
 `;
 
 const ExpertiseOption = styled.label`
@@ -89,7 +88,37 @@ const FormGroup = styled.div`
     text-align: right;
 `;
 
-const expertiseOptions = [
+const AddExpertiseRow = styled.div`
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+    direction: rtl;
+`;
+
+const AddButton = styled.button`
+    background-color: #6c5ce7;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+
+    &:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+`;
+
+const Note = styled.small`
+    color: #666;
+    display: block;
+    margin-top: 4px;
+    text-align: right;
+`;
+
+const defaultExpertiseOptions = [
     "אימון כוח",
     "אימון פונקציונלי",
     "אימון אירובי",
@@ -138,6 +167,21 @@ const TrainerProfile = () => {
         }
     });
 
+    // רשימת אפשרויות דינמית (ברירת מחדל + מה שכבר נבחר כולל מותאם אישית)
+    const [allExpertiseOptions, setAllExpertiseOptions] = useState(
+        Array.from(new Set([...(defaultExpertiseOptions || []), ...((user?.expertise) || [])]))
+    );
+
+    // שדה התמחות מותאמת אישית
+    const [customExpertise, setCustomExpertise] = useState("");
+
+    useEffect(() => {
+        // עדכון אופציות במקרה שהמשתמש/הנתונים מתעדכנים (למשל אחרי שמירה)
+        setAllExpertiseOptions(
+    Array.from(new Set([...(defaultExpertiseOptions || []), ...((formData.expertise) || [])]))
+);
+
+    }, [formData.expertise]);
 
     // בדיקה אם אובייקט הכתובת ריק
     const isAddressEmpty = (addr) =>
@@ -148,13 +192,11 @@ const TrainerProfile = () => {
                 (typeof v === "object" && v !== null && Object.values(v).every(z => z === null || z === ""))
         );
 
-
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "image") {
             setFormData((prev) => ({ ...prev, image: files[0] }));
         } else if (name === "phone" || name === "whatsapp") {
-            // Allow only numbers and + for phone numbers
             const cleanedValue = value.replace(/[^\d+]/g, '');
             setFormData((prev) => ({ ...prev, [name]: cleanedValue }));
         } else {
@@ -162,6 +204,7 @@ const TrainerProfile = () => {
         }
     };
 
+    // עדכון מהיר של התמחויות (צ'קבוקסים) + שמירה לשרת
     const handleExpertiseChange = async (expertise) => {
         const newExpertise = formData.expertise.includes(expertise)
             ? formData.expertise.filter(item => item !== expertise)
@@ -172,19 +215,19 @@ const TrainerProfile = () => {
             expertise: newExpertise
         }));
 
-        // Save changes immediately
         try {
             setLoading(true);
             const data = new FormData();
             data.append("expertise", JSON.stringify(newExpertise));
-
             const userId = user?._id || user?.id;
+
             const res = await axios.post(
                 `${API_URL}/user/update/${userId}`,
                 data,
                 {
                     headers: {
                         "Content-Type": "multipart/form-data",
+                        Authorization: `Bearer ${token}`, // ✅ מוסיף טוקן
                     },
                     withCredentials: true,
                 }
@@ -200,6 +243,34 @@ const TrainerProfile = () => {
         }
     };
 
+    // הוספת התמחות מותאמת אישית (אם לא קיימת)
+    const handleAddCustomExpertise = async () => {
+        const valueRaw = (customExpertise || "").trim();
+        if (!valueRaw) return;
+
+        // ניקוי כפילויות + אורך סביר
+        const value = valueRaw.replace(/\s+/g, ' ');
+        if (value.length > 40) {
+            alert("שם התמחות ארוך מדי (מקסימום 40 תווים).");
+            return;
+        }
+
+        const existsInOptions = allExpertiseOptions.some(opt => opt.toLowerCase() === value.toLowerCase());
+        const existsInSelected = formData.expertise.some(opt => opt.toLowerCase() === value.toLowerCase());
+
+        // אם כבר קיים – רק מסמן/מעדכן בחירה
+        if (!existsInOptions) {
+            setAllExpertiseOptions(prev => Array.from(new Set([...prev, value])));
+        }
+
+        if (!existsInSelected) {
+            // מסמן מיד ובמקביל שומר לשרת דרך handleExpertiseChange
+            await handleExpertiseChange(value);
+        }
+
+        setCustomExpertise("");
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -213,12 +284,9 @@ const TrainerProfile = () => {
         data.append("experienceYears", formData.experienceYears);
         data.append("previousGyms", JSON.stringify(formData.previousGyms));
 
-
-        // שינוי כאן!
         if (!isAddressEmpty(formData.address)) {
             data.append("address", JSON.stringify(formData.address));
         }
-        // אחרת - לא שולחים את address בכלל
 
         if (formData.image) {
             data.append("image", formData.image);
@@ -229,23 +297,22 @@ const TrainerProfile = () => {
             const userId = user?._id || user?.id;
 
             const res = await axios.post(
-    `${API_URL}/user/update/${userId}`,
-    data,
-    {
-        headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // מוסיף את הטוקן
-        },
-        withCredentials: true,
-    }
-);
+                `${API_URL}/user/update/${userId}`,
+                data,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        Authorization: `Bearer ${token}`, // ✅ טוקן גם כאן
+                    },
+                    withCredentials: true,
+                }
+            );
 
-// עדכון המשתמש ישירות מהשרת
-updateUser({}); // קריאה ריקה שלא תשלח שוב לשרת
-setUser(res.data); // 👈 תוודאי שזה זמין מהקונטקסט. אם לא - נעשה עדכון לקונטקסט
-alert("עודכן בהצלחה 🎉");
-setIsEditing(false);
-
+            // עדכון המשתמש ישירות מהשרת
+            updateUser({}); // קריאה ריקה שלא תשלח שוב לשרת
+            setUser(res.data);
+            alert("עודכן בהצלחה 🎉");
+            setIsEditing(false);
         } catch (error) {
             console.error("Axios error:", error);
             alert("שגיאה בעדכון הפרופיל");
@@ -253,9 +320,9 @@ setIsEditing(false);
             setLoading(false);
         }
 
+        // אם תרצי להימנע מרענון מלא – הסירי את השורה הבאה
         window.location.reload();
     };
-
 
     const handleDeleteProfile = async () => {
         if (!showDeleteConfirmation) {
@@ -300,7 +367,6 @@ setIsEditing(false);
 
     const handleEditClick = () => {
         setIsEditing(true);
-        // Add a small delay to ensure the form is rendered before scrolling
         setTimeout(() => {
             editFormRef.current?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -309,9 +375,7 @@ setIsEditing(false);
     if (!isLoggedIn || user?.role !== "trainer") return <p>Unauthorized</p>;
 
     return (
-
         <TrainerDashboardContainer style={{ direction: 'rtl' }}>
-
             <TrainerStatus status={user.trainerStatus}>
                 {user.trainerStatus === 'approved' && 'החשבון שלך מאושר'}
                 {user.trainerStatus === 'pending' && 'החשבון שלך ממתין לאישור מנהל'}
@@ -522,8 +586,10 @@ setIsEditing(false);
 
                 <EnhancedProfileSection>
                     <EnhancedProfileTitle>💪 תחומי התמחות</EnhancedProfileTitle>
+
+                    {/* רשימת אפשרויות (דינמית): */}
                     <ExpertiseGrid>
-                        {expertiseOptions.map((expertise) => (
+                        {allExpertiseOptions.map((expertise) => (
                             <ExpertiseOption key={expertise}>
                                 <input
                                     type="checkbox"
@@ -534,6 +600,34 @@ setIsEditing(false);
                             </ExpertiseOption>
                         ))}
                     </ExpertiseGrid>
+
+                    {/* הוספת התמחות מותאמת אישית: */}
+                    <FormGroup>
+                        <FormLabel>הוספת התמחות חדשה</FormLabel>
+                        <AddExpertiseRow>
+                            <FormInput
+                                type="text"
+                                value={customExpertise}
+                                onChange={(e) => setCustomExpertise(e.target.value)}
+                                placeholder="לדוגמה: אימון לאחר לידה / רצים מתחילים / רצפת אגן"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleAddCustomExpertise();
+                                    }
+                                }}
+                            />
+                            <AddButton
+                                type="button"
+                                onClick={handleAddCustomExpertise}
+                                disabled={loading || !customExpertise.trim()}
+                                title="הוסף והתאם סימון מידי"
+                            >
+                                הוסף התמחות
+                            </AddButton>
+                        </AddExpertiseRow>
+                        <Note>ההתמחות תתווסף לרשימה ותסומן מיד בפרופיל שלך.</Note>
+                    </FormGroup>
                 </EnhancedProfileSection>
 
                 <EnhancedProfileSection>
@@ -582,4 +676,4 @@ setIsEditing(false);
     );
 };
 
-export default TrainerProfile; 
+export default TrainerProfile;
