@@ -5,15 +5,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import {
-  FaMapMarkerAlt,
-  FaEnvelope,
-  FaPhoneAlt,
-  FaWhatsapp,
-  FaDumbbell,
-  FaFemale,
-  FaArrowRight,
-  FaTimes,
-  FaPlus,
+    FaMapMarkerAlt,
+    FaEnvelope,
+    FaPhoneAlt,
+    FaWhatsapp,
+    FaDumbbell,
+    FaFemale,
+    FaArrowRight,
+    FaTimes,
+    FaPlus,
 } from 'react-icons/fa';
 import { useUser } from '../context/UserContext';
 
@@ -181,243 +181,252 @@ const Note = styled.small`
 `;
 
 const TrainerPublicProfile = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { user, isLoggedIn, token } = useUser();
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { user, isLoggedIn, token } = useUser();
 
-  const [trainer, setTrainer] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [trainer, setTrainer] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  // --- Admin controls state ---
-  const [categories, setCategories] = useState([]);      // local editable expertise
-  const [newCategory, setNewCategory] = useState('');
-  const [saving, setSaving] = useState(false);
-  const authToken = useMemo(
-    () => token || localStorage.getItem('token') || '',
-    [token]
-  );
+    // --- Admin controls state ---
+    const [categories, setCategories] = useState([]); // local editable expertise
+    const [newCategory, setNewCategory] = useState('');
+    const [saving, setSaving] = useState(false);
 
-  const isAdmin = useMemo(() => {
-    const role = user?.role?.toLowerCase?.();
-    return isLoggedIn && (role === 'admin' || role === 'superadmin');
-  }, [isLoggedIn, user]);
+    const authToken = useMemo(
+        () => token || localStorage.getItem('token') || '',
+        [token]
+    );
 
-  useEffect(() => {
-    const fetchTrainer = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${API_URL}/user/public/${id}`);
-        setTrainer(res.data);
-        setCategories(Array.isArray(res.data?.expertise) ? res.data.expertise : []);
-      } catch (err) {
-        console.error('שגיאה בטעינת פרופיל מאמנת:', err);
-      } finally {
-        setLoading(false);
-      }
+    const isAdmin = useMemo(() => {
+        const role = user?.role?.toLowerCase?.();
+        return isLoggedIn && (role === 'admin' || role === 'superadmin');
+    }, [isLoggedIn, user]);
+
+    useEffect(() => {
+        const fetchTrainer = async () => {
+            setLoading(true);
+            try {
+                const res = await axios.get(`${API_URL}/user/public/${id}`);
+                setTrainer(res.data);
+                setCategories(Array.isArray(res.data?.expertise) ? res.data.expertise : []);
+            } catch (err) {
+                console.error('שגיאה בטעינת פרופיל מאמנת:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTrainer();
+    }, [id]);
+
+    // ---- SAVE expertise via POST /user/update/:id ----
+    const persistCategories = async (nextCategories) => {
+        if (!authToken) {
+            alert('אין הרשאת מנהלת. התחברי מחדש.');
+            return;
+        }
+        setSaving(true);
+        try {
+            const data = new FormData();
+            data.append('expertise', JSON.stringify(nextCategories));
+
+            await axios.post(
+                `${API_URL}/user/update/${id}`,
+                data,
+                {
+                    headers: { Authorization: `Bearer ${authToken}` },
+                    withCredentials: true,
+                }
+            );
+
+            setCategories(nextCategories);
+            setTrainer((prev) => ({ ...prev, expertise: nextCategories }));
+        } catch (e) {
+            console.error('שמירת קטגוריות נכשלה', e);
+            const status = e?.response?.status;
+            if (status === 401 || status === 403) {
+                alert('פג תוקף ההתחברות או אין הרשאה מתאימה. התחברי מחדש.');
+            } else {
+                alert('שמירת הקטגוריות נכשלה. בדקי שהינך מחוברת עם הרשאות מנהל ושהשרת זמין.');
+            }
+        } finally {
+            setSaving(false);
+        }
     };
-    fetchTrainer();
-  }, [id]);
 
-const persistCategories = async (nextCategories) => {
-  if (!authToken) {
-    alert('אין הרשאת מנהלת. התחברי מחדש.');
-    return;
-  }
-  setSaving(true);
-  try {
-    const data = new FormData();
-    data.append('expertise', JSON.stringify(nextCategories));
+    const handleAddCategory = async () => {
+        const value = (newCategory || '').trim();
+        if (!value) return;
 
-    await axios.post(
-      `${API_URL}/user/update/${id}`,
-      data,
-      {
-        headers: { Authorization: `Bearer ${authToken}` },
-        withCredentials: true,
-      }
-    );
+        // מניעת כפילויות (Case-insensitive)
+        const exists = categories.some((c) => c.toLowerCase() === value.toLowerCase());
+        if (exists) {
+            setNewCategory('');
+            return;
+        }
 
-    setCategories(nextCategories);
-    setTrainer((prev) => ({ ...prev, expertise: nextCategories }));
-  } catch (e) {
-    console.error('שמירת קטגוריות נכשלה', e);
-    alert('שמירת הקטגוריות נכשלה. בדקי שהינך מחוברת עם הרשאות מנהל ושהשרת זמין.');
-  } finally {
-    setSaving(false);
-  }
-};
+        const next = [...categories, value];
+        setNewCategory('');
+        await persistCategories(next);
+    };
 
+    const handleRemoveCategory = async (value) => {
+        const next = categories.filter((c) => c !== value);
+        await persistCategories(next);
+    };
 
-  const handleAddCategory = async () => {
-    const value = (newCategory || '').trim();
-    if (!value) return;
+    if (loading)
+        return (
+            <Container>
+                <p style={{ textAlign: 'center' }}>טוען פרופיל...</p>
+                <BackButton onClick={() => navigate('/search?type=trainer')}>
+                    <FaArrowRight />
+                    חזרה לחיפוש מאמנות
+                </BackButton>
+            </Container>
+        );
 
-    // נורמליזציה קלה + מניעת כפילויות (Case-insensitive)
-    const exists = categories.some((c) => c.toLowerCase() === value.toLowerCase());
-    if (exists) {
-      setNewCategory('');
-      return;
-    }
+    if (!trainer)
+        return (
+            <Container>
+                <p style={{ textAlign: 'center', fontSize: '1.3rem', margin: '2rem 0' }}>
+                    מאמנת לא נמצאה
+                </p>
+                <BackButton onClick={() => navigate('/search?type=trainer')}>
+                    <FaArrowRight />
+                    חזרה לחיפוש מאמנות
+                </BackButton>
+            </Container>
+        );
 
-    const next = [...categories, value];
-    setNewCategory('');
-    await persistCategories(next);
-  };
-
-  const handleRemoveCategory = async (value) => {
-    const next = categories.filter((c) => c !== value);
-    await persistCategories(next);
-  };
-
-  if (loading)
     return (
-      <Container>
-        <p style={{ textAlign: 'center' }}>טוען פרופיל...</p>
-        <BackButton onClick={() => navigate('/search?type=trainer')}>
-          <FaArrowRight />
-          חזרה לחיפוש מאמנות
-        </BackButton>
-      </Container>
-    );
+        <Container>
+            <ProfileHeader>
+                {trainer.image ? (
+                    <ProfileImage src={trainer.image} alt={trainer.name} />
+                ) : (
+                    <FemaleIconCircle>
+                        <FaFemale />
+                    </FemaleIconCircle>
+                )}
+                <Name>{trainer.name}</Name>
+            </ProfileHeader>
 
-  if (!trainer)
-    return (
-      <Container>
-        <p style={{ textAlign: 'center', fontSize: '1.3rem', margin: '2rem 0' }}>
-          מאמנת לא נמצאה
-        </p>
-        <BackButton onClick={() => navigate('/search?type=trainer')}>
-          <FaArrowRight />
-          חזרה לחיפוש מאמנות
-        </BackButton>
-      </Container>
-    );
+            <InfoSection>
+                <h2>פרטי קשר</h2>
+                {trainer.email && <InfoRow><FaEnvelope /> {trainer.email}</InfoRow>}
+                {trainer.phone && <InfoRow><FaPhoneAlt /> {trainer.phone}</InfoRow>}
+                {trainer.whatsapp && (
+                    <InfoRow>
+                        <FaWhatsapp />{' '}
+                        <a href={`https://wa.me/${trainer.whatsapp}`} target="_blank" rel="noreferrer">
+                            {trainer.whatsapp}
+                        </a>
+                    </InfoRow>
+                )}
+                {trainer.address?.city && (
+                    <InfoRow>
+                        <FaMapMarkerAlt /> {trainer.address?.street}, {trainer.address?.city}
+                    </InfoRow>
+                )}
+            </InfoSection>
 
-  return (
-    <Container>
-      <ProfileHeader>
-        {trainer.image ? (
-          <ProfileImage src={trainer.image} alt={trainer.name} />
-        ) : (
-          <FemaleIconCircle>
-            <FaFemale />
-          </FemaleIconCircle>
-        )}
-        <Name>{trainer.name}</Name>
-      </ProfileHeader>
+            <InfoSection>
+                <h2>התמחויות</h2>
 
-      <InfoSection>
-        <h2>פרטי קשר</h2>
-        {trainer.email && <InfoRow><FaEnvelope /> {trainer.email}</InfoRow>}
-        {trainer.phone && <InfoRow><FaPhoneAlt /> {trainer.phone}</InfoRow>}
-        {trainer.whatsapp && (
-          <InfoRow>
-            <FaWhatsapp />{' '}
-            <a href={`https://wa.me/${trainer.whatsapp}`} target="_blank" rel="noreferrer">
-              {trainer.whatsapp}
-            </a>
-          </InfoRow>
-        )}
-        {trainer.address?.city && (
-          <InfoRow>
-            <FaMapMarkerAlt /> {trainer.address?.street}, {trainer.address?.city}
-          </InfoRow>
-        )}
-      </InfoSection>
+                {/* תצוגה רגילה */}
+                {(!isAdmin || saving) && (
+                    <>
+                        {trainer.expertise?.length > 0 ? (
+                            <TagsWrap>
+                                {trainer.expertise.map((item) => (
+                                    <Tag key={item}>
+                                        <FaDumbbell /> {item}
+                                    </Tag>
+                                ))}
+                            </TagsWrap>
+                        ) : (
+                            <p>אין מידע זמין</p>
+                        )}
+                    </>
+                )}
 
-      <InfoSection>
-        <h2>התמחויות</h2>
+                {/* פנל ניהול ל־ADMIN/SUPERADMIN */}
+                {isAdmin && !saving && (
+                    <AdminPanel>
+                        <AdminTitle>ניהול קטגוריות (למנהלות בלבד)</AdminTitle>
 
-        {/* תצוגה רגילה */}
-        {(!isAdmin || saving) && (
-          <>
-            {trainer.expertise?.length > 0 ? (
-              <TagsWrap>
-                {trainer.expertise.map((item, index) => (
-                  <Tag key={index}>
-                    <FaDumbbell /> {item}
-                  </Tag>
-                ))}
-              </TagsWrap>
-            ) : (
-              <p>אין מידע זמין</p>
+                        {/* רשימת תגיות ניתנות להסרה */}
+                        <Row>
+                            {categories.length > 0 ? (
+                                <TagsWrap>
+                                    {categories.map((cat) => (
+                                        <RemovableTag key={cat} title="הסירי קטגוריה">
+                                            <FaDumbbell /> {cat}
+                                            <button onClick={() => handleRemoveCategory(cat)} aria-label={`הסר ${cat}`}>
+                                                <FaTimes />
+                                            </button>
+                                        </RemovableTag>
+                                    ))}
+                                </TagsWrap>
+                            ) : (
+                                <Note>אין קטגוריות כרגע.</Note>
+                            )}
+                        </Row>
+
+                        {/* הוספת תגית */}
+                        <Row>
+                            <Input
+                                type="text"
+                                placeholder="הוסיפי קטגוריה (למשל: אימון לאחר לידה)"
+                                value={newCategory}
+                                onChange={(e) => setNewCategory(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleAddCategory();
+                                    }
+                                }}
+                            />
+                            <AddBtn onClick={handleAddCategory} disabled={saving || !newCategory.trim()}>
+                                <FaPlus /> הוספה
+                            </AddBtn>
+                            {saving && <Note>שומרת…</Note>}
+                        </Row>
+
+                        <Note>
+                            השינויים נשמרים מיידית בפרופיל המאמנת ומופיעים גם בחיפוש.
+                        </Note>
+                    </AdminPanel>
+                )}
+            </InfoSection>
+
+            {trainer.previousGyms?.length > 0 && (
+                <InfoSection>
+                    <h2>ניסיון תעסוקתי</h2>
+                    {trainer.previousGyms.map((gym, index) => (
+                        <InfoRow key={`${gym?.name || gym}-${index}`}>
+                            🏋️‍♀️ {gym?.name ? `${gym.name} (${gym.years} שנים)` : gym}
+                        </InfoRow>
+                    ))}
+                </InfoSection>
             )}
-          </>
-        )}
 
-        {/* פנל ניהול ל־ADMIN/SUPERADMIN */}
-        {isAdmin && (
-          <AdminPanel>
-            <AdminTitle>ניהול קטגוריות (למנהלות בלבד)</AdminTitle>
+            {trainer.bodyType?.type && (
+                <InfoSection>
+                    <h2>סוג מבנה גוף</h2>
+                    <InfoRow>
+                        🧍‍♀️ {trainer.bodyType.type} - {trainer.bodyType.description}
+                    </InfoRow>
+                </InfoSection>
+            )}
 
-            {/* רשימת תגיות ניתנות להסרה */}
-            <Row>
-              {categories.length > 0 ? (
-                <TagsWrap>
-                  {categories.map((cat) => (
-                    <RemovableTag key={cat} title="הסירי קטגוריה">
-                      <FaDumbbell /> {cat}
-                      <button onClick={() => handleRemoveCategory(cat)} aria-label={`הסר ${cat}`}>
-                        <FaTimes />
-                      </button>
-                    </RemovableTag>
-                  ))}
-                </TagsWrap>
-              ) : (
-                <Note>אין קטגוריות כרגע.</Note>
-              )}
-            </Row>
-
-            {/* הוספת תגית */}
-            <Row>
-              <Input
-                type="text"
-                placeholder="הוסיפי קטגוריה (למשל: אימון לאחר לידה)"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddCategory();
-                }}
-              />
-              <AddBtn onClick={handleAddCategory} disabled={saving || !newCategory.trim()}>
-                <FaPlus /> הוספה
-              </AddBtn>
-              {saving && <Note>שומרת…</Note>}
-            </Row>
-
-            <Note>
-              השינויים נשמרים מיידית בפרופיל המאמנת ומופיעים גם בחיפוש.
-            </Note>
-          </AdminPanel>
-        )}
-      </InfoSection>
-
-      {trainer.previousGyms?.length > 0 && (
-        <InfoSection>
-          <h2>ניסיון תעסוקתי</h2>
-          {trainer.previousGyms.map((gym, index) => (
-            <InfoRow key={index}>
-              🏋️‍♀️ {gym.name ? `${gym.name} (${gym.years} שנים)` : gym}
-            </InfoRow>
-          ))}
-        </InfoSection>
-      )}
-
-      {trainer.bodyType?.type && (
-        <InfoSection>
-          <h2>סוג מבנה גוף</h2>
-          <InfoRow>
-            🧍‍♀️ {trainer.bodyType.type} - {trainer.bodyType.description}
-          </InfoRow>
-        </InfoSection>
-      )}
-
-      <BackButton onClick={() => navigate('/search?type=trainer')}>
-        <FaArrowRight />
-        חזרה לחיפוש מאמנות
-      </BackButton>
-    </Container>
-  );
+            <BackButton onClick={() => navigate('/search?type=trainer')}>
+                <FaArrowRight />
+                חזרה לחיפוש מאמנות
+            </BackButton>
+        </Container>
+    );
 };
 
 export default TrainerPublicProfile;
