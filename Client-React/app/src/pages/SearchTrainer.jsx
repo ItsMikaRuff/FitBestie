@@ -42,16 +42,6 @@ const Filters = styled.div`
   justify-content: center;
 `;
 
-const FilterButton = styled.button`
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  background: ${props => props.$active ? '#6c5ce7' : '#fff'};
-  color: ${props => props.$active ? '#fff' : '#333'};
-  cursor: pointer;
-  transition: 0.3s;
-`;
-
 const Input = styled.input`
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -152,14 +142,17 @@ const SearchTrainer = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isLoggedIn } = useUser();
+
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeFilter, setActiveFilter] = useState('all');
+
+    // נשאר רק סינון לפי עיר ומרחק
     const [locationFilter, setLocationFilter] = useState('');
-    const [favorites, setFavorites] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
     const [distance, setDistance] = useState(50);
+
+    const [favorites, setFavorites] = useState([]);
     const [updating, setUpdating] = useState(false);
     const [selectedTrainer, setSelectedTrainer] = useState(null);
 
@@ -168,13 +161,8 @@ const SearchTrainer = () => {
     useEffect(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (pos) => setUserLocation({
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude
-                }),
-                (err) => {
-                    console.error("Geolocation error", err);
-                }
+                (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                (err) => console.error("Geolocation error", err)
             );
         }
     }, []);
@@ -186,12 +174,8 @@ const SearchTrainer = () => {
                 const res = await axios.get(`${API_URL}/search?type=${searchType}`);
                 const filtered = res.data
                     .filter(r => r.role !== 'trainer' || r.trainerStatus === 'approved')
-                    .map(r => ({
-                        ...r,
-                        _id: r._id?.toString?.() ?? r._id
-                    }));
+                    .map(r => ({ ...r, _id: r._id?.toString?.() ?? r._id }));
                 setResults(filtered);
-                  console.log("RESULTS:", filtered);
             } catch (err) {
                 console.error("❌ שגיאה בטעינת תוצאות", err);
                 setResults([]);
@@ -260,12 +244,8 @@ const SearchTrainer = () => {
         }
     };
 
+    // ⬇️ ללא סינון סוג – רק עיר/מרחק + מיון לפי מרחק כשיש מיקום
     const filteredResults = results
-        .filter(r => {
-            if (activeFilter === 'trainers') return r.role === 'trainer';
-            if (activeFilter === 'studios') return r.role === 'studio';
-            return true;
-        })
         .filter(r => {
             if (!locationFilter) return true;
             const city = r.address?.city || '';
@@ -273,16 +253,20 @@ const SearchTrainer = () => {
         })
         .filter(r => {
             if (!userLocation) return true;
-            if (!r.address?.coordinates || typeof r.address.coordinates.lat !== "number" || typeof r.address.coordinates.lng !== "number") return false;
-            const from = userLocation;
-            const to = r.address.coordinates;
-            const dist = haversine(from, to) / 1000;
-            return dist <= distance;
+            const c = r.address?.coordinates;
+            if (!c || typeof c.lat !== 'number' || typeof c.lng !== 'number') return false;
+            const distKm = haversine(userLocation, { lat: c.lat, lng: c.lng }) / 1000;
+            return distKm <= distance;
         })
         .sort((a, b) => {
-            if (!userLocation || !a.address?.location || !b.address?.location) return 0;
-            const distA = haversine(userLocation, a.address.location) / 1000;
-            const distB = haversine(userLocation, b.address.location) / 1000;
+            if (!userLocation) return 0;
+            const ca = a.address?.coordinates;
+            const cb = b.address?.coordinates;
+            if (!ca || !cb || typeof ca.lat !== 'number' || typeof ca.lng !== 'number' || typeof cb.lat !== 'number' || typeof cb.lng !== 'number') {
+                return 0;
+            }
+            const distA = haversine(userLocation, { lat: ca.lat, lng: ca.lng }) / 1000;
+            const distB = haversine(userLocation, { lat: cb.lat, lng: cb.lng }) / 1000;
             return distA - distB;
         });
 
@@ -311,6 +295,7 @@ const SearchTrainer = () => {
 
             <Content>
                 <Name>{trainer.name}</Name>
+                {/* אפשר להשאיר/להסיר את התג בהתאם לרצונך. כאן השארתי כדי שמשתמשים יראו את הסוג. */}
                 <Type>{trainer.role === 'trainer' ? 'מאמנת אישית' : 'מאמנת קבוצתית'}</Type>
 
                 <Info>
@@ -354,9 +339,6 @@ const SearchTrainer = () => {
             </Header>
 
             <Filters>
-                <FilterButton $active={activeFilter === 'all'} onClick={() => setActiveFilter('all')}>הכל</FilterButton>
-                <FilterButton $active={activeFilter === 'trainers'} onClick={() => setActiveFilter('trainers')}>מאמנות אישיות</FilterButton>
-                <FilterButton $active={activeFilter === 'studios'} onClick={() => setActiveFilter('studios')}>מאמנות קבוצתיות</FilterButton>
                 <Input
                     placeholder="סנן לפי עיר"
                     value={locationFilter}

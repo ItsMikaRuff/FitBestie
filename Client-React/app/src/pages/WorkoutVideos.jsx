@@ -156,12 +156,6 @@ const IconBtn = styled.button`
   cursor: pointer;
 `;
 
-const Note = styled.small`
-  color: #666;
-  display: block;
-  margin-top: 0.4rem;
-`;
-
 /** מיפוי שם מפתח -> תווית עברית */
 const MUSCLE_LABELS_HE = {
   'front-arm-left': 'זרוע קדמית',
@@ -344,7 +338,7 @@ const WorkoutVideos = () => {
                 />
                 <Input
                   type="text"
-                  placeholder="קישור YouTube (watch?v= / youtu.be / embed)"
+                  placeholder="קישור YouTube "
                   value={newUrl}
                   onChange={(e) => setNewUrl(e.target.value)}
                   onKeyDown={(e) => {
@@ -358,7 +352,6 @@ const WorkoutVideos = () => {
                   <FaPlus /> הוספה
                 </AddBtn>
               </Row>
-              <Note>הקישור יומר אוטומטית ל־embed. לאחר שמירה הסרטון יופיע מיד.</Note>
             </AdminPanel>
           )}
 
