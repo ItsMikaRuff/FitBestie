@@ -142,6 +142,15 @@ const userSchema = new mongoose.Schema({
         default: Date.now,
     },
 
+    loginCount: { 
+        type: Number, 
+        default: 0 
+    },
+
+    lastLoginAt: { 
+        type: Date 
+    },
+
     favoriteRecipes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Recipe"

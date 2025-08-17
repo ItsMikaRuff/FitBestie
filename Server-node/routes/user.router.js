@@ -1,4 +1,4 @@
-//user.router.js
+// user.router.js
 
 const express = require("express");
 const router = express.Router();
@@ -11,7 +11,6 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const sendResetPasswordEmail = require("../utils/sendResetPasswordEmail");
 
-// const trainerModel = require("../models/trainer.model");
 const UserModel = require("../models/user.model");
 const RecipeModel = require("../models/recipe.model");
 const AddressModel = require("../models/address.model");
@@ -23,9 +22,9 @@ const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../utils/cloudinary");
 
-// configure cloud storage
+// ---------- Cloudinary upload ----------
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
     folder: "fitbestie_users",
     allowed_formats: ["jpg", "png", "jpeg", "mp4", "mov"],
@@ -34,33 +33,28 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage });
 
-
-// יצירת טוקנים
-
+// ---------- Tokens ----------
 function generateTokens(user) {
   const payload = { id: user._id, role: user.role };
-
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "15m"
-  });
-
-  const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
-    expiresIn: "7d"
-  });
-
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+  const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, { expiresIn: "7d" });
   return { accessToken, refreshToken };
 }
 
+// קונפיגורציה מרוכזת לעוגיית רענון (DEV/PROD)
+function cookieOpts() {
+  const isProd = process.env.NODE_ENV === "production";
+  return isProd
+    ? { httpOnly: true, secure: true, sameSite: "None", maxAge: 7 * 24 * 60 * 60 * 1000 }
+    : { httpOnly: true, secure: false, sameSite: "Lax",  maxAge: 7 * 24 * 60 * 60 * 1000 };
+}
 
+/* ======================= RESET PASSWORD ======================= */
 
-// --------------------- איפוס סיסמה ---------------------
-
+// (גרסה אחת בלבד – מחקתי כפילות)
 router.post("/reset-password", async (req, res) => {
   const { token, password } = req.body;
-
-  if (!token || !password) {
-    return res.status(400).json({ message: "חסרים פרטים לביצוע איפוס" });
-  }
+  if (!token || !password) return res.status(400).json({ message: "חסרים פרטים לביצוע איפוס" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -69,31 +63,20 @@ router.post("/reset-password", async (req, res) => {
     const user = await UserModel.findById(userId);
     if (!user) return res.status(404).json({ message: "משתמש לא נמצא" });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
+    user.password = await bcrypt.hash(password, 10);
     await user.save();
 
-    //  יצירת טוקנים
     const { accessToken, refreshToken } = generateTokens(user);
-
-    // שליחת refreshToken ב־cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None", // חשוב אם אתה עובד מ־localhost ל־onrender
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ימים
-    });
-
-    //  החזרת גישה מיידית
+    res.cookie("refreshToken", refreshToken, cookieOpts());
     res.json({ user, token: accessToken, message: "הסיסמה עודכנה בהצלחה" });
-
   } catch (err) {
     console.error("שגיאה באיפוס סיסמה:", err.message);
     res.status(500).json({ message: "קישור לא חוקי או שפג תוקפו" });
   }
 });
 
-// --------------------- שכחתי סיסמה ---------------------
+/* ======================= FORGOT PASSWORD ======================= */
+
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "יש להזין כתובת מייל" });
@@ -109,42 +92,14 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-router.post("/reset-password", async (req, res) => {
-  const { token, password } = req.body;
-  if (!token || !password) {
-    return res.status(400).json({ message: "חסרים פרטים לביצוע איפוס" });
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
-    const user = await UserModel.findById(userId);
-    if (!user) return res.status(404).json({ message: "משתמש לא נמצא" });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
-    await user.save();
-    res.json({ message: "הסיסמה עודכנה בהצלחה" });
-  } catch (err) {
-    console.error("שגיאה באיפוס סיסמה:", err.message);
-    res.status(500).json({ message: "קישור לא חוקי או שפג תוקפו" });
-  }
-});
+/* ======================= REGISTER ======================= */
 
-// --------------------- הרשמה ---------------------
 router.post("/", async (req, res) => {
   console.log("📝 received data:", req.body);
-
   try {
-
     const user = await userController.createUser(req.body);
     const { accessToken, refreshToken } = generateTokens(user);
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
-
+    res.cookie("refreshToken", refreshToken, cookieOpts());
     res.status(201).json({ user, token: accessToken });
   } catch (err) {
     console.error("❌ create error:", err.message);
@@ -152,112 +107,169 @@ router.post("/", async (req, res) => {
   }
 });
 
-// --------------------- התחברות ---------------------
+/* ======================= LOGIN ======================= */
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password, captchaToken } = req.body;
-    const isHuman = await captcha(captchaToken);
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "חסר אימייל או סיסמה" });
+    }
+    if (!captchaToken) {
+      return res.status(400).json({ message: "חסר captchaToken" });
+    }
+
+    // אימות CAPTCHA (מוגן משגיאה פנימית)
+    let isHuman = false;
+    try {
+      isHuman = await captcha(captchaToken);
+    } catch (e) {
+      console.error("captcha() error:", e?.message || e);
+      return res.status(502).json({ message: "שגיאה באימות CAPTCHA" });
+    }
     if (!isHuman) {
       return res.status(403).json({ message: "אימות CAPTCHA נכשל. אנא אשר שאתה לא רובוט." });
     }
-    const user = await userController.readOne({ email }, true);
-    if (!user) {
-      return res.status(401).json({ message: "אימייל או סיסמה שגויים" });
-    }
 
+    // שימי לב: readOne כנראה מחזיר אובייקט רגיל (לא Document)
+    const user = await userController.readOne({ email }, true);
+    if (!user) return res.status(401).json({ message: "אימייל או סיסמה שגויים" });
     if (!user.password) {
       return res.status(400).json({ message: "לא קיימת סיסמה למשתמש זה. אנא אפס/י סיסמה או הירשם/י מחדש." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "אימייל או סיסמה שגויים" });
-    }
-    if (user.twoFactorEnabled && user.role === "admin") {
+    if (!isMatch) return res.status(400).json({ message: "אימייל או סיסמה שגויים" });
+
+    // 2FA לאדמין – עדכון ישיר במסד (לא user.save())
+    if (user.twoFactorEnabled) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const expires = new Date(Date.now() + 5 * 60 * 1000);
-      user.otpCode = otp;
-      user.otpExpiresAt = expires;
-      await user.save();
+      await UserModel.updateOne({ _id: user._id }, { $set: { otpCode: otp, otpExpiresAt: expires } });
       await sendOTPEmail(user.email, otp);
-      return res.status(206).json({
-        message: "OTP נשלח למייל",
-        requireOTP: true,
-        userId: user._id,
-      });
+      return res.status(206).json({ message: "OTP נשלח למייל", requireOTP: true, userId: user._id });
     }
 
     const { accessToken, refreshToken } = generateTokens(user);
+    res.cookie("refreshToken", refreshToken, cookieOpts());
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    // העלאת מונה התחברויות + חותמת זמן — בלי user.save()
+    await UserModel.updateOne(
+      { _id: user._id },
+      { $inc: { loginCount: 1 }, $set: { lastLoginAt: new Date() } }
+    );
 
-    res.json({ user, token: accessToken });
+    const safeUser = { ...user };
+    delete safeUser.password;
+    delete safeUser.otpCode;
+    delete safeUser.otpExpiresAt;
 
+    return res.json({ user: safeUser, token: accessToken });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "שגיאה בשרת בעת התחברות" });
   }
 });
 
-
 router.post("/login/verify-otp", async (req, res) => {
-  const { userId, otp } = req.body;
-  const user = await UserModel.findById(userId);
-  if (!user || !user.otpCode || new Date() > user.otpExpiresAt) {
-    return res.status(400).json({ message: "OTP לא תקף או פג תוקף" });
+  try {
+    const { userId, otp } = req.body;
+    const user = await UserModel.findById(userId);
+    if (!user || !user.otpCode || new Date() > user.otpExpiresAt) {
+      return res.status(400).json({ message: "OTP לא תקף או פג תוקף" });
+    }
+    if (otp !== user.otpCode) {
+      return res.status(401).json({ message: "OTP שגוי" });
+    }
+
+    // אפס את ה-OTP בעדכון ישיר
+    await UserModel.updateOne(
+      { _id: user._id },
+      { $unset: { otpCode: "", otpExpiresAt: "" } }
+    );
+
+    const { accessToken, refreshToken } = generateTokens(user);
+    res.cookie("refreshToken", refreshToken, cookieOpts());
+    res.json({ user, token: accessToken });
+  } catch (err) {
+    console.error("verify-otp error:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
   }
-  if (otp !== user.otpCode) {
-    return res.status(401).json({ message: "OTP שגוי" });
-  }
-  user.otpCode = undefined;
-  user.otpExpiresAt = undefined;
-  await user.save();
-
-  const { accessToken, refreshToken } = generateTokens(user);
-
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
-
-  res.json({ user, token: accessToken });
-
 });
 
-// --------------------- הפעלת 2FA ---------------------
+// --------------------- הפעלת/כיבוי 2FA ---------------------
 router.put("/:id/2fa", async (req, res) => {
   try {
-    const updatedUser = await userController.update(
-      { _id: req.params.id },
-      { twoFactorEnabled: req.body.enabled }
+    const { id } = req.params;
+    const { enabled } = req.body;
+
+    // ודאי שהערך בוליאני
+    const twoFactorEnabled = !!enabled;
+
+    const doc = await UserModel.findByIdAndUpdate(
+      id,
+      { twoFactorEnabled },
+      { new: true, runValidators: true, select: "twoFactorEnabled" }
     );
-    res.json(updatedUser);
+
+    if (!doc) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.json({ twoFactorEnabled: doc.twoFactorEnabled });
   } catch (err) {
-    res.status(500).json({ message: "שגיאה בעדכון אימות דו־שלבי", error: err.message });
+    console.error("2FA toggle error:", err);
+    return res.status(500).json({ message: "שגיאה בעדכון 2FA" });
   }
 });
 
-// --------------------- מאמנות בהמתנה ---------------------
-router.get("/pending-trainers", async (req, res) => {
-  try {
-    const pendingTrainers = await userController.read({
-      role: "trainer",
-      trainerStatus: "pending",
-    });
-    res.send(pendingTrainers);
-  } catch (error) {
-    res.status(500).send("Error fetching pending trainers");
-  }
-});
 
-// --------------------- אישור/דחיית מאמנת ---------------------
+/* ======================= PENDING TRAINERS ======================= */
+router.get(
+  "/pending-trainers",
+  requireAuth,
+  requireRole(["worker", "superAdmin", "manager"]),
+  async (req, res) => {
+    try {
+      const trainers = await UserModel.find(
+        { role: "trainer", trainerStatus: "pending" },
+        "name email role phone phoneNumber contact address paymentDetails"
+      ).lean();
+
+      const sanitized = trainers.map((u) => {
+        const phone =
+          u.phone ||
+          u.phoneNumber ||
+          (u.contact && (u.contact.phone || u.contact.phoneNumber)) ||
+          (u.address && (u.address.phone || u.address.phoneNumber)) ||
+          "";
+
+        let last4 = null;
+        if (u.paymentDetails?.cardNumber) {
+          const digits = String(u.paymentDetails.cardNumber).replace(/\D/g, "");
+          if (digits.length >= 4) last4 = digits.slice(-4);
+        }
+        if (!last4 && u.paymentDetails?.last4) {
+          const digits = String(u.paymentDetails.last4).replace(/\D/g, "");
+          if (digits.length === 4) last4 = digits;
+        }
+        if (!last4 && u.paymentDetails?.cardNumber && /\*{4}\s?(\d{4})$/.test(u.paymentDetails.cardNumber)) {
+          last4 = u.paymentDetails.cardNumber.match(/(\d{4})$/)?.[1] || null;
+        }
+
+        return { _id: u._id, name: u.name || "", email: u.email || "", phone, last4 };
+      });
+
+      res.json(sanitized);
+    } catch (error) {
+      console.error("Error fetching pending trainers:", error);
+      res.status(500).send("Error fetching pending trainers");
+    }
+  }
+);
+
+/* ======================= APPROVE / REJECT TRAINER ======================= */
 router.post("/approve-trainer/:id", requireAuth, requireRole(["worker", "superAdmin"]), async (req, res) => {
   try {
     const trainer = await UserModel.findById(req.params.id);
@@ -279,7 +291,7 @@ router.post("/reject-trainer/:id", requireAuth, requireRole(["worker", "superAdm
     if (!trainer || trainer.role !== "trainer") {
       return res.status(404).json({ message: "מאמנת לא נמצאה" });
     }
-    trainer.trainerStatus = "rejected"; // אפשר לשנות ל"pending" כדי להחזיר לתור, או למחוק פרטי תשלום אם צריך
+    trainer.trainerStatus = "rejected";
     await trainer.save();
     res.json({ message: "הבקשה נדחתה", trainerId: trainer._id });
   } catch (err) {
@@ -288,17 +300,12 @@ router.post("/reject-trainer/:id", requireAuth, requireRole(["worker", "superAdm
   }
 });
 
-
-// --------------------- חיפוש מאמנות לפי סוג ---------------------
+/* ======================= SEARCH TRAINERS ======================= */
 router.get("/search", async (req, res) => {
   try {
     const { type } = req.query;
-    const query = {
-      role: type || "trainer",
-      trainerStatus: "approved",
-    };
+    const query = { role: type || "trainer", trainerStatus: "approved" };
     const results = await userController.searchByTypeAndLocation(query);
-    console.log("Search results:", results);
     res.json(results);
   } catch (error) {
     console.error("Search error:", error);
@@ -306,27 +313,25 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// דירוג מאמנת
-router.put('/:id/rate', requireAuth, async (req, res) => {
+/* ======================= RATE TRAINER ======================= */
+router.put("/:id/rate", requireAuth, async (req, res) => {
   const { rating } = req.body;
-  const userId = req.user.id; // מהטוקן, המשתמש המדורג
-
-  if (typeof rating !== 'number' || rating < 0 || rating > 5) {
+  const userId = req.user.id;
+  if (typeof rating !== "number" || rating < 0 || rating > 5) {
     return res.status(400).json({ message: "דירוג לא חוקי" });
   }
   try {
     const trainer = await UserModel.findById(req.params.id);
-    if (!trainer || trainer.role !== 'trainer') {
+    if (!trainer || trainer.role !== "trainer") {
       return res.status(404).json({ message: "מאמנת לא נמצאה" });
     }
 
-    // עדכני/הוסיפי דירוג של המשתמש
     let found = false;
     if (!trainer.ratings) trainer.ratings = [];
-    trainer.ratings = trainer.ratings.map(r => {
+    trainer.ratings = trainer.ratings.map((r) => {
       if (r.user.toString() === userId) {
         found = true;
-        return { user: r.user, value: rating }; // עדכון ערך קיים
+        return { user: r.user, value: rating };
       }
       return r;
     });
@@ -334,27 +339,20 @@ router.put('/:id/rate', requireAuth, async (req, res) => {
       trainer.ratings.push({ user: userId, value: rating });
     }
 
-    // חישוב ממוצע
     const avg = trainer.ratings.length
-      ? (trainer.ratings.reduce((sum, r) => sum + r.value, 0) / trainer.ratings.length)
+      ? trainer.ratings.reduce((sum, r) => sum + r.value, 0) / trainer.ratings.length
       : 0;
 
     trainer.rating = avg;
     await trainer.save();
 
-    res.json({
-      message: "הדירוג נשמר!",
-      rating: avg,
-      ratingsCount: trainer.ratings.length
-    });
+    res.json({ message: "הדירוג נשמר!", rating: avg, ratingsCount: trainer.ratings.length });
   } catch (err) {
     res.status(500).json({ message: "שגיאת שרת", error: err.message });
   }
 });
 
-
-
-// --------------------- עדכון משתמש ---------------------
+/* ======================= UPDATE USER ======================= */
 router.post("/update/:id", (req, res, next) => {
   upload.single("image")(req, res, async (err) => {
     if (err) {
@@ -363,11 +361,9 @@ router.post("/update/:id", (req, res, next) => {
     }
     try {
       const user = await UserModel.findById(req.params.id);
-
       if (!user) throw new Error("User not found");
       const updates = {};
 
-      // Handle basic user info
       if (req.body.name) updates.name = req.body.name;
       if (req.body.email) updates.email = req.body.email;
       if (req.body.location) updates.location = req.body.location;
@@ -376,7 +372,6 @@ router.post("/update/:id", (req, res, next) => {
       if (req.body.instagram) updates.instagram = req.body.instagram;
       if (req.body.role) updates.role = req.body.role;
 
-      // ניסיון תעסוקתי
       if (req.body.previousGyms !== undefined) {
         try {
           updates.previousGyms = typeof req.body.previousGyms === "string"
@@ -387,15 +382,9 @@ router.post("/update/:id", (req, res, next) => {
         }
       }
 
-
-      // Handle address (Separate Table)
-
       if (req.body.address) {
         try {
-          const addressData = typeof req.body.address === 'string'
-            ? JSON.parse(req.body.address)
-            : req.body.address;
-          // עדכני/צרי Address במסד נתונים
+          const addressData = typeof req.body.address === "string" ? JSON.parse(req.body.address) : req.body.address;
           let addressId;
           if (user.address) {
             await AddressModel.findByIdAndUpdate(user.address, addressData);
@@ -410,11 +399,9 @@ router.post("/update/:id", (req, res, next) => {
         }
       }
 
-      // Handle expertise
       if (req.body.expertise) {
         try {
-          // תמיד לנסות לפרסר JSON, ואם נכשל פשוט לשמור כ-string (למקרה שהגיעה רשימה בודדת)
-          if (typeof req.body.expertise === 'string' && req.body.expertise.trim().startsWith('[')) {
+          if (typeof req.body.expertise === "string" && req.body.expertise.trim().startsWith("[")) {
             updates.expertise = JSON.parse(req.body.expertise);
           } else {
             updates.expertise = Array.isArray(req.body.expertise) ? req.body.expertise : [req.body.expertise];
@@ -424,17 +411,9 @@ router.post("/update/:id", (req, res, next) => {
         }
       }
 
-      // Handle measurements
       if (
-        req.body.height ||
-        req.body.weight ||
-        req.body.bmi ||
-        req.body.bmiCategory ||
-        req.body.wrist ||
-        req.body.ankle ||
-        req.body.hip ||
-        req.body.waist ||
-        req.body.shoulder
+        req.body.height || req.body.weight || req.body.bmi || req.body.bmiCategory ||
+        req.body.wrist || req.body.ankle || req.body.hip || req.body.waist || req.body.shoulder
       ) {
         const measurements = {};
         if (req.body.height) measurements.height = Number(req.body.height);
@@ -450,13 +429,11 @@ router.post("/update/:id", (req, res, next) => {
         updates.measurements = measurements;
       }
 
-      // Handle body type
-      const allowedBodyTypes = ['אקטומורף', 'מזומורף', 'אנדומורף'];
+      const allowedBodyTypes = ["אקטומורף", "מזומורף", "אנדומורף"];
       let bodyTypeValue = null;
       let bodyTypeDescriptionValue = null;
 
       if (req.body.bodyType) {
-        // אם הגיע אובייקט עם type ו-description
         if (typeof req.body.bodyType === "object") {
           if (typeof req.body.bodyType.type === "string" && allowedBodyTypes.includes(req.body.bodyType.type)) {
             bodyTypeValue = req.body.bodyType.type;
@@ -464,39 +441,28 @@ router.post("/update/:id", (req, res, next) => {
           if (typeof req.body.bodyType.description === "string") {
             bodyTypeDescriptionValue = req.body.bodyType.description;
           }
-        }
-        // אם הגיע סטרינג בלבד
-        else if (typeof req.body.bodyType === "string" && allowedBodyTypes.includes(req.body.bodyType)) {
+        } else if (typeof req.body.bodyType === "string" && allowedBodyTypes.includes(req.body.bodyType)) {
           bodyTypeValue = req.body.bodyType;
         }
       }
 
-      // תמיכה ב-bodyTypeDescription שמגיע מחוץ לאובייקט (legacy)
       if (typeof req.body.bodyTypeDescription === "string") {
         bodyTypeDescriptionValue = req.body.bodyTypeDescription;
       }
 
-      // רק אם יש לפחות שדה אחד לעדכן
       if (bodyTypeValue !== null || bodyTypeDescriptionValue !== null) {
-        updates.bodyType = {
-          type: bodyTypeValue,
-          description: bodyTypeDescriptionValue,
-          lastCalculated: new Date()
-        };
+        updates.bodyType = { type: bodyTypeValue, description: bodyTypeDescriptionValue, lastCalculated: new Date() };
       }
 
-      if (req.file && req.file.path) {
+      if (req.file?.path) {
         updates.image = req.file.path;
       }
 
       const updatedUser = await UserModel.findByIdAndUpdate(
-        req.params.id,
-        { $set: updates },
-        { new: true }
+        req.params.id, { $set: updates }, { new: true }
       ).populate("address");
 
       if (!updatedUser) throw new Error("User not found");
-
       res.send(updatedUser);
     } catch (error) {
       console.error("🔥 Error updating user:", error);
@@ -505,17 +471,11 @@ router.post("/update/:id", (req, res, next) => {
   });
 });
 
-// --------------------- מתכונים ---------------------
-router.post('/:id/favoriteRecipes', requireAuth, async (req, res) => {
+/* ======================= RECIPES ======================= */
+router.post("/:id/favoriteRecipes", requireAuth, async (req, res) => {
   try {
     const { title, ingredients, instructions, tags } = req.body;
-    const recipe = new RecipeModel({
-      title,
-      ingredients,
-      instructions,
-      tags,
-      createdBy: req.params.id
-    });
+    const recipe = new RecipeModel({ title, ingredients, instructions, tags, createdBy: req.params.id });
     await recipe.save();
     const user = await UserModel.findById(req.params.id);
     user.favoriteRecipes.push(recipe._id);
@@ -527,9 +487,9 @@ router.post('/:id/favoriteRecipes', requireAuth, async (req, res) => {
   }
 });
 
-router.get('/:id/favoriteRecipes', requireAuth, async (req, res) => {
+router.get("/:id/favoriteRecipes", requireAuth, async (req, res) => {
   try {
-    const user = await UserModel.findById(req.params.id).populate('favoriteRecipes');
+    const user = await UserModel.findById(req.params.id).populate("favoriteRecipes");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user.favoriteRecipes);
   } catch (err) {
@@ -538,11 +498,11 @@ router.get('/:id/favoriteRecipes', requireAuth, async (req, res) => {
   }
 });
 
-router.delete('/:id/favoriteRecipes/:recipeId', requireAuth, async (req, res) => {
+router.delete("/:id/favoriteRecipes/:recipeId", requireAuth, async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
-    user.favoriteRecipes = user.favoriteRecipes.filter(recipeId => recipeId.toString() !== req.params.recipeId);
+    user.favoriteRecipes = user.favoriteRecipes.filter((recipeId) => recipeId.toString() !== req.params.recipeId);
     await user.save();
     res.json({ message: "Recipe removed from favorites" });
   } catch (err) {
@@ -551,20 +511,17 @@ router.delete('/:id/favoriteRecipes/:recipeId', requireAuth, async (req, res) =>
   }
 });
 
-// --------------------- Favorite Trainer, update & get ---------------------
+/* ======================= FAVORITES ======================= */
 router.put("/favorites", requireAuth, async (req, res) => {
   try {
     const user = await UserModel.findById(req.user.id);
     const { trainerId } = req.body;
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    if (!trainerId) {
-      return res.status(400).json({ message: "Trainer ID required" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!trainerId) return res.status(400).json({ message: "Trainer ID required" });
+
     const exists = user.favoriteTrainers.includes(trainerId);
     if (exists) {
-      user.favoriteTrainers = user.favoriteTrainers.filter(id => id.toString() !== trainerId);
+      user.favoriteTrainers = user.favoriteTrainers.filter((id) => id.toString() !== trainerId);
     } else {
       user.favoriteTrainers.push(trainerId);
     }
@@ -583,44 +540,36 @@ router.get("/favorites", requireAuth, async (req, res) => {
       select: "name image role address expertise rating",
       options: { strictPopulate: false },
     });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
     const favorites = Array.isArray(user.favoriteTrainers)
-      ? user.favoriteTrainers.filter(trainer => trainer && trainer.name)
+      ? user.favoriteTrainers.filter((trainer) => trainer && trainer.name)
       : [];
     res.json({ favorites });
   } catch (err) {
     console.error("🔥 Error in GET /favorites:", err);
-    res.status(500).json({
-      message: "שגיאה בשליפת מועדפים",
-      error: err?.message || "Unknown error",
-      stack: err?.stack || null
-    });
+    res.status(500).json({ message: "שגיאה בשליפת מועדפים", error: err?.message || "Unknown error", stack: err?.stack || null });
   }
 });
 
-
-
-// --------------------- חיפוש לפי עיר ---------------------
-router.get('/searchByCity', async (req, res) => {
+/* ======================= SEARCH BY CITY ======================= */
+router.get("/searchByCity", async (req, res) => {
   const { city } = req.query;
-  if (!city) return res.status(400).json({ message: 'יש להזין עיר' });
+  if (!city) return res.status(400).json({ message: "יש להזין עיר" });
   try {
-    const addresses = await AddressModel.find({ city: { $regex: city, $options: 'i' } });
-    const addressIds = addresses.map(a => a._id);
+    const addresses = await AddressModel.find({ city: { $regex: city, $options: "i" } });
+    const addressIds = addresses.map((a) => a._id);
     const users = await UserModel.find({
       address: { $in: addressIds },
-      role: 'trainer',
-      trainerStatus: 'approved'
-    }).populate('address');
+      role: "trainer",
+      trainerStatus: "approved",
+    }).populate("address");
     res.json(users);
   } catch (err) {
-    res.status(500).json({ message: 'שגיאה בחיפוש לפי עיר' });
+    res.status(500).json({ message: "שגיאה בחיפוש לפי עיר" });
   }
 });
 
-// --------------------- קבלת כל המשתמשים ---------------------
+/* ======================= GET ALL USERS ======================= */
 router.get("/", async (req, res) => {
   try {
     const users = await userController.read({ ...req.query });
@@ -630,17 +579,14 @@ router.get("/", async (req, res) => {
   }
 });
 
-// --------------------- מחיקת משתמש ---------------------
+/* ======================= DELETE USER ======================= */
 router.delete("/:id", async (req, res) => {
   try {
     const user = await userController.readOne({ _id: req.params.id });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
+
     const deletedUser = await userController.deleteOne({ _id: req.params.id });
-    if (!deletedUser) {
-      return res.status(500).json({ message: "Failed to delete user" });
-    }
+    if (!deletedUser) return res.status(500).json({ message: "Failed to delete user" });
     res.json({ message: "User deleted successfully", user: deletedUser });
   } catch (error) {
     console.error("Error deleting user:", error);
@@ -648,23 +594,13 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-
-// --------------------- פרופיל ציבורי של מאמנת ---------------------
+/* ======================= PUBLIC TRAINER PROFILE ======================= */
 router.get("/public/:id", async (req, res) => {
-  console.log("🔍 בקשה לפרופיל ציבורי ל-ID:", req.params.id);
   try {
     const trainer = await UserModel.findById(req.params.id);
-    console.log('💬 Trainer raw from DB:', trainer);
+    if (!trainer) return res.status(404).json({ message: "מאמנת לא נמצאה (לא נמצאה במסד)" });
+    if (trainer.role !== "trainer") return res.status(404).json({ message: "מאמנת לא נמצאה (לא role=trainer)" });
 
-    // השאר את שורת הסלקט אחרי הקונסול
-    if (!trainer) {
-      return res.status(404).json({ message: "מאמנת לא נמצאה (לא נמצאה במסד)" });
-    }
-    if (trainer.role !== "trainer") {
-      return res.status(404).json({ message: "מאמנת לא נמצאה (לא role=trainer)" });
-    }
-
-    // מחזירים רק את השדות שרצית
     const publicFields = {
       name: trainer.name,
       image: trainer.image,
@@ -687,18 +623,13 @@ router.get("/public/:id", async (req, res) => {
   }
 });
 
-
-// --------------------- שליפת משתמש לפי ID ---------------------
+/* ======================= GET USER BY ID ======================= */
 router.get("/:id", requireAuth, async (req, res) => {
-
   try {
-
     const user = await UserModel.findById(req.params.id)
-    .populate("address")
-    .select("+previousGyms");
-
+      .populate("address")
+      .select("+previousGyms");
     if (!user) return res.status(404).json({ message: "User not found" });
-
     res.json(user);
   } catch (err) {
     console.error("❌ Error fetching user by ID:", err.message);
@@ -706,14 +637,10 @@ router.get("/:id", requireAuth, async (req, res) => {
   }
 });
 
-
-
-// --------------------- איפוס סיסמה ע"י אדמין ---------------------
+/* ======================= ADMIN RESET PASSWORD ======================= */
 router.post("/admin-reset-password", requireAuth, requireRole(["admin", "superAdmin"]), async (req, res) => {
   const { userId, newPassword } = req.body;
-  if (!userId || !newPassword) {
-    return res.status(400).json({ message: "חסרים פרטים" });
-  }
+  if (!userId || !newPassword) return res.status(400).json({ message: "חסרים פרטים" });
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     const user = await UserModel.findByIdAndUpdate(userId, { password: hashedPassword });
@@ -725,8 +652,7 @@ router.post("/admin-reset-password", requireAuth, requireRole(["admin", "superAd
   }
 });
 
-
-// --------------------- שליחת קישור איפוס סיסמה למייל ע"י אדמין ---------------------
+/* ======================= ADMIN SEND RESET LINK ======================= */
 router.post("/admin-send-reset-link", requireAuth, requireRole(["admin", "superAdmin"]), async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "יש להזין כתובת מייל" });
@@ -743,8 +669,7 @@ router.post("/admin-send-reset-link", requireAuth, requireRole(["admin", "superA
   }
 });
 
-// חידוש טוקן של משתמש מחובר
-
+/* ======================= REFRESH TOKEN ======================= */
 router.post("/refresh-token", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) return res.status(401).json({ message: "No token" });
@@ -754,24 +679,41 @@ router.post("/refresh-token", async (req, res) => {
     const accessToken = jwt.sign({ id: payload.id, role: payload.role }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
     const user = await UserModel.findById(payload.id).lean();
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json({ token: accessToken, user }); // ✅ גם user וגם token
+    res.json({ token: accessToken, user });
   } catch (err) {
     console.error("❌ Refresh error:", err.message);
     res.status(403).json({ message: "Invalid refresh token" });
   }
 });
 
-//מחיקת הטוקן אחרי התנתקות
+/* ======================= LOGOUT ======================= */
 router.post("/logout", (req, res) => {
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    sameSite: "Strict"
-  });
+  // נשתמש באותם פרמטרים כמו בהגדרת העוגייה כדי להבטיח מחיקה
+  const opts = cookieOpts();
+  res.clearCookie("refreshToken", { httpOnly: true, sameSite: opts.sameSite, secure: opts.secure });
   res.status(200).json({ message: "Logged out" });
 });
 
+/* ======================= ADMIN SIMPLE STATS ======================= */
+router.get("/admin/simple-stats", requireAuth, requireRole(["superAdmin", "manager"]), async (req, res) => {
+  const totalUsers = await UserModel.countDocuments({});
+  const trainers = await UserModel.countDocuments({ role: "trainer" });
+  const admins = await UserModel.countDocuments({ role: "admin" });
+  const managers = await UserModel.countDocuments({ role: "manager" });
+
+  const totalLoginsAgg = await UserModel.aggregate([
+    { $group: { _id: null, total: { $sum: "$loginCount" } } }
+  ]);
+  const totalLogins = totalLoginsAgg[0]?.total || 0;
+
+  const topLogins = await UserModel.find({}, "name email loginCount")
+    .sort({ loginCount: -1 })
+    .limit(5)
+    .lean();
+
+  res.json({ totalUsers, trainers, admins, managers, totalLogins, topLogins });
+});
 
 module.exports = router;
