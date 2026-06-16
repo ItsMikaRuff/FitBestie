@@ -169,7 +169,7 @@ export const UserProvider = ({ children }) => {
             ...(isMultipart && { "Content-Type": "multipart/form-data" }),
           },
           withCredentials: true,
-        },
+        }
       );
       setUser(res.data);
       try {
